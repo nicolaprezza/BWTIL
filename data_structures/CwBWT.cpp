@@ -70,8 +70,6 @@ CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired num
 
 	build(verbose);
 
-	bwFileReader.close();
-
 	if(verbose) printRSSstat();
 
 }
