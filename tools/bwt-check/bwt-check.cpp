@@ -80,7 +80,7 @@ using namespace bwtil;
 	}
 
 	cout << "\nSUCCESS!\n";
-	cout << argv[1] << " " << "is a valid BWT of " << argv[2] << endl;
+	cout << argv[1] << " " << "is the BWT of " << argv[2] << endl;
 
  }
 

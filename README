@@ -13,7 +13,7 @@ BWTIL is a library which aims to offer a set of (hopefully useful!) tools to dea
 
  >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  >> cw-bwt (work in progress) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
- >> bwt-check (work in progress) : check consistency of bwt-files (see tools/bwt-check/README)
+ >> bwt-check : check consistency of bwt-files (see tools/bwt-check/README)
 
 
  ***   Compile   ***
