@@ -1,0 +1,23 @@
+#------------------------------------------------------------------------------
+
+SOURCE=\
+../../common/common.h \
+bwt-check.cpp \
+../../data_structures/StaticBitVector.cpp \
+../../data_structures/IndexedBWT.cpp \
+../../data_structures/WaveletTree.cpp \
+../../data_structures/WordVector.cpp
+
+BINARY=../../bwt-check
+
+#------------------------------------------------------------------------------
+
+all: $(BINARY)
+
+$(BINARY): $(SOURCE)
+
+	g++ $(SOURCE) -o $(BINARY)
+
+clean:
+
+	rm -f $(BINARY)

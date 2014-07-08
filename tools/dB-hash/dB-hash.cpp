@@ -1,0 +1,191 @@
+//============================================================================
+// Name        : dB-hash.cpp
+// Author      : Nicola Prezza and Alberto Policriti
+// Version     : 1.0
+// Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
+// Description : test class for the dB-hash data structure. Allows to build a dB-hash over a text file and query it with a pattern.
+//============================================================================
+
+#include <iostream>
+
+#include "../../data_structures/StaticBitVector.h"
+#include "../../data_structures/DBhash.h"
+#include "../../data_structures/HashFunction.h"
+
+using namespace bwtil;
+using namespace std;
+
+
+/*
+ * input: path of a text file, pattern length m
+ * returns: a dB-hash data structure built on the text. Hash function used is the default (base b=4). word size w used is the optimal w=log_b(m*n), where n=text length
+ */
+DBhash * buildFromFile(const char * text_path, uint m){
+
+	// 1) read text from file
+
+	FILE *fp;
+
+	if ((fp = fopen(text_path, "rb")) == NULL) {
+		VERBOSE_CHANNEL<< "Cannot open file "  << text_path <<endl;
+		exit(1);
+	}
+
+	fseek(fp,0,SEEK_END);
+	ulint n = ftell(fp);
+	fseek(fp,0,SEEK_SET);
+
+	if(n==0){
+		VERBOSE_CHANNEL<< "Empty file. "  << text_path <<endl;
+		exit(1);
+	}else
+		n--;//remove terminator char
+
+	unsigned char * text = new unsigned char[n];
+	fread(text, sizeof(unsigned char), n, fp);
+
+	fclose(fp);
+
+	// 2) create the hash function
+
+	//HashFunction * h = new HashFunction(n,m,DNA_SEARCH);//hash function for DNA search
+	HashFunction * h = new HashFunction(m,text_path,true);//general purpose hash function: detect automatically alphabet size
+
+	//build dBhash data structure
+
+	DBhash * dBhash = new DBhash(text,n,h,4,true);
+
+	return dBhash;
+
+}
+
+void debug(){
+
+	ulint n = 100;
+
+	StaticBitVector * bv = new StaticBitVector(n);
+	vector<bool> * bv_correct = new vector<bool>(n);
+
+	srand(time(NULL));
+
+	for(ulint i=0;i<n;i++){
+
+		uint b = rand()%2;
+
+		bv->setBit(i,b);
+		bv_correct->at(i)=b;
+
+	}
+
+	bv->computeRanks();
+
+	uint rank=0;
+
+	for(ulint i=0;i<n;i++){
+
+		if(i>0)
+			rank+=bv_correct->at(i-1);
+
+		if(rank!=bv->rank1(i)){
+			cout << "rank ERROR in position " << i << " : correct=" << rank << ", wrong= "<<bv->rank1(i)<<endl;
+
+
+			for(uint j=0;j<n;j++)
+				cout << bv_correct->at(j);
+			cout<<endl;
+			for(uint j=0;j<n;j++)
+				cout << bv->bitAt(j);
+			cout<<endl;
+
+
+			exit(0);
+		}
+
+	}
+
+
+	cout << "TEST TERMINATED.\n";
+
+	exit(0);
+
+}
+
+ int main(int argc,char** argv) {
+
+	//debug();
+
+	if(argc != 4){
+		cout << "*** dB-hash data structure ***\n";
+		cout << "Usage: dB-hash option file [pattern] [pattern_length]\n";
+		cout << "where option = build|search. file=path of the text file (if build mode) or dB-hash .dbh file (if search mode). In build mode, specify also pattern length pattern_length. In search mode, specify a string to be searched (pattern).\n";
+		exit(0);
+	}
+
+	int build=0,search=1;
+
+	int mode;
+
+	if(string(argv[1]).compare("build")==0)
+		mode=build;
+	else if(string(argv[1]).compare("search")==0)
+		mode=search;
+	else{
+		cout << "Unrecognized option "<<argv[1]<<endl;
+		exit(0);
+	}
+
+	string in(argv[2]);
+	string out(in);
+	out.append(".dbh");
+
+	uint m;
+
+	string pattern;
+
+	if(mode==search){
+		pattern = string(argv[3]);
+		m = pattern.length();
+	}
+
+	if(mode==build)
+		m = atoi(argv[3]);
+
+	DBhash * dBhash;
+
+	if(mode==build){
+
+		cout << "Building dB-hash of file "<< in<<endl;
+		dBhash = buildFromFile(in.c_str(),m);
+
+		cout << "\nStoring dB-hash in "<< out<<endl;
+		dBhash->saveToFile(out.c_str());
+
+		cout << "Done.\n";
+
+	}
+
+	if(mode==search){
+
+		cout << "Loading dB-hash from file "<< in <<endl;
+		dBhash = DBhash::loadFromFile(in.c_str());
+		cout << "Done.\n";
+
+		if(dBhash->patternLength()!=m){
+			cout << "Error: structure built with pattern length " << dBhash->patternLength() << ", but now searching a pattern of length " << m << endl;
+			exit(1);
+		}
+
+		cout << "\nSearching pattern "<< pattern <<endl;
+
+		vector<ulint> occ = dBhash->getOccurrencies( pattern );
+
+		cout << "pattern occurs at the following positions : ";
+		for(uint i=0;i<occ.size();i++)
+			cout << occ.at(i) << " ";
+
+		cout << "\n\nDone.\n";
+
+	}
+
+}
+
