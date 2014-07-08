@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <fstream>
 
 using namespace std;
 
@@ -34,6 +35,7 @@ typedef unsigned int uint;
 typedef unsigned short int t_char; ///< Type for char conversion
 typedef unsigned short int t_errors; ///< Type for ERRORS
 
+typedef unsigned char uchar;
 typedef unsigned char symbol;
 typedef unsigned char uint8;
 

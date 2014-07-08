@@ -331,7 +331,7 @@ void CwBWT::build(bool verbose){
 
 	symbol head,tail;//head=symbol to be inserted, tail=symbol exiting from the context
 
-	if(verbose) cout << "\nStep 3/3: main algorithm (building incrementally the CwBWT)\n";
+	if(verbose) cout << "\nStep 3/3: main cw-bwt algorithm (building incrementally the BWT)\n";
 
 	//first of all, insert the last k characters of the text
 
@@ -599,14 +599,20 @@ void CwBWT::toFile(string path){//save CwBWT to file
 	ulint i=0;
 	symbol c;
 
+	if(n<100) cout << "saving bwt : ";
+
 	while(it.hasNext()){
 
 		c = it.next();
 		fwrite(&c, sizeof(symbol), 1, fp);
 
+		if(n<100){  if(c==0)cout << "#"; else cout << c; }
+
 		i++;
 
 	}
+
+	if(n<100) cout<< endl;
 
 	fclose(fp);
 
@@ -631,7 +637,7 @@ CwBWT::CwBWTIterator::CwBWTIterator(CwBWT * bwt){
 	prefix=0;
 	suffix=0;
 
-	n = bwt->n;
+	n = bwt->n+1;//add text terminator
 
 	position = 0;
 

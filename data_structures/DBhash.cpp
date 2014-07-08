@@ -164,7 +164,7 @@ void DBhash::test(){
 	cout << endl;
 
 	for(ulint i=0;i<indexedBWT->length();i++)
-		cout << (uint)indexedBWT->charAt(i);
+		cout << (uint)indexedBWT->charAt_remapped(i);
 
 	cout << endl;
 }

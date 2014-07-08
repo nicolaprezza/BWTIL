@@ -191,7 +191,16 @@ ulint IndexedBWT::rank(unsigned char c, ulint i){//number of characters 'c' befo
 
 }
 
-unsigned char IndexedBWT::charAt(ulint i){
+unsigned char IndexedBWT::at(ulint i){
+
+	if(i==terminator_position)
+		return 0;
+
+	return bwt_wt->charAt(i)+1;
+
+}
+
+unsigned char IndexedBWT::charAt_remapped(ulint i){
 
 	if(i==terminator_position)
 		return TERMINATOR;
@@ -202,7 +211,7 @@ unsigned char IndexedBWT::charAt(ulint i){
 
 ulint IndexedBWT::LF(ulint i){//LF mapping from last column to first
 
-	unsigned char c = charAt(i);
+	unsigned char c = charAt_remapped(i);
 	return  FIRST[c] + rank(c,i);
 
 }

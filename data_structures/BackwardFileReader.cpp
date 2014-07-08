@@ -28,7 +28,9 @@ BackwardFileReader::BackwardFileReader(string path){
 	  exit(0);
 	}
 
-	bufferSize = (ulint)(log2(n+1)*log2(n+1));
+	bufferSize = n/(ulint)(log2(n+1)*log2(n+1));//read file in chunks of n/log^2 n bytes (in total log^2 n sequential reads of the file)
+	if(bufferSize==0)
+		bufferSize = 1;
 
 	buffer = new symbol[bufferSize];
 
@@ -58,8 +60,6 @@ void BackwardFileReader::rewind(){//go back to EOF
 	begin_of_file=false;
 
 	ptr_in_buffer = size-1;
-
-	read();//skip newline (at the end of the file)
 
 }
 
