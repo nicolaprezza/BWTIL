@@ -66,8 +66,8 @@ private:
 	//returns i-th digit of log_sigma bits from left in the suffix of length 'length' of the word W
 	uint digitAt(ulint W, uint i);
 
-	void markPositions();//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
-	void sampleSA();//sample SA pointers (1 every offrate positions on text). Vector marked_positions must be already computed!
+	void markPositions(bool verbose);//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
+	void sampleSA(bool verbose);//sample SA pointers (1 every offrate positions on text). Vector marked_positions must be already computed!
 
 	uint sigma;//alphabet size (excluded terminator character)
 	uint log_sigma;//number of bits of each character

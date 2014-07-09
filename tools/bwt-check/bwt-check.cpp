@@ -36,7 +36,11 @@ using namespace bwtil;
 	bwt_fr.read(bwt,n_bwt);
 	bwt_fr.close();
 
-	IndexedBWT idxBWT = IndexedBWT(bwt,n_bwt,64);
+	cout << "Indexing the BWT ... \n\n";
+
+	IndexedBWT idxBWT = IndexedBWT(bwt,n_bwt,0,true);
+
+	cout << "\nDone. Inverting the BWT ... \n";
 
 	//invert the bwt
 
@@ -50,6 +54,8 @@ using namespace bwtil;
 		i++;
 
 	}
+
+	cout << "Done.\n";
 
 	FileReader text_fr(argv[2]);
 	ulint n_text = text_fr.size();

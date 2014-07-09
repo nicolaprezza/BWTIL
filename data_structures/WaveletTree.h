@@ -61,6 +61,9 @@ private:
 	uint log_sigma;//number of bits for each symbol
 	ulint number_of_nodes;
 
+	uint * remapping;
+	uint * inverse_remapping;
+
 };
 
 } /* namespace data_structures */

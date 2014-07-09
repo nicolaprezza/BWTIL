@@ -19,7 +19,7 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 	this->n=n;
 	this->offrate=offrate;
 
-	number_of_SA_pointers = n/offrate + 1;
+	number_of_SA_pointers = (offrate==0?0:n/offrate + 1);
 
 	if(verbose) cout << " Building indexed BWT data structure over h(T)" << endl;
 	if(verbose) cout << "  Number of sampled SA pointers = " << number_of_SA_pointers << endl;
@@ -45,11 +45,11 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 	sigma = bwt_wt->alphabetSize();
 	log_sigma = bwt_wt->bitsPerSymbol();
 
-	TERMINATOR = sigma;
+	TERMINATOR = 256;
 
-	FIRST = new ulint [sigma+1];
+	FIRST = new ulint [257];
 
-	for(uint i=0;i<sigma;i++)
+	for(uint i=0;i<257;i++)
 		FIRST[i]=0;
 
 	FIRST[TERMINATOR]=0;//first occurrence of terminator char in the first column is at the beginning
@@ -58,38 +58,55 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 		if(i!=terminator_position)
 			FIRST[bwt_wt->charAt(i)]++;
 
-	for(uint i=1;i<sigma;i++)
+	for(uint i=1;i<256;i++)
 		FIRST[i] += FIRST[i-1];
 
-	for(int i=sigma-1;i>0;i--)
+	for(int i=255;i>0;i--)
 		FIRST[i] = FIRST[i-1];
 
 	FIRST[0] = 0;
 
-	for(uint i=0;i<sigma;i++)
+	for(uint i=0;i<256;i++)
 		FIRST[i]++;
 
-	if(verbose) cout << "  Marking positions containing a SA pointer ... ";
-	markPositions();
-	if(verbose) cout << "Done.\n";
+	if(offrate>0){
+		if(verbose) cout << "\n  Marking positions containing a SA pointer ... ";
+		markPositions(verbose);
+		if(verbose) cout << "  Done.\n";
 
-	if(verbose) cout << "  Sampling SA pointers ... ";
-	sampleSA();
-	if(verbose) cout << "Done.\n";
+		if(verbose) cout << "\n  Sampling SA pointers ... ";
+		sampleSA(verbose);
+		if(verbose) cout << "  Done.\n";
+	}
 
 }
 
-void IndexedBWT::markPositions(){//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
+void IndexedBWT::markPositions(bool verbose){//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
 
 	ulint i=n-1;//current position on text
 	ulint j=0;  //current position on the BWT (0=terminator position on the F column)
+	uint perc;
+	uint last_perc=1;
+
+	if(verbose) cout << endl;
 
 	while(i>0){
+
+		perc = (100*(n-i))/n;
+
+		if(verbose)
+			if(perc%10==0 and perc!= last_perc){
+
+				cout << "   " << perc << "% done.\n";
+				last_perc=perc;
+
+			}
 
 		if(i%offrate==0)
 			marked_positions->setBit(j,1);
 
 		j = LF(j);
+
 		i--;
 
 	}
@@ -101,12 +118,26 @@ void IndexedBWT::markPositions(){//mark 1 every offrate positions of the text on
 
 }
 
-void IndexedBWT::sampleSA(){//sample Suffix Array pointers (1 every offrate positions on text). Vector marked_positions must be already computed!
+void IndexedBWT::sampleSA(bool verbose){//sample Suffix Array pointers (1 every offrate positions on text). Vector marked_positions must be already computed!
 
 	ulint i=n-1;//current position on text
 	ulint j=0;  //current position on the BWT (0=terminator position on the F column)
+	uint perc;
+		uint last_perc=1;
+
+		if(verbose) cout << endl;
 
 	while(i>0){
+
+		perc = (100*(n-i))/n;
+
+		if(verbose)
+			if(perc%10==0 and perc!= last_perc){
+
+				cout << "   " << perc << "% done.\n";
+				last_perc=perc;
+
+			}
 
 		if(marked_positions->bitAt(j)==1)
 			text_pointers->setWord( marked_positions->rank1(j), i );
@@ -212,6 +243,7 @@ unsigned char IndexedBWT::charAt_remapped(ulint i){
 ulint IndexedBWT::LF(ulint i){//LF mapping from last column to first
 
 	unsigned char c = charAt_remapped(i);
+
 	return  FIRST[c] + rank(c,i);
 
 }
@@ -276,7 +308,7 @@ void IndexedBWT::saveToFile(FILE *fp){
 	marked_positions->saveToFile(fp);
 	text_pointers->saveToFile(fp);
 
-	fwrite(FIRST, sizeof(ulint), sigma+1, fp);
+	fwrite(FIRST, sizeof(ulint), 257, fp);
 
 }
 
@@ -311,9 +343,9 @@ void IndexedBWT::loadFromFile(FILE *fp){
 	marked_positions->loadFromFile(fp);
 	text_pointers->loadFromFile(fp);
 
-	FIRST = new ulint[sigma+1];
+	FIRST = new ulint[257];
 
-	numBytes = fread(FIRST, sizeof(ulint), sigma+1, fp);
+	numBytes = fread(FIRST, sizeof(ulint), 257, fp);
 	check_numBytes();
 
 
