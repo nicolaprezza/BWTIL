@@ -21,8 +21,12 @@ BWTIL is a library which aims to offer a set of (hopefully useful!) tools to dea
 
 To compile all the executables, execute
 
-> make
+> make clean; make
 
-in the main BWTIL/ directory. To compile the executables individually, execute (in the example, the dB-hash tool)
+in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
 
-> make dB-hash
+> make clean; make tool_name
+
+where tool_name is one of dB-hash, cw-bwt, bwt-check.
+
+Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
