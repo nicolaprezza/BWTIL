@@ -53,10 +53,10 @@ using namespace bwtil;
 
 	if(argc != 3 and argc != 4){
 		cout << "*** context-wise BWT construction in compressed space ***\n";
-		cout << "Usage: cw-bwt text_path bwt_path [k]\n";
+		cout << "Usage: cw-bwt text_file bwt_file [k]\n";
 		cout << "where:\n";
-		cout << "  text_path is the input text path. Input file must not contain a 0x0 byte since the algorithm uses it as text terminator.\n";
-		cout << "  bwt_path is the output bwt path. This output file will contain a 0x0 terminator and thus will be 1 byte longer than the input file.\n";
+		cout << "  text_file is the input text file. Input file must not contain a 0x0 byte since the algorithm uses it as text terminator.\n";
+		cout << "  bwt_file is the output bwt file. This output file will contain a 0x0 terminator and thus will be 1 byte longer than the input file.\n";
 		cout << "  k (automatic if not specified) is the entropy order.\n";
 		cout << "WARNING: sigma^k space will be allocated, where sigma is the alphabet size. If you specify k, choose it carefully!\n";
 		cout << "For more informations, read the file README.\n";

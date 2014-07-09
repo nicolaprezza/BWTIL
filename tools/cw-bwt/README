@@ -1,0 +1,52 @@
+Welcome to the context-wise BWT construction algorithm (cw-bwt)!
+
+Authors: Nicola Prezza and Alberto Policriti
+mail: nicolapr@gmail.com
+
+
+
+
+
+ ************************************************************* WARNING : *********************************************************
+
+	the tool is still under development!!! at the moment, cw.bwt works BUT very inefficient data structures are used!!!
+	DO NOT use the tool on large files!
+
+ *********************************************************************************************************************************
+
+
+
+*** Brief introduction: ***
+
+cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for certain text distributions (nearly uniform) cw-bwt is optimal in both time and space.
+
+*** Complexity ***
+
+n = input length
+Hk = k-th order entropy of the text, where k = O(log_s(n)) (Hk <= log s, where s is the alphabet size)
+
+Average-case (uniform input texts, eg. DNA)
+
+ time: O(n * Hk)
+ space: n * Hk + o(n * Hk)
+
+Worst-case (happens if the text has large (O(n)) length-k contexts)
+
+ time: O( n * log n * Hk ) 
+ space: O( n * Hk )
+
+*** Compile ***
+
+In the cw-bwt/ directory, just execute
+
+> make clean; make
+
+The executable "cw-bwt" will be created in the BWTIL/ main folder.
+
+*** Execute ***
+
+In the BWTIL/ directory, execute
+
+> ./cw-bwt
+
+to display info about the tool usage.

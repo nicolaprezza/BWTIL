@@ -13,7 +13,9 @@ The dB-hash is particularly useful in approximate string matching under the Hamm
 
 In the dB-hash/ directory, just execute
 
-> make
+> make clean; make
+
+The executable "dB-hash" will be created in the BWTIL/ main folder.
 
 *** Test ***
 

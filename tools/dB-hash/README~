@@ -13,7 +13,9 @@ The dB-hash is particularly useful in approximate string matching under the Hamm
 
 In the dB-hash/ directory, just execute
 
-> make
+> make clean; make
+
+The executable "dB-hash" will be created in the BWTIL/ main folder.
 
 *** Test ***
 
@@ -25,7 +27,7 @@ to build a dB-hash with pattern length=30 on the file test/50000.fasta . This wi
 
 > make example-search
 
-to search the pattern "gttgaatgcaacacttactattaatcaaat" (exact search) in the dB-hash just created.
+to search the pattern "aaatttataacctattgcaccatatactag" (exact search) in the dB-hash just created.
 
 *** Notes ***
 
