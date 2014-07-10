@@ -2,14 +2,14 @@
  ***   BWTIL : the BWT Text-indexing Library   ***
 
 
-Authors: Nicola Prezza and Alberto Policriti
+Authors: Nicola Prezza, Nicola Gigante, and Alberto Policriti
 mail: nicolapr@gmail.com
 
 
  ***   Brief introduction   ***
 
 
-BWTIL is a library which aims to offer a set of (hopefully useful!) tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer the best performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, compressed dynamic strings, partial sums, Huffman tree, static wavelet trees, dB-hash data structure. The available executables (to date) are:
+BWTIL is a library which aims to offer a set of (hopefully useful!) tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer the best performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, and the dB-hash data structure. The available executables (to date) are:
 
  >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  >> cw-bwt (work in progress) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
