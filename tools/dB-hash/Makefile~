@@ -33,7 +33,3 @@ example-build:
 example-search:
 
 	../../dB-hash search ../../data/50000.fasta.dbh aaatttataacctattgcaccatatactag
-
-
-
-

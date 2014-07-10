@@ -39,7 +39,11 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 
 	bwt_wt = new WaveletTree(BWT,n,verbose);
 
-	marked_positions = new StaticBitVector(n);
+	if(offrate>0)
+		marked_positions = new StaticBitVector(n);
+	else
+		marked_positions = new StaticBitVector(0);
+
 	text_pointers = new WordVector(number_of_SA_pointers,w);
 
 	sigma = bwt_wt->alphabetSize();

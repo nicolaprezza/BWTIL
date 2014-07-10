@@ -42,7 +42,15 @@ DBhash * buildFromFile(const char * text_path, uint m){
 		n--;//remove terminator char
 
 	unsigned char * text = new unsigned char[n];
-	fread(text, sizeof(unsigned char), n, fp);
+	ulint n_bytes = fread(text, sizeof(unsigned char), n, fp);
+
+	if(n_bytes==0){
+
+		VERBOSE_CHANNEL<< "Error while reading file "  << text_path <<endl;
+		exit(1);
+
+	}
+
 
 	fclose(fp);
 
