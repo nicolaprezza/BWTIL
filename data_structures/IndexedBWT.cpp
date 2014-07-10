@@ -21,7 +21,7 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 
 	number_of_SA_pointers = (offrate==0?0:n/offrate + 1);
 
-	if(verbose) cout << " Building indexed BWT data structure over h(T)" << endl;
+	if(verbose) cout << " Building indexed BWT data structure" << endl;
 	if(verbose) cout << "  Number of sampled SA pointers = " << number_of_SA_pointers << endl;
 
 	w = ceil(log2(n));
