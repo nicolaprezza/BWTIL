@@ -1,6 +1,6 @@
 Welcome to the context-wise BWT construction algorithm (cw-bwt)!
 
-Authors: Nicola Prezza and Alberto Policriti
+Authors: Nicola Prezza, Nicola Gigante, and Alberto Policriti
 mail: nicolapr@gmail.com
 
 
@@ -23,17 +23,17 @@ cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable 
 *** Complexity ***
 
 n = input length
-Hk = k-th order entropy of the text, where k = O(log_s(n)) (Hk <= log s, where s is the alphabet size)
+Hk = k-th order entropy of the text, where k = log_s( n/log^3 n ) (Hk <= log s, where s is the alphabet size)
 
-Average-case (uniform input texts, eg. DNA)
+Average-case: uniform input texts (eg. DNA)
 
- time: O(n * Hk)
- space: n * Hk + o(n * Hk)
+ time: O(n * Hk)	(a factor Hk from optimal)
+ space: n * Hk + o(n * Hk)	(compressed succinct space)
 
-Worst-case (happens if the text has large (O(n)) length-k contexts)
+Worst-case: Happens if the text has large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
 
- time: O( n * log n * Hk ) 
- space: O( n * Hk )
+ time: O( n * log n * Hk )	(a factor log n * Hk from optimal)
+ space: O( n * Hk )		(compressed)
 
 *** Compile ***
 
