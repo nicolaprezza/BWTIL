@@ -77,7 +77,7 @@ using namespace bwtil;
 
 			cout << "\nError: text file and inverted bwt do not match.\n";
 			cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
-			//exit(0);
+			exit(0);
 
 		}
 
