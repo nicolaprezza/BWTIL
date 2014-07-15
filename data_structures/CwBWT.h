@@ -16,6 +16,7 @@
 #include "CumulativeCounters.h"
 #include "DynamicString.h"
 #include "BackwardFileReader.h"
+#include "ContextAutomata.h"
 
 namespace bwtil {
 
@@ -36,8 +37,7 @@ public:
 
 		CwBWT * bwt;
 		ulint context;//pointer to context of next symbol
-		ulint prefix;//pointer to prefix of the next context (if prefix>=prefix size then we are in the suffix)
-		ulint suffix;//pointer to the suffix of the next context
+		ulint i;//next position to be read in the current context
 
 		ulint n;
 
@@ -65,19 +65,17 @@ public:
 
 protected:
 
-	void appendToPrefix(ulint context, symbol s);
-	ulint prefixLength(ulint context);
-	symbol prefixAt(ulint context,ulint i);
 	void printRSSstat();
 
-	ulint number_of_contexts;//equals sigma^k
+	ulint number_of_contexts;
 
 	ulint terminator_position;
 
-	symbol * inverse_remapping;//from symbol -> to char (file)
-	symbol TERMINATOR;//equal to sigma
+	symbol TERMINATOR;//equal to 0
 
 	ulint n;//length of the text (without text terminator)
+
+	ContextAutomata ca;
 
 private:
 
@@ -85,12 +83,7 @@ private:
 	void computeActualEntropy();//actual entropy of order k obtained with the Huffman compressor. Always >= empiricalEntropy()
 
 	void build(bool verbose);//build CwBWT (after all structures have been created)
-	void init1(string path, bool verbose);
-	void init2(string path, bool verbose);
-
-	ulint shift(ulint context, symbol s);
-
-	void printContext(ulint x);
+	void initStructures(string path, bool verbose);
 
 	static const uint empty = 256;
 
@@ -104,13 +97,7 @@ private:
 	DynamicString ** dynStrings;
 	vector<ulint> * frequencies;//frequencies[i] = frequency of each symbol in {0,...,sigma-1} in the context i
 
-	vector<symbol> ** prefixes;//each context can have a (small) prefix
-
 	ulint * lengths;//length of each context
-
-	uint * remapping;//from char (file) -> to symbols in {0,...,sigma-1}
-
-	ulint sigma_pow_k_minus_one;//sigma^(k-1)
 
 	double Hk,bits_per_symbol;
 

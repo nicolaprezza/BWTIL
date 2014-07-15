@@ -11,7 +11,9 @@ cw-bwt.cpp \
 ../../data_structures/DynamicString.cpp \
 ../../data_structures/UnaryDynamicString.cpp \
 ../../data_structures/MultiaryDynamicString.cpp \
-../../data_structures/HuffmanTree.cpp
+../../data_structures/HuffmanTree.cpp \
+../../data_structures/ContextAutomata.cpp
+
 
 BINARY=../../cw-bwt
 

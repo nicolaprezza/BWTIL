@@ -36,6 +36,8 @@ public:
 
 	ulint length(){return n;};
 
+	string getPath(){return path;}
+
 private:
 
 	ulint n;
@@ -51,6 +53,7 @@ private:
 	uint offset;//offset (in the file) of the byte after the next chunk to be read
 
 	FILE * fp;//pointer to file.
+
 
 };
 
