@@ -1,5 +1,6 @@
 all: 
 
+	make clean
 	make cw-bwt
 	make dB-hash	
 	make bwt-check

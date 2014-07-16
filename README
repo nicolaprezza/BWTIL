@@ -21,7 +21,7 @@ The BWTIL library offers a set of (hopefully useful!) tools to deal with bwt-bas
 
 To compile all the executables, execute
 
-> make clean; make
+> make
 
 in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
 

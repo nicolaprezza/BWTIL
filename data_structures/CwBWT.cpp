@@ -139,35 +139,6 @@ void CwBWT::initStructures(string path, bool verbose){
 
 }
 
-int compare(uint i, uint j, vector<uint> sorted_positions, symbol * last_symbols, uint k){
-
-	if(i==j) return 0;
-
-	if(last_symbols[i]<last_symbols[j])
-		return -1;
-	else if (last_symbols[i]>last_symbols[j])
-		return 1;
-
-	//last_symbols[i]==last_symbols[j]
-
-	i++;
-	j++;
-
-	if(i==k) return -1;
-
-	if(j==k) return 1;
-
-	for(uint l=0;l<sorted_positions.size();l++){
-
-		if(sorted_positions.at(l)==i) return -1;
-		if(sorted_positions.at(l)==j) return 1;
-
-	}
-
-	return 0;
-
-}
-
 void CwBWT::build(bool verbose){
 
 	ulint pos = n-1;//current position on text (char to be inserted in the bwt)
@@ -237,8 +208,16 @@ void CwBWT::build(bool verbose){
 void CwBWT::printRSSstat(){
 
 	size_t peakSize = getPeakRSS( );
-	cout << "\nPeak RAM usage (Bytes): " <<  peakSize <<endl;
+
+	if(peakSize/((ulint)1<<30) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<30) << " GB" <<endl;
+	else if (peakSize/((ulint)1<<20) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<20) << " MB" <<endl;
+	else if (peakSize/((ulint)1<<10) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<10) << " KB" <<endl;
+
 	cout << "Bits per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size())*8 <<endl;
+	cout << "Bytes per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size()) <<endl;
 
 }
 

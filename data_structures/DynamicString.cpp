@@ -9,7 +9,7 @@
 
 namespace bwtil {
 
-DynamicString::DynamicString(){n=0;current_size=0;unary_string=true;sigma=0;sigma_0=0;H0=64;}
+DynamicString::DynamicString(){n=0;current_size=0;unary_string=true;sigma=0;sigma_0=0;H0=0;}
 
 DynamicString::DynamicString(vector<ulint> * freq){//absolute frequencies of the characters
 
@@ -23,7 +23,7 @@ DynamicString::DynamicString(vector<ulint> * freq){//absolute frequencies of the
 		unary_string=true;
 		sigma=0;
 		sigma_0=0;
-		H0=64;
+		H0=0;
 		return;
 	}
 

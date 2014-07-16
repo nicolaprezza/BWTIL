@@ -59,12 +59,12 @@ private:
 	uint16_t * child0;//for each node, pointer to left child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 	uint16_t * child1;//for each node, pointer to right child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 
-	symbol s;//unique symbol
-
+	symbol s;//unique symbol of the string if unary alphabet
 	bool unary_string;//alphabet has size 1
+
 	ulint current_size;
-	symbol sigma;
-	symbol sigma_0;
+	symbol sigma;//alphabet size
+	symbol sigma_0;//number of characters with frequency > 0
 
 	double H0;//0-th order entropy reached by the Huffman compressor
 
