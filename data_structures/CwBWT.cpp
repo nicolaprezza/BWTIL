@@ -13,19 +13,25 @@ namespace bwtil {
 CwBWT::CwBWT(string path, bool verbose){
 
 	//detect optimal k
-	BackwardFileReader bfr(path);
-	bfr.close();
+	//BackwardFileReader bfr(path);
+	//bfr.close();
 
 	k = 2;//TODO
 
-	CwBWT(path, k, verbose);
+	init(path, k, verbose);
 
 }
 
 CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired number of contexts
 
+	init(path,k,verbose);
+
+}
+
+void CwBWT::init(string path, uint k, bool verbose){
+
 	if(k==0){
-		cout << "Error: context length must be k>0\n";
+		cout << "Error: context length must be k>0" << endl;
 		exit(0);
 	}
 
@@ -35,7 +41,7 @@ CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired num
 	n = bwFileReader.length();
 
 	if(n<=k){
-		cout << "Error: File length n must be n>k, where k is the context length.\n";
+		cout << "Error: File length n must be n>k, where k is the context length." << endl;
 		exit(0);
 	}
 
@@ -55,8 +61,6 @@ CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired num
 
 }
 
-
-
 void CwBWT::initStructures(string path, bool verbose){
 
 	frequencies = new vector<ulint>[number_of_contexts];
@@ -72,7 +76,7 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	ulint symbols_read=0;
 
-	if(verbose) cout << "\n*** Scanning input file to compute context frequencies ***\n";
+	if(verbose) cout << "\n*** Scanning input file to compute context frequencies ***" << endl;
 
 	while(not bwFileReader.BeginOfFile()){
 
@@ -87,7 +91,7 @@ void CwBWT::initStructures(string path, bool verbose){
 		symbols_read++;
 
 		if(symbols_read%5000000==0 and verbose)
-			cout << " " << 100*((double)symbols_read/(double)n) << "% done.\n";
+			cout << " " << 100*((double)symbols_read/(double)n) << "% done." << endl;
 
 	}
 
@@ -96,21 +100,21 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	computeEmpiricalEntropy();
 
-	if(verbose) cout << " Done.\n\n";
+	if(verbose) cout << " Done.\n" << endl;
 
 	ulint max_len=0;
 	for(ulint i=0;i<number_of_contexts;i++)
 		if(lengths[i]>max_len)
 			max_len=lengths[i];
 
-	if(verbose) cout << " Largest context has " << max_len << " characters\n";
+	if(verbose) cout << " Largest context has " << max_len << " characters" << endl;
 
 	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***";
 
 	dynStrings = new DynamicString*[number_of_contexts];
 	for(ulint i=0;i<number_of_contexts;i++){
 
-		dynStrings[i] = DynamicString::getDynamicString(&frequencies[i]);
+		dynStrings[i] = new DynamicString(&frequencies[i]);
 
 	}
 
@@ -124,7 +128,7 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	delete [] lengths;
 
-	if(verbose) cout << "\n\n Done.\n";
+	if(verbose) cout << "\n\n Done." << endl;
 
 	if(verbose){
 
@@ -186,7 +190,7 @@ void CwBWT::build(bool verbose){
 
 	symbol head,tail;//head=symbol to be inserted, tail=symbol exiting from the context
 
-	if(verbose) cout << "\n*** Main cw-bwt algorithm (context-wise incremental construction of the BWT) *** \n";
+	if(verbose) cout << "\n*** Main cw-bwt algorithm (context-wise incremental construction of the BWT) *** " << endl;
 
 	uint perc,last_percentage=1;
 
@@ -195,12 +199,12 @@ void CwBWT::build(bool verbose){
 		perc = 10*(uint)(10*((double)(n-pos)/(double)n));
 
 		if(perc>last_percentage and verbose){
-			cout << perc << "% done.\n";
+			cout << perc << "% done." << endl;
 			last_percentage = perc;
 		}
 
 		if((n-pos)%5000000==0 and verbose)
-			cout << 100*((double)(n-pos)/(double)n) << "% done.\n";
+			cout << 100*((double)(n-pos)/(double)n) << "% done." << endl;
 
 		head = ca.ASCIItoCode( bwFileReader.read() );//this symbol has context corresponding to ca.currentState(). symbol entering from left in context
 		tail = context_char[pos%k];// = (pos+k)%k . Symbol exiting from right of the context
@@ -230,7 +234,7 @@ void CwBWT::build(bool verbose){
 
 	bwFileReader.close();//close input file
 
-	if(verbose) cout << "Done.\n";
+	if(verbose) cout << "Done." << endl;
 }
 
 void CwBWT::printRSSstat(){

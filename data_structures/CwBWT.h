@@ -85,6 +85,8 @@ private:
 	void build(bool verbose);//build CwBWT (after all structures have been created)
 	void initStructures(string path, bool verbose);
 
+	void init(string path, uint k, bool verbose);
+
 	static const uint empty = 256;
 
 	uint k;//context length and order of compression (entropy H_k). default: k = ceil( log_sigma(n/log^3 n) )

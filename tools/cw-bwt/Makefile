@@ -9,8 +9,6 @@ cw-bwt.cpp \
 ../../data_structures/FileReader.cpp \
 ../../data_structures/CwBWT.cpp \
 ../../data_structures/DynamicString.cpp \
-../../data_structures/UnaryDynamicString.cpp \
-../../data_structures/MultiaryDynamicString.cpp \
 ../../data_structures/HuffmanTree.cpp \
 ../../data_structures/ContextAutomata.cpp
 
@@ -24,6 +22,10 @@ all: $(BINARY)
 $(BINARY): $(SOURCE)
 
 	g++ -O3 $(SOURCE) -o $(BINARY)
+
+debug:
+
+	g++ $(SOURCE) -o $(BINARY) -DDEBUG
 
 clean:
 
