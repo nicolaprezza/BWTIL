@@ -76,7 +76,7 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	ulint symbols_read=0;
 
-	if(verbose) cout << "\n*** Scanning input file to compute context frequencies ***" << endl;
+	if(verbose) cout << "\n*** Scanning input file to compute context frequencies ***" << endl << endl;
 
 	while(not bwFileReader.BeginOfFile()){
 
@@ -190,21 +190,18 @@ void CwBWT::build(bool verbose){
 
 	symbol head,tail;//head=symbol to be inserted, tail=symbol exiting from the context
 
-	if(verbose) cout << "\n*** Main cw-bwt algorithm (context-wise incremental construction of the BWT) *** " << endl;
+	if(verbose) cout << "\n*** Main cw-bwt algorithm (context-wise incremental construction of the BWT) *** " << endl << endl;
 
-	uint perc,last_percentage=1;
+	int perc,last_percentage=-1;
 
 	while(not bwFileReader.BeginOfFile()){
 
-		perc = 10*(uint)(10*((double)(n-pos)/(double)n));
+		perc = (100*(n-pos-1))/n;
 
-		if(perc>last_percentage and verbose){
-			cout << perc << "% done." << endl;
+		if((perc%5==0) and (perc>last_percentage) and verbose){
+			cout << " " << perc << "% done." << endl;
 			last_percentage = perc;
 		}
-
-		if((n-pos)%5000000==0 and verbose)
-			cout << 100*((double)(n-pos)/(double)n) << "% done." << endl;
 
 		head = ca.ASCIItoCode( bwFileReader.read() );//this symbol has context corresponding to ca.currentState(). symbol entering from left in context
 		tail = context_char[pos%k];// = (pos+k)%k . Symbol exiting from right of the context
@@ -234,7 +231,7 @@ void CwBWT::build(bool verbose){
 
 	bwFileReader.close();//close input file
 
-	if(verbose) cout << "Done." << endl;
+	if(verbose) cout << " Done." << endl;
 }
 
 void CwBWT::printRSSstat(){
