@@ -15,42 +15,6 @@ using namespace bwtil;
 	 cout << "\n ****** DEBUG MODE ******\n\n";
 #endif
 
-	/* vector<ulint> freq;
-
-	 freq.push_back(22);
-	 freq.push_back(0);
-	 freq.push_back(21);
-	 freq.push_back(5);
-	 freq.push_back(3);
-	 freq.push_back(0);
-	 freq.push_back(9);
-
-	 ulint n=0;
-	 for(uint i=0;i<freq.size();i++)
-		 n+= freq.at(i);
-
-	 DynamicString * dyns = DynamicString::newDynamicString(n,freq);
-
-	 for(uint k=0;k<freq.size();k++){
-
-		 for(uint i=0;i<freq.at(k);i++)
-			 dyns->insert(k,0);
-
-	 }
-
-	 cout << dyns->toString()<<endl;*/
-
-	/* uint sigma = 254;
-	 CumulativeCounters cc(sigma,1000);
-
-	cout << cc.toString() << endl;
-
-	cc.increment(2);
-	cout << cc.toString() << endl;
-
-	cout << cc.toString() << endl;*/
-
-
 	if(argc != 3 and argc != 4){
 		cout << "*** context-wise BWT construction in compressed space ***\n";
 		cout << "Usage: cw-bwt text_file bwt_file [k]\n";

@@ -11,18 +11,270 @@ namespace bwtil {
 
 ContextAutomata::ContextAutomata(uint k, BackwardFileReader * bfr, bool verbose){
 
-	this->k=k;
-	this->bwFileReader = bfr;
+	init(bfr, verbose);
+	build(k, bfr, verbose);
 
-	if(verbose) cout << "\n*** Building context automata ***\n\n";
+}
 
-	init(verbose);
+ContextAutomata::ContextAutomata(BackwardFileReader * bfr, uint overhead, bool verbose){
+
+	init(bfr, verbose);
+
+	//detect optimal k and build automata
+
+	if(verbose) cout << "\ Allowed memory overhead for the automata = " << overhead << "%" << endl;
+	if(verbose) cout << " Detecting optimal k ... " << endl;
+
+	uint _k = optimalK(overhead, bfr, verbose);
+
+	if(verbose) cout << " Done. Optimal k = " << _k << endl;
+
+	build( _k , bfr, verbose);
+
+}
+
+ContextAutomata::ContextAutomata(BackwardFileReader * bfr, bool verbose){
+
+	init(bfr, verbose);
+
+	//detect optimal k and build automata
+	//default 5% of overhead
+
+	if(verbose) cout << "\n Allowed memory overhead for the automata = 5%" << endl;
+	if(verbose) cout << " Detecting optimal k ... " << endl;
+
+	uint _k = optimalK(5, bfr, verbose);
+
+	if(verbose) cout << " Done. Optimal k = " << _k << endl;
+
+	build( _k , bfr, verbose);
+
+}
+
+/*
+ * return true with probability p
+ */
+bool flip_coin(double p){
+
+	return ((double)rand()/(double)RAND_MAX) <= p;
+
+}
+
+uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool verbose){
+
+	//strategy: sample randomly n/log n characters of the text (in contiguous blocks of size B)
+	//and try k=1,... until suitable k is found. There will be at most log_sigma n iterations, so work is linear.
+
+	ulint B = 1000; //number of characters per block
+	vector<symbol> sampled_text;
+
+	srand(time(NULL));
+
+	ulint nr_of_blocks = n/B;//total number of blocks in the text
+	ulint sampled_n = n/(uint)log2(n);//expected size of sampled text
+	ulint nr_of_sampled_blocks = sampled_n/B;//expected number of sampled blocks
+	double p = (double)nr_of_sampled_blocks/(double)nr_of_blocks;//probability that a block is sampled
+
+	ulint pos = n-1;//current position in the text
+	while(not bfr->BeginOfFile()){
+
+		if(pos%B==0){//begin of a block
+
+			if(pos+1 >= B ){//if there are at least B characters to be sampled
+
+				if(flip_coin(p)){//randomly decide if sample the block
+
+					for(uint i=0;i<B;i++)	//sample B characters
+						sampled_text.push_back( bfr->read() );
+
+				}
+
+			}
+
+		}
+
+		bfr->read();//skip character on text
+		pos--;
+
+	}
+
+	bfr->rewind();
+
+	if(verbose)
+		cout << "  Sampled text size = " << sampled_text.size() << endl;
+
+	//for each context the automata will memorize:
+	// sigma edges
+	// sigma partial sum counters: log n * sigma
+	// approximate total number of bits for each context: O(sigma * log n)
+
+	uint log_sigma = log2(sigma+1);
+	uint log_n = log2(n+1);
+
+	ulint bits_per_context = sigma*32;
+	ulint nr_of_contexts;
+
+	// we want the highest k such that nr_of_contexts*bits_per_context <= n * log sigma * (overhead/100)
+
+	uint _k = 1;//start from k=1.
+	nr_of_contexts=numberOfContexts( _k, sampled_text);
+
+	if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_contexts << endl;
+
+	while( _k < log_n and nr_of_contexts * bits_per_context <= (n * log_sigma * overhead)/100 ){
+
+		_k++;
+
+		nr_of_contexts=numberOfContexts( _k, sampled_text);
+
+		if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_contexts << endl;
+
+	}
+
+	if(_k > 1)//we found the first _k above the threshold, so decrease _k. Minimum _k is 1.
+		_k--;
+
+	return _k;
+
+}
+
+/*
+ * number of contexts of length k in the sampled text
+ */
+ulint ContextAutomata::numberOfContexts(uint k, vector<symbol> sampled_text){
 
 	sigma_pow_k_minus_one = 1;
 	for(uint i=0;i<k-1;i++)
 		sigma_pow_k_minus_one *= sigma;
 
+	ulint q = n/(log2(n)*log2(n)) + 1;//hash size: n/log^2 n
+
+	vector<set<ulint> > H = vector<set<ulint> >( q,set<ulint>() );//the hash
+
+	ulint context = (ulint)0;//first context
+
+	H.at(context%q).insert(context);
+
+	for(ulint i=0;i<sampled_text.size();i++){
+
+		context = shift(context, ASCIItoCode(sampled_text.at(i)) );
+
+		H.at(context%q).insert(context);
+
+	}
+
+	vector<ulint> k_mers;
+
+	for(ulint i=0;i<q;i++)
+		for (std::set<ulint>::iterator it=H.at(i).begin(); it!=H.at(i).end(); ++it)
+			k_mers.push_back(*it);
+
+	return k_mers.size();
+
+}
+
+void ContextAutomata::init(BackwardFileReader * bfr, bool verbose){
+
+	if(verbose) cout << "\n*** Building context automata ***\n\n";
+
+	bwFileReader = bfr;
+
+	n = bwFileReader->length();
 	null_ptr = ~((uint)0);
+
+	if(verbose) cout << " Text length is " << n << endl;
+
+	remapping = new uint[256];
+	inverse_remapping = new symbol[256];
+
+	for(uint i=0;i<256;i++){
+		remapping[i]=empty;
+		inverse_remapping[i]=0;
+	}
+
+	if(verbose) cout << "\n scanning file to detect alphabet ... \n";
+
+	vector<symbol> alphabet = vector<symbol>();
+
+	ulint symbols_read=0;
+	vector<bool> inserted = vector<bool>(256,false);
+
+	while(not bwFileReader->BeginOfFile()){
+
+		symbol s = bwFileReader->read();
+
+		if(s==0){
+
+			cout << "ERROR while reading file " << bwFileReader->getPath() << " : the file contains a 0x0 byte.\n";
+			exit(0);
+
+		}
+
+		if(not inserted.at(s)){
+			inserted.at(s) = true;
+			alphabet.push_back(s);
+		}
+
+		symbols_read++;
+
+		if(symbols_read%5000000==0 and verbose)
+			cout << " " << 100*((double)symbols_read/(double)n) << "% done.\n";
+
+
+	}
+
+	if(verbose) cout << " done.\n\n Sorting alphabet ... ";
+
+	std::sort(alphabet.begin(),alphabet.end());
+
+	if(verbose) cout << "done. Alphabet size: sigma = " << alphabet.size() << endl;
+
+	sigma = 1;//code 0x0 is for the terminator
+
+	if(verbose) cout << "\n Alphabet = { ";
+
+	for (uint i=0;i<alphabet.size();i++){
+
+		if(remapping[alphabet.at(i)]==empty){//new symbol
+
+			remapping[alphabet.at(i)] = sigma;
+			sigma++;
+
+		}
+
+		if(verbose) cout << alphabet.at(i) << ' ';
+
+	}
+
+	if(verbose) cout << "}\n\n";
+
+	if(verbose) cout << " Alphabet (ASCII codes) = { ";
+
+	for (uint i=0;i<alphabet.size();i++)
+		if(verbose) cout << (ulint)alphabet.at(i) << ' ';
+
+	if(verbose) cout << "}\n";
+
+	TERMINATOR = 0;
+
+	for(uint i=1;i<256;i++)
+		if(remapping[i]!=empty)
+			inverse_remapping[remapping[i]] = i;
+
+	inverse_remapping[TERMINATOR] = 0;//0 is the terminator appended in the file
+
+	bwFileReader->rewind();
+
+}
+
+void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
+
+	this->k=k;
+	this->bwFileReader = bfr;
+
+	sigma_pow_k_minus_one = 1;
+	for(uint i=0;i<k-1;i++)
+		sigma_pow_k_minus_one *= sigma;
 
 	ulint q = n/(log2(n)*log2(n)) + 1;//hash size: n/log^2 n
 
@@ -107,95 +359,6 @@ ContextAutomata::ContextAutomata(uint k, BackwardFileReader * bfr, bool verbose)
 	rewind();//go back to initial state
 
 	if(verbose) cout << "done.\n";
-
-}
-
-void ContextAutomata::init(bool verbose){
-
-	n = bwFileReader->length();
-
-	if(verbose) cout << " Text length is " << n << endl;
-
-	remapping = new uint[256];
-	inverse_remapping = new symbol[256];
-
-	for(uint i=0;i<256;i++){
-		remapping[i]=empty;
-		inverse_remapping[i]=0;
-	}
-
-	if(verbose) cout << "\n scanning file to detect alphabet ... \n";
-
-	vector<symbol> alphabet = vector<symbol>();
-
-	ulint symbols_read=0;
-	vector<bool> inserted = vector<bool>(256,false);
-
-	while(not bwFileReader->BeginOfFile()){
-
-		symbol s = bwFileReader->read();
-
-		if(s==0){
-
-			cout << "ERROR while reading file " << bwFileReader->getPath() << " : the file contains a 0x0 byte.\n";
-			exit(0);
-
-		}
-
-		if(not inserted.at(s)){
-			inserted.at(s) = true;
-			alphabet.push_back(s);
-		}
-
-		symbols_read++;
-
-		if(symbols_read%5000000==0 and verbose)
-			cout << " " << 100*((double)symbols_read/(double)n) << "% done.\n";
-
-
-	}
-
-	if(verbose) cout << " done.\n\n Sorting alphabet ... ";
-
-	std::sort(alphabet.begin(),alphabet.end());
-
-	if(verbose) cout << "done. Alphabet size: sigma = " << alphabet.size() << endl;
-
-	sigma = 1;//code 0x0 is for the terminator
-
-	if(verbose) cout << "\n Alphabet = { ";
-
-	for (uint i=0;i<alphabet.size();i++){
-
-		if(remapping[alphabet.at(i)]==empty){//new symbol
-
-			remapping[alphabet.at(i)] = sigma;
-			sigma++;
-
-		}
-
-		if(verbose) cout << alphabet.at(i) << ' ';
-
-	}
-
-	if(verbose) cout << "}\n\n";
-
-	if(verbose) cout << " Alphabet (ASCII codes) = { ";
-
-	for (uint i=0;i<alphabet.size();i++)
-		if(verbose) cout << (ulint)alphabet.at(i) << ' ';
-
-	if(verbose) cout << "}\n";
-
-	TERMINATOR = 0;
-
-	for(uint i=1;i<256;i++)
-		if(remapping[i]!=empty)
-			inverse_remapping[remapping[i]] = i;
-
-	inverse_remapping[TERMINATOR] = 0;//0 is the terminator appended in the file
-
-	bwFileReader->rewind();
 
 }
 

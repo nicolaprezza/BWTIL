@@ -85,7 +85,7 @@ private:
 	void build(bool verbose);//build CwBWT (after all structures have been created)
 	void initStructures(string path, bool verbose);
 
-	void init(string path, uint k, bool verbose);
+	void init(string path, bool verbose);
 
 	static const uint empty = 256;
 

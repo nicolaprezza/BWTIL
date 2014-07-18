@@ -12,23 +12,19 @@ namespace bwtil {
 
 CwBWT::CwBWT(string path, bool verbose){
 
-	//detect optimal k
-	//BackwardFileReader bfr(path);
-	//bfr.close();
+	bwFileReader = BackwardFileReader(path);
+	n = bwFileReader.length();
 
-	k = 2;//TODO
+	ca = ContextAutomata(&bwFileReader, true);
+	k = ca.contextLength();
 
-	init(path, k, verbose);
+	init(path, verbose);
 
 }
 
 CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired number of contexts
 
-	init(path,k,verbose);
-
-}
-
-void CwBWT::init(string path, uint k, bool verbose){
+	this->k = k;
 
 	if(k==0){
 		cout << "Error: context length must be k>0" << endl;
@@ -47,7 +43,12 @@ void CwBWT::init(string path, uint k, bool verbose){
 
 	ca = ContextAutomata(k, &bwFileReader, true);
 
-	this->k = k;
+	init(path, verbose);
+
+}
+
+void CwBWT::init(string path, bool verbose){
+
 	number_of_contexts = ca.numberOfStates();
 
 	sigma = ca.alphabetSize();//this takes into account also the terminator character
