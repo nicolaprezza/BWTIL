@@ -33,6 +33,7 @@ private:
 	ulint current_size;
 	ulint n;
 	vector<bool> * bitvector;
+	vector<bool> * waste;
 
 };
 

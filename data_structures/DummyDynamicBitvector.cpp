@@ -13,13 +13,12 @@ DummyDynamicBitvector::DummyDynamicBitvector(ulint n) {
 
 	this->n = n;
 	bitvector = new vector<bool>(n);
+	waste = new vector<bool>((n*2)/10);
 	current_size = 0;
 
 }
 
-DummyDynamicBitvector::~DummyDynamicBitvector() {
-	// TODO Auto-generated destructor stub
-}
+DummyDynamicBitvector::~DummyDynamicBitvector() {}
 
 bool DummyDynamicBitvector::access(ulint i){
 

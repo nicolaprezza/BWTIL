@@ -15,7 +15,7 @@ CwBWT::CwBWT(string path, bool verbose){
 	bwFileReader = BackwardFileReader(path);
 	n = bwFileReader.length();
 
-	ca = ContextAutomata(&bwFileReader, true);
+	ca = ContextAutomata(&bwFileReader, 10, true);
 	k = ca.contextLength();
 
 	init(path, verbose);
@@ -79,6 +79,8 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	if(verbose) cout << "\n*** Scanning input file to compute context frequencies ***" << endl << endl;
 
+	int perc,last_perc=-1;
+
 	while(not bwFileReader.BeginOfFile()){
 
 		s = ca.ASCIItoCode( bwFileReader.read() );//this symbol has as context the current state of the automata
@@ -89,10 +91,13 @@ void CwBWT::initStructures(string path, bool verbose){
 
 		ca.goTo(s);
 
-		symbols_read++;
+		perc = (100*symbols_read)/n;
 
-		if(symbols_read%5000000==0 and verbose)
-			cout << " " << 100*((double)symbols_read/(double)n) << "% done." << endl;
+		if(perc>last_perc and (perc%5)==0 and verbose){
+			cout << " " << perc << "% done." << endl;
+			last_perc=perc;
+		}
+		symbols_read++;
 
 	}
 
@@ -110,12 +115,13 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	if(verbose) cout << " Largest context has " << max_len << " characters" << endl;
 
-	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***";
+	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << flush;
 
 	dynStrings = new DynamicString*[number_of_contexts];
 	for(ulint i=0;i<number_of_contexts;i++){
 
 		dynStrings[i] = new DynamicString(&frequencies[i]);
+		frequencies[i].clear();//free memory
 
 	}
 
