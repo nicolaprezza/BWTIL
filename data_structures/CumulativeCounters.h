@@ -48,15 +48,17 @@ private:
 	uint8_t childNumber(uint16_t n);//return which children number is n in his parent
 	ulint getCounterNumber(ulint n, uint i);//get value of the counter number i in the node n
 
-	bool base_counter;//added to each count (1 only in the last context in the text, to count for one terminator)
-
 	uint8_t sigma;
 	uint8_t nr_of_leafs;
 	uint8_t log2n;//number of bits of each counter
-	bool empty;
-	ulint ones;//1^d in base 2^log2n
 	uint8_t d;//number of counters per node = 64/log2(n)
+
+	bool base_counter;//added to each count (1 only in the last context in the text, to count for one terminator)
+	bool empty;
+
 	uint16_t nr_of_nodes;
+
+	ulint ones;//1^d in base 2^log2n
 	ulint * nodes;//each node is a 64-bits word and stores d counters
 
 

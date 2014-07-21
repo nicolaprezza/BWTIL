@@ -41,6 +41,13 @@ CwBWT::CwBWT(string path, uint k, bool verbose){//creates CwBWT with desired num
 		exit(0);
 	}
 
+	uint log_n = log2(n);
+
+	if(k>=log_n){
+		cout << "Error: k is too large. k must be <= log_s(n), where s is the alphabet size." << endl;
+		exit(0);
+	}
+
 	ca = ContextAutomata(k, &bwFileReader, true);
 
 	init(path, verbose);
@@ -151,7 +158,7 @@ void CwBWT::initStructures(string path, bool verbose){
 	}
 
 
-	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << endl;
+	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << endl << endl;
 
 	perc=0;
 	last_perc=-1;

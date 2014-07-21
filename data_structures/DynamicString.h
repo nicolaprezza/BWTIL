@@ -61,7 +61,6 @@ private:
 	symbol access(uint node, ulint i);
 	ulint rank(vector<bool> * code, uint node, uint pos, ulint i);
 
-	vector<vector<bool> > codes;//Huffman codes
 
 #ifdef DEBUG
 
@@ -70,22 +69,26 @@ private:
 
 #endif
 
-	DummyDynamicBitvector * wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
-	//tree topology
 	symbol number_of_internal_nodes;
+	symbol sigma;//alphabet size
+	symbol sigma_0;//number of characters with frequency > 0
+	symbol s;//unique symbol of the string if unary alphabet
+
 	uint16_t * child0;//for each node, pointer to left child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 	uint16_t * child1;//for each node, pointer to right child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 
-	symbol s;//unique symbol of the string if unary alphabet
-	bool unary_string;//alphabet has size 1
+	DummyDynamicBitvector * wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
+	//tree topology
+
+	vector<vector<bool> > codes;//Huffman codes
 
 	ulint current_size;
-	symbol sigma;//alphabet size
-	symbol sigma_0;//number of characters with frequency > 0
 
 	double H0;//0-th order entropy reached by the Huffman compressor
 
 	ulint n;//max size of the string
+
+	bool unary_string;//alphabet has size 1
 
 };
 

@@ -133,10 +133,7 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 	 */
 
 	CumulativeCounters sample_cumulative_counter = CumulativeCounters(sigma,n);//sample of cumulative counter to extimate its memory consumption
-	vector<ulint> sample_freq;
-	for(uint i=0;i<sigma;i++)
-		sample_freq.push_back(1);
-	DynamicString sample_dynstring = DynamicString(&sample_freq);
+	DynamicString sample_dynstring = DynamicString(new vector<ulint>(sigma,1));
 
 	ulint bits_per_k_mer =
 			CHAR_BIT * sizeof(DynamicString *) + //pointers to DynamicStrings
@@ -165,7 +162,7 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 
 	if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_k_mers << endl;
 
-	while( _k < log_n and nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * overhead)/100 ){
+	while( _k < log_n and (nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * overhead)/100) ){
 
 		_k++;
 
@@ -369,9 +366,9 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	number_of_k_mers = k_mers.size();
 
-	if(verbose) cout << "done. " << k_mers.size() << " nonempty contexts of length " << k << " (including contexts containing terminator character)"  << endl;
+	if(verbose) cout << "done. " << k_mers.size() << " nonempty contexts of length k = " << k << " (including contexts containing terminator character)"  << endl;
 
-	if(verbose) cout << " building automata edges ... "<< endl;
+	if(verbose) cout << " building automata edges ... "<< flush;
 
 	uint nr_of_prefixes=0;
 	prefix_nr.push_back(nr_of_prefixes);
@@ -401,38 +398,32 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 	last_perc=-1;
 	symbols_read=0;
 
-	while(not bfr->BeginOfFile()){
+	ulint context_from;
+	ulint context_to;
 
-		s = ASCIItoCode(bfr->read());//read symbol
-		context = shift(context, s );//new context
+	for(ulint i = 0;i<number_of_k_mers;i++ ){//for each k-mer
 
-		if( edge(current_state,s) == null_ptr ){//edge does not exist: create it
+		context_from = k_mers.at(i);
 
-			//search context position and store new pointer
+		for(symbol s = 0;s<sigma;s++){//for each symbol
 
-			setEdge(current_state, s, searchContext(context, k_mers));
+			if( edge(i,s) == null_ptr ){//edge does not exist: create it
+
+				context_to = shift(context_from, s );
+
+				//search context position and store new pointer
+
+				setEdge(i, s, searchContext(context_to, k_mers));
+
+			}
 
 		}
-
-		//jump following the edge
-		current_state = edge(current_state,s);
-
-		perc = (100*symbols_read)/n;
-
-		if(perc>last_perc and (perc%5)==0 and verbose){
-			cout << " " << perc << "% done." << endl;
-			last_perc=perc;
-		}
-
-		symbols_read++;
 
 	}
 
-	bfr->rewind();
-
 	rewind();//go back to initial state
 
-	if(verbose) cout << " done." << endl;
+	if(verbose) cout << "done." << endl;
 	if(verbose) cout << "\nContext automata completed." << endl;
 
 }
