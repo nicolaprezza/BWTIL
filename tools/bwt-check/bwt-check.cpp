@@ -7,6 +7,7 @@
 
 #include "../../data_structures/IndexedBWT.h"
 #include "../../data_structures/FileReader.h"
+#include "../../extern/getRSS.c"
 
 using namespace bwtil;
 
@@ -21,7 +22,8 @@ using namespace bwtil;
 		cout << "Given a bwt file and a text file, checks if the former is the valid bwt of the latter\n";
 		cout << "Usage: bwt-check bwt_file text_file\n";
 		cout << "where:\n";
-		cout << "  bwt_file is the bwt of text_file, with a 0x0 byte as terminator character (must appear only once in the bwt!)\n";
+		cout <<	"- bwt_file is the bwt of text_file, with a 0x0 byte as terminator character (must appear only once in the bwt!).\n";
+		cout <<	"- bwt_file is the plain text file whose bwt is supposed to be stored in bwt_file.\n";
 		exit(0);
 	}
 
@@ -40,7 +42,9 @@ using namespace bwtil;
 
 	IndexedBWT idxBWT = IndexedBWT(bwt,n_bwt,0,true);
 
-	cout << "\nDone. Inverting the BWT ... \n";
+	delete [] bwt;
+
+	cout << "\nDone. Inverting the BWT ... " << endl;
 
 	//invert the bwt
 
@@ -87,6 +91,8 @@ using namespace bwtil;
 
 	cout << "\nSUCCESS!\n";
 	cout << argv[1] << " " << "is the BWT of " << argv[2] << endl;
+
+	printRSSstat();
 
  }
 

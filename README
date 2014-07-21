@@ -9,12 +9,12 @@ mail: nicolapr@gmail.com
  ***   Brief introduction   ***
 
 
-The BWTIL library offers a set of tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer the best performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, and the dB-hash data structure. The available executables (to date) are:
+The BWTIL library offers a set of tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer good performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, and the dB-hash data structure. The available executables (to date) are:
 
  >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  >> cw-bwt (work in progress) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
- >> bwt-check : check consistency of bwt-files (see tools/bwt-check/README)
-
+ >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
+ >> bwt-to-sa (work in progress) : induce the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
 
  ***   Compile   ***
 
@@ -27,6 +27,6 @@ in the main BWTIL/ directory. To compile the executables individually, execute (
 
 > make clean; make tool_name
 
-where tool_name is one of dB-hash, cw-bwt, bwt-check.
+where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa.
 
 Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.

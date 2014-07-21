@@ -44,7 +44,7 @@ public:
 			bits += codes.at(i).size();
 
 		bits += CHAR_BIT* sizeof(this);
-		bits += CHAR_BIT*codes.size()*sizeof(vector<bool>);
+		bits += CHAR_BIT*codes.capacity()*sizeof(vector<bool>);
 		bits += CHAR_BIT*sizeof(codes);
 		bits += CHAR_BIT*number_of_internal_nodes*sizeof(DummyDynamicBitvector *);
 		bits += CHAR_BIT*number_of_internal_nodes*sizeof(DummyDynamicBitvector);

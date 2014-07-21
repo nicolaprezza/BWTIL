@@ -76,10 +76,6 @@ size_t getPeakRSS( )
 #endif
 }
 
-
-
-
-
 /**
  * Returns the current resident set size (physical memory use) measured
  * in bytes, or zero if the value cannot be determined on this OS.
@@ -119,4 +115,17 @@ size_t getCurrentRSS( )
 	/* AIX, BSD, Solaris, and Unknown OS ------------------------ */
 	return (size_t)0L;			/* Unsupported. */
 #endif
+}
+
+void printRSSstat(){
+
+	size_t peakSize = getPeakRSS( );
+
+	if(peakSize/((ulint)1<<30) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<30) << " GB" <<endl;
+	else if (peakSize/((ulint)1<<20) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<20) << " MB" <<endl;
+	else if (peakSize/((ulint)1<<10) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<10) << " KB" <<endl;
+
 }

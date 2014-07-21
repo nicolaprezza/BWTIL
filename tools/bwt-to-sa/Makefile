@@ -2,14 +2,14 @@
 
 SOURCE=\
 ../../common/common.h \
-bwt-check.cpp \
-#../../data_structures/StaticBitVector.cpp \
+bwt-to-sa.cpp \
+../../data_structures/StaticBitVector.cpp \
 ../../data_structures/IndexedBWT.cpp \
-#../../data_structures/WaveletTree.cpp \
-#../../data_structures/WordVector.cpp \
+../../data_structures/WaveletTree.cpp \
+../../data_structures/WordVector.cpp \
 ../../data_structures/FileReader.cpp
 
-BINARY=../../bwt-check
+BINARY=../../bwt-to-sa
 
 #------------------------------------------------------------------------------
 

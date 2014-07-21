@@ -355,4 +355,13 @@ void IndexedBWT::loadFromFile(FILE *fp){
 
 }
 
+void IndexedBWT::storeSuffixArrayToFile(string file, ulint bufsize){
+
+	if(bufsize==0)
+		bufsize = n/log2(n+1);
+
+
+
+}
+
 } /* namespace data_structures */

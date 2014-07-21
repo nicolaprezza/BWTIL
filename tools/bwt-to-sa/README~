@@ -1,0 +1,38 @@
+Welcome to the bwt-to-sa converter!
+
+Authors: Nicola Prezza
+mail: nicolapr@gmail.com
+
+*** Brief introduction: ***
+
+This tool can be used to induce the suffix array of a text file from its BWT.
+
+bwt-to-sa firstly indexes the bwt using a succinct wavelet-tree based data structure. Once the bwt is indexed, the tool traverses it n/bufsize times, where bufsize is the size of the SA addresses. Each time the bwt is traversed, the buffer is filled with bufsize SA entries, from the (i*bufsize)-th to the ((i+1)*bufsize -1)-th (where i is the iteration number).
+
+by default, bufsize = n/(log n * log s)
+
+INPUT FORMAT: the bwt file is assumed to be the bwt of the input file, with a 0x0 byte (text terminator) appearing only once inside the file.
+
+*** Complexity ***
+
+n = input length, s = alphabet size
+
+SPACE:	O(n * log s + bufsize*log n) bits. default : O(n * log s)
+
+TIME:	O(n * log s * n/bufsize). default: O(n log n)
+
+*** Compile ***
+
+In the bwt-to-sa/ directory, just execute
+
+> make clean; make
+
+The executable "bwt-to-sa" will be created in the BWTIL/ main folder.
+
+*** Execute ***
+
+In the BWTIL/ directory, execute
+
+> ./bwt-to-sa
+
+to display info about the tool usage.

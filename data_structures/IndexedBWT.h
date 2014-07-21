@@ -59,6 +59,8 @@ public:
 	void saveToFile(FILE *fp);
 	void loadFromFile(FILE *fp);
 
+	void storeSuffixArrayToFile(string file, ulint bufsize=0);
+
 private:
 
 
