@@ -36,6 +36,23 @@ public:
 
 	double entropy(){return H0;}
 
+	ulint bitSize(){
+
+		ulint bits=0;
+
+		for(uint i=0;i<codes.size();i++)
+			bits += codes.at(i).size();
+
+		bits += CHAR_BIT* sizeof(this);
+		bits += CHAR_BIT*codes.size()*sizeof(vector<bool>);
+		bits += CHAR_BIT*sizeof(codes);
+		bits += CHAR_BIT*number_of_internal_nodes*sizeof(DummyDynamicBitvector *);
+		bits += CHAR_BIT*number_of_internal_nodes*sizeof(DummyDynamicBitvector);
+		bits += 2*CHAR_BIT*number_of_internal_nodes*sizeof(uint16_t);
+
+		return  bits;
+	}
+
 private:
 
 	void buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint pos, uint this_node, uint * next_free_node);

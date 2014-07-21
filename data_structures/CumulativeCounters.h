@@ -34,6 +34,12 @@ public:
 
 	void setBaseCounter(){base_counter=1;};
 
+	uint bitSize(){//return size in bits
+
+		return CHAR_BIT*(sizeof(this) + nr_of_nodes*sizeof(ulint));
+
+	}
+
 private:
 
 	void incrementFrom(ulint * node, uint i);//increment counters in node by 1 starting from counter number i (from left)

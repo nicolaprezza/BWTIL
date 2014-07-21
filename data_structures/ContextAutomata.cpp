@@ -79,10 +79,14 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 	ulint nr_of_sampled_blocks = sampled_n/B;//expected number of sampled blocks
 	double p = (double)nr_of_sampled_blocks/(double)nr_of_blocks;//probability that a block is sampled
 
+	int perc,last_perc=-1;
+	if(verbose)
+		cout << "  Sampling text ... " << endl;
+
 	ulint pos = n-1;//current position in the text
 	while(not bfr->BeginOfFile()){
 
-		if(((n-1)-pos)%B==0){//begin of a block
+		if(((n-1)-pos)%B==0){
 
 			if(pos+1 >= B ){//if there are at least B characters to be sampled
 
@@ -95,6 +99,13 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 
 			}
 
+			perc = (100*((n-1)-pos))/n;
+
+			if(perc>last_perc and (perc%5)==0 and verbose){
+				cout << "  " << perc << "% done." << endl;
+				last_perc=perc;
+			}
+
 		}
 
 		bfr->read();//skip character on text
@@ -105,55 +116,63 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 	bfr->rewind();
 
 	if(verbose)
-		cout << "  Sampled text size = " << sampled_text.size() << endl;
-
-	//for each context the automata will memorize:
-	// sigma edges
-	// sigma partial sum counters: log n * sigma
-	// approximate total number of bits for each context: O(sigma * log n)
-
-	uint log_sigma = log2(sigma+1);
-	uint log_n = log2(n+1);
+		cout << "\n  Sampled text size = " << sampled_text.size() << endl;
 
 	/*
+	 * Extimate number of bits in memory for each context:
+	 * O(sigma * log n) bits for each context.
+	 *
 	 * Structures in memory:
 	 *
-	 * vector<uint > prefix_nr; -> sizeof(uint)*CHAR_BIT /context
-	 * vector<vector<uint> > edges;//sigma edges for each (k-1)-mer -> <= sigma*sizeof(uint)*CHAR_BIT + sizeof(ulint)*CHAR_BIT / context
-	 * CumulativeCounters * counters; -> sigma*sizeof(uint)*CHAR_BIT + sizeof(ulint)*CHAR_BIT / context
-	 * DynamicString ** dynStrings; -> sigma*sizeof(uint)*CHAR_BIT / context
-	 * ulint * lengths; -> sizeof(ulint)*CHAR_BIT / context
+	 * vector<uint > prefix_nr;
+	 * vector<vector<uint> > edges;
+	 * CumulativeCounters * counters;
+	 * DynamicString ** dynStrings;
+	 * ulint * lengths;
 	 *
 	 */
 
-	uint A1 = 3*sizeof(uint)*CHAR_BIT;//extimated number of bits per alphabet symbol per context
-	uint A2 =  sizeof(uint)*CHAR_BIT + 3*sizeof(ulint)*CHAR_BIT;//extimated number of bits per context
+	CumulativeCounters sample_cumulative_counter = CumulativeCounters(sigma,n);//sample of cumulative counter to extimate its memory consumption
+	vector<ulint> sample_freq;
+	for(uint i=0;i<sigma;i++)
+		sample_freq.push_back(1);
+	DynamicString sample_dynstring = DynamicString(&sample_freq);
 
-	uint A3 = 10;//empirical scale factor
+	ulint bits_per_k_mer =
+			CHAR_BIT * sizeof(DynamicString *) + //pointers to DynamicStrings
+			sample_cumulative_counter.bitSize()  + //cumulative counters
+			sample_dynstring.bitSize() + //DynamicStrings
+			CHAR_BIT*sizeof(vector<uint >) + //vector prefix_nr
+			CHAR_BIT*sizeof(uint) + //content of vector prefix_nr
+			CHAR_BIT*sizeof(ulint); //lengths
 
-	//uint A1 = 1202;
-	//uint A2 = 25545;
+	ulint bits_per_k_1_mer =
+			CHAR_BIT*sizeof(vector<uint>) + //vector edges
+			CHAR_BIT*sigma*sizeof(uint); //content of vector edges
 
-	ulint bits_per_context = A3*(sigma*A1 + A2);
+	uint log_n = log2(n+1);
 
-	if(verbose) cout << "  Extimated number of bits per context: " << bits_per_context << endl;
+	if(verbose) cout << "  Extimated number of bits per k-mer: " << bits_per_k_mer << endl;
+	if(verbose) cout << "  Extimated number of bits per (k-1)-mer: " << bits_per_k_1_mer << endl;
 
-	ulint nr_of_contexts;
+	ulint nr_of_k_mers;
+	ulint nr_of_k_1_mers=1;//number of (k-1)-mers
 
 	// we want the highest k such that nr_of_contexts*bits_per_context <= n * (overhead/100)
 
 	uint _k = 1;//start from k=1.
-	nr_of_contexts=numberOfContexts( _k, sampled_text);
+	nr_of_k_mers=numberOfContexts( _k, sampled_text);
 
-	if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_contexts << endl;
+	if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_k_mers << endl;
 
-	while( _k < log_n and nr_of_contexts * bits_per_context <= (n * overhead)/100 ){
+	while( _k < log_n and nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * overhead)/100 ){
 
 		_k++;
 
-		nr_of_contexts=numberOfContexts( _k, sampled_text);
+		nr_of_k_1_mers = nr_of_k_mers;
+		nr_of_k_mers=numberOfContexts( _k, sampled_text);
 
-		if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_contexts << endl;
+		if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_k_mers << endl;
 
 	}
 
@@ -311,11 +330,13 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	vector<set<ulint> > H = vector<set<ulint> >( q,set<ulint>() );//the hash
 
-	if(verbose) cout << "\n detecting k-mers ... " << flush;
+	if(verbose) cout << "\n detecting k-mers ... " << endl;
 
 	ulint context = (ulint)0;//first context
 
 	H.at(context%q).insert(context);
+
+	int perc,last_perc=-1,symbols_read=0;
 
 	while(not bfr->BeginOfFile()){
 
@@ -323,11 +344,20 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 		H.at(context%q).insert(context);
 
+		perc = (100*symbols_read)/n;
+
+		if(perc>last_perc and (perc%5)==0 and verbose){
+			cout << " " << perc << "% done." << endl;
+			last_perc=perc;
+		}
+
+		symbols_read++;
+
 	}
 
 	bfr->rewind();
 
-	if(verbose) cout << "done.\n sorting k-mers ... " << flush;
+	if(verbose) cout << " done.\n\n sorting k-mers ... " << flush;
 
 	vector<ulint> k_mers;
 
@@ -341,7 +371,7 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	if(verbose) cout << "done. " << k_mers.size() << " nonempty contexts of length " << k << " (including contexts containing terminator character)"  << endl;
 
-	if(verbose) cout << " building automata edges ... "<< flush;
+	if(verbose) cout << " building automata edges ... "<< endl;
 
 	uint nr_of_prefixes=0;
 	prefix_nr.push_back(nr_of_prefixes);
@@ -367,6 +397,10 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 	current_state = 0;
 	symbol s;
 
+	perc=0;
+	last_perc=-1;
+	symbols_read=0;
+
 	while(not bfr->BeginOfFile()){
 
 		s = ASCIItoCode(bfr->read());//read symbol
@@ -383,13 +417,23 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 		//jump following the edge
 		current_state = edge(current_state,s);
 
+		perc = (100*symbols_read)/n;
+
+		if(perc>last_perc and (perc%5)==0 and verbose){
+			cout << " " << perc << "% done." << endl;
+			last_perc=perc;
+		}
+
+		symbols_read++;
+
 	}
 
 	bfr->rewind();
 
 	rewind();//go back to initial state
 
-	if(verbose) cout << "done." << endl;
+	if(verbose) cout << " done." << endl;
+	if(verbose) cout << "\nContext automata completed." << endl;
 
 }
 

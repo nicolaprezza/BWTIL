@@ -56,7 +56,7 @@ void CwBWT::init(string path, bool verbose){
 
 	initStructures(path, verbose);
 
-	build(verbose);
+	//build(verbose);//TODO
 
 	if(verbose) printRSSstat();
 
@@ -108,12 +108,48 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	if(verbose) cout << " Done.\n" << endl;
 
-	ulint max_len=0;
-	for(ulint i=0;i<number_of_contexts;i++)
-		if(lengths[i]>max_len)
-			max_len=lengths[i];
+	//99 intervals [i,i+100M/100] and one final interval i>100M
 
-	if(verbose) cout << " Largest context has " << max_len << " characters" << endl;
+	//statistics:
+	uint number_of_intervals = 20;
+	ulint max_len = (10*n)/number_of_contexts;
+	ulint step = max_len / number_of_intervals;
+	ulint tot_intervals = number_of_intervals+1;
+
+	vector<ulint> stats = vector<ulint>(tot_intervals,0);
+
+	ulint max=0;
+	for(ulint i=0;i<number_of_contexts;i++)
+		if(lengths[i]>max)
+			max=lengths[i];
+
+	for(ulint i=0;i<number_of_contexts;i++){
+
+		if(lengths[i]>=max_len)
+			stats.at(tot_intervals-1) = stats.at(tot_intervals-1)+1;
+		else{
+
+			uint pos=lengths[i]/step;
+			stats.at(pos) = stats.at(pos)+1;
+
+		}
+
+	}
+
+	if(verbose) cout << " Largest context has " << max << " characters" << endl;
+	if(verbose) cout << " Expected context size (if uniform text) is " << n/number_of_contexts << " characters\n" << endl;
+
+	if(verbose) cout << " Context length statistics: " << endl;
+
+	if(verbose){
+
+		for(uint i=0;i<tot_intervals-1;i++)
+			cout << " [" << i*step << ", " << (i+1)*step << "[ -> " << stats.at(i)<<endl;
+
+		cout << " [ " << max_len <<", inf [ -> " << stats.at(tot_intervals-1)<<endl;
+
+	}
+
 
 	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << flush;
 
@@ -135,14 +171,14 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	delete [] lengths;
 
-	if(verbose) cout << "\n\n Done." << endl;
-
 	if(verbose){
 
-		cout << "\n k-th order empirical entropy of the text is " << empiricalEntropy() << endl;
+		cout << "\n\n k-th order empirical entropy of the text is " << empiricalEntropy() << endl;
 		cout << " bits per symbol used (only compressed text): " << actualEntropy() << endl;
 
 	}
+
+	if(verbose) cout << "\nData structures created." << endl;
 
 }
 

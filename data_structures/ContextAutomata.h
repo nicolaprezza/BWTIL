@@ -10,6 +10,8 @@
 
 #include "../common/common.h"
 #include "BackwardFileReader.h"
+#include "CumulativeCounters.h"
+#include "DynamicString.h"
 
 namespace bwtil {
 
