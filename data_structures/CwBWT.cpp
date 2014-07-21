@@ -56,7 +56,7 @@ void CwBWT::init(string path, bool verbose){
 
 	initStructures(path, verbose);
 
-	//build(verbose);//TODO
+	build(verbose);
 
 	if(verbose) printRSSstat();
 

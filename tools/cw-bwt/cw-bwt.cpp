@@ -36,7 +36,7 @@ using namespace bwtil;
 		bwt = CwBWT(argv[1],atoi(argv[3]),true);
 
 	cout << "\nSaving BWT in " << argv[2] << endl;
-	//bwt.toFile(argv[2]);//TODO
+	bwt.toFile(argv[2]);
 	cout << "Done. " << endl;
 
  }
