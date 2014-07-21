@@ -14,7 +14,7 @@ The BWTIL library offers a set of tools to deal with bwt-based text indexes. The
  >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  >> cw-bwt (work in progress) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
  >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
- >> bwt-to-sa (work in progress) : induce the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
+ >> bwt-to-sa : build the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
 
  ***   Compile   ***
 

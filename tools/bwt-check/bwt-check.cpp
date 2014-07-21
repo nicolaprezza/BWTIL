@@ -38,7 +38,7 @@ using namespace bwtil;
 	bwt_fr.read(bwt,n_bwt);
 	bwt_fr.close();
 
-	cout << "Indexing the BWT ... \n\n";
+	cout << "Indexing the BWT ... " << endl << endl;
 
 	IndexedBWT idxBWT = IndexedBWT(bwt,n_bwt,0,true);
 

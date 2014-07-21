@@ -5,11 +5,11 @@ mail: nicolapr@gmail.com
 
 *** Brief introduction: ***
 
-This tool can be used to induce the suffix array of a text file from its BWT.
+This tool can be used to build the suffix array of a text file from its BWT.
 
-bwt-to-sa firstly indexes the bwt using a succinct wavelet-tree based data structure. Once the bwt is indexed, the tool traverses it n/bufsize times, where bufsize is the size of the SA addresses. Each time the bwt is traversed, the buffer is filled with bufsize SA entries, from the (i*bufsize)-th to the ((i+1)*bufsize -1)-th (where i is the iteration number).
+bwt-to-sa firstly indexes the bwt using a succinct wavelet-tree based data structure. Once the bwt is indexed, the tool extracts from it the SA pointers one by one, directly saving them to disk (the SA is not stored in RAM). In the indexed BWT, SA pointers are sampled every 'offset' positions of the text (this establishes a space-time tradeoff).
 
-by default, bufsize = n/(log n * log s)
+by default, offset = log n / log s (s being the alphabet size)
 
 INPUT FORMAT: the bwt file is assumed to be the bwt of the input file, with a 0x0 byte (text terminator) appearing only once inside the file.
 
@@ -17,9 +17,9 @@ INPUT FORMAT: the bwt file is assumed to be the bwt of the input file, with a 0x
 
 n = input length, s = alphabet size
 
-SPACE:	O(n * log s + bufsize*log n) bits. default : O(n * log s)
+SPACE:	O(n * log s + log n * n/offset) bits. With default parameters : O(n * log s) bits
 
-TIME:	O(n * log s * n/bufsize). default: O(n log n)
+TIME:	O(n * log s * offset). With default parameters: O(n log n)
 
 *** Compile ***
 

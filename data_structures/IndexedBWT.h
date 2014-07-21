@@ -59,10 +59,8 @@ public:
 	void saveToFile(FILE *fp);
 	void loadFromFile(FILE *fp);
 
-	void storeSuffixArrayToFile(string file, ulint bufsize=0);
 
 private:
-
 
 
 	//returns i-th digit of log_sigma bits from left in the suffix of length 'length' of the word W
