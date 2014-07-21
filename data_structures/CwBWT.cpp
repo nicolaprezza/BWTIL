@@ -151,13 +151,23 @@ void CwBWT::initStructures(string path, bool verbose){
 	}
 
 
-	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << flush;
+	if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << endl;
+
+	perc=0;
+	last_perc=-1;
 
 	dynStrings = new DynamicString*[number_of_contexts];
 	for(ulint i=0;i<number_of_contexts;i++){
 
 		dynStrings[i] = new DynamicString(&frequencies[i]);
 		frequencies[i].clear();//free memory
+
+		perc = (100*i)/number_of_contexts;
+
+		if(perc>last_perc and (perc%10)==0 and verbose){
+			cout << " " << perc << "% done." << endl;
+			last_perc=perc;
+		}
 
 	}
 
@@ -173,7 +183,7 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	if(verbose){
 
-		cout << "\n\n k-th order empirical entropy of the text is " << empiricalEntropy() << endl;
+		cout << "\n k-th order empirical entropy of the text is " << empiricalEntropy() << endl;
 		cout << " bits per symbol used (only compressed text): " << actualEntropy() << endl;
 
 	}

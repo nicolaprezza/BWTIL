@@ -18,7 +18,7 @@ mail: nicolapr@gmail.com
 
 *** Brief introduction: ***
 
-cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for certain text distributions (nearly uniform) cw-bwt is optimal in both time and space.
+cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for certain text distributions (nearly uniform) and small alphabets (e.g. DNA) cw-bwt is optimal in both time and space.
 
 *** Complexity ***
 
@@ -31,13 +31,18 @@ SPACE
 
 TIME
 
-Average-case: uniform input texts (eg. DNA) : 
+------------------------------------------------------------------------------------------------
+		complexity	notes	
 
-	O(n * Hk)	(a factor Hk from optimal)
+expected	O( n * Hk )	uniform text distribution assumed. A factor Hk from optimal. optimal for small alphabets (e.g. DNA)
 
-Worst-case: Happens if the text has large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
+worst-case	O( n * log n * Hk )	a factor log n * Hk from optimal
 
-	O( n * log n * Hk )	(a factor log n * Hk from optimal)
+------------------------------------------------------------------------------------------------
+
+Notes: 
+The worst-case is a text with large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
+
 
 *** Compile ***
 
