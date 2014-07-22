@@ -76,6 +76,15 @@ using namespace bwtil;
 	for(ulint i=1;i<n_bwt;i++){
 
 		ulint idx = idxBWT.convertToTextCoordinate(i);
+
+		if(idx>=n_bwt-1){
+
+			cout << "Error: SA address greater than text length. " << idx << ">=" << n_bwt-1 << endl;
+			cout << "Debug needed.\n";
+			exit(1);
+
+		}
+
 		fwrite(&idx, sizeof(ulint), 1, fp);
 
 		perc=(100*(i+1))/n_bwt;

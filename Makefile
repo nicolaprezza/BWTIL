@@ -5,6 +5,7 @@ all:
 	make dB-hash	
 	make bwt-check
 	make bwt-to-sa
+	make sa-to-bwt
 
 cw-bwt:
 
@@ -21,7 +22,11 @@ bwt-check:
 bwt-to-sa:
 
 	make -C tools/bwt-to-sa
+	
+sa-to-bwt:
+
+	make -C tools/sa-to-bwt
 
 clean:
 
-	rm -f dB-hash cw-bwt bwt-check bwt-to-sa
+	rm -f dB-hash cw-bwt bwt-check bwt-to-sa sa-to-bwt

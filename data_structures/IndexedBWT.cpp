@@ -127,9 +127,9 @@ void IndexedBWT::sampleSA(bool verbose){//sample Suffix Array pointers (1 every 
 	ulint i=n-1;//current position on text
 	ulint j=0;  //current position on the BWT (0=terminator position on the F column)
 	uint perc;
-		uint last_perc=1;
+	uint last_perc=1;
 
-		if(verbose) cout << endl;
+	if(verbose) cout << endl;
 
 	while(i>0){
 
@@ -166,7 +166,7 @@ ulint IndexedBWT::convertToTextCoordinate(ulint i){//i=address on BWT (F column)
 		l++;
 
 		if(l>n){//prevents loop in case of errors in the BWT
-			cout << "Error: loop while scanning BWT.\n";
+			cout << "Error: loop while scanning BWT. Check input BWT file.\n";
 			exit(1);
 		}
 
