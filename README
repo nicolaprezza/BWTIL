@@ -16,6 +16,7 @@ The BWTIL library offers a set of tools to deal with bwt-based text indexes. The
  >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
  >> bwt-to-sa : build the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
  >> sa-to-bwt : build the BWT from a suffix array file (see tools/sa-to-bwt/README)
+ >> bwt-invert : invert a BWT file to reconstruct the original text (see tools/bwt-invert/README)
 
  ***   Compile   ***
 
@@ -28,6 +29,6 @@ in the main BWTIL/ directory. To compile the executables individually, execute (
 
 > make clean; make tool_name
 
-where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt.
+where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert.
 
 Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
