@@ -28,8 +28,8 @@ clean:
 
 example-build:
 
-	../../dB-hash build ../../data/50000.fasta 30
+	../../dB-hash build ../../data/plain/dna.1MB 30
 
 example-search:
 
-	../../dB-hash search ../../data/50000.fasta.dbh aaatttataacctattgcaccatatactag
+	../../dB-hash search ../../data/plain/50000.fasta.dbh ATCCATGTAGATATAACACAGCTATTTTCA

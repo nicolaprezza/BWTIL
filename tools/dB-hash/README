@@ -23,11 +23,11 @@ In the dB-hash/ directory, execute
 
 > make example-build
 
-to build a dB-hash with pattern length=30 on the file test/50000.fasta . This will create the file test/50000.fasta.dbh . After that, execute
+to build a dB-hash with pattern length=30 on the file BWTIL/data/plain/dna.1MB . This will create the file BWTIL/data/plain/dna.1MB.dbh . After that, execute
 
 > make example-search
 
-to search the pattern "aaatttataacctattgcaccatatactag" (exact search) in the dB-hash just created.
+to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the dB-hash just created.
 
 *** Notes ***
 

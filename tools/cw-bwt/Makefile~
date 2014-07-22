@@ -1,5 +1,7 @@
 #------------------------------------------------------------------------------
 
+CXX := clang++
+
 SOURCE=\
 ../../common/common.h \
 cw-bwt.cpp \
@@ -21,7 +23,11 @@ all: $(BINARY)
 
 $(BINARY): $(SOURCE)
 
-	g++ -O3 $(SOURCE) -o $(BINARY)
+	$(CXX) -o $(BINARY) -O3 $(SOURCE) 
+
+debug:
+
+	$(CXX) $(SOURCE) -o $(BINARY) -DDEBUG
 
 clean:
 
