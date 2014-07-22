@@ -51,7 +51,7 @@ The folder BWTIL/data/plain/ contains some small example files to test the libra
 
 After compiling, in the main BWTIL/ directory run
 
-> ./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
+> ./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt 2
 
 To build the BWT of the text data/plain/sources.1MB. The BWT will be saved in data/bwt/sources.1MB.bwt
 
