@@ -77,5 +77,14 @@ If we want to check the consistency of the SA, we can simply convert it back to 
 
 And check with bwt-check the consistency of data/bwt/sources.1MB_copy.bwt against the plain text file data/plain/sources.1MB.
 
-Examples of the dB-hash index usage can be found in the file tools/dB-hash/README
+To search the occurrences of a pattern in a text file with the dB-hash data structure, first create the index (in the example, pattern length is 20):
+
+> ./dB-hash build data/plain/sources.1MB 20
+
+Then, to search for the occurrencies of the pattern of length 20 "static unsigned long", run
+
+> ./dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
+
+
+
 
