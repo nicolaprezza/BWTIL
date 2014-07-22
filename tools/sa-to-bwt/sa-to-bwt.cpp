@@ -37,7 +37,7 @@ using namespace bwtil;
 
 	}
 
-	cout << "Reading the text ... " << endl;
+	cout << "\nReading the text ... " << endl;
 
 	FileReader text_fr(argv[2]);
 
@@ -114,7 +114,7 @@ using namespace bwtil;
 
 	}
 
-	cout << "\nDone. BWT stored in " << bwt_path << endl;
+	cout << "Done. BWT stored in " << bwt_path << endl;
 
 	fclose(fp_bwt);
 	fclose(fp_sa);

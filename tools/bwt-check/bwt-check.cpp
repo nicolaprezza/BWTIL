@@ -23,7 +23,7 @@ using namespace bwtil;
 		cout << "Usage: bwt-check bwt_file text_file\n";
 		cout << "where:\n";
 		cout <<	"- bwt_file is the bwt of text_file, with a 0x0 byte as terminator character (must appear only once in the bwt!).\n";
-		cout <<	"- bwt_file is the plain text file whose bwt is supposed to be stored in bwt_file.\n";
+		cout <<	"- text_file is the plain text file whose bwt is supposed to be stored in bwt_file.\n";
 		exit(0);
 	}
 
@@ -33,7 +33,6 @@ using namespace bwtil;
 	ulint n_inv_bwt = n_bwt-1;
 
 	uchar * bwt = new uchar[n_bwt];//with text terminator 0x0
-	uchar * inverted_bwt = new uchar[n_inv_bwt];//without text terminator 0x0
 
 	bwt_fr.read(bwt,n_bwt);
 	bwt_fr.close();
@@ -44,6 +43,8 @@ using namespace bwtil;
 
 	delete [] bwt;
 
+	uchar * inverted_bwt = new uchar[n_inv_bwt];//without text terminator 0x0
+
 	cout << "\nDone. Inverting the BWT ... " << endl;
 
 	//invert the bwt
@@ -51,11 +52,21 @@ using namespace bwtil;
 	ulint i=0;//number of steps
 	ulint bwt_pos=0;//position in the L column of the BWT.
 
+	int perc, last_perc=-1;
+
 	while(i<n_inv_bwt){
 
 		inverted_bwt[n_inv_bwt-i-1] = idxBWT.at(bwt_pos);
 		bwt_pos = idxBWT.LF(bwt_pos);
 		i++;
+
+		perc = (i*100)/(n_inv_bwt-1);
+		if(perc>last_perc and perc%10==0){
+
+			cout << perc << "% done"<<endl;
+			last_perc=perc;
+
+		}
 
 	}
 

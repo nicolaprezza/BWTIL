@@ -21,6 +21,11 @@ SPACE:	O(n * log s + log n * n/offset) bits. With default parameters : O(n * log
 
 TIME:	O(n * log s * offset). With default parameters: O(n log n)
 
+ALTERNATIVE TRADEOFFS:
+
+- specifying offset = 1, the space is O(n * log n) and time is linear O(n * log s)
+- specifying offset = sqrt(log n)/log s, both space and time are O(n * sqrt(log n))
+
 *** Compile ***
 
 In the bwt-to-sa/ directory, just execute
