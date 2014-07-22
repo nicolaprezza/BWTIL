@@ -176,7 +176,7 @@ void debug(){
 
 		cout << "Loading dB-hash from file "<< in <<endl;
 		dBhash = DBhash::loadFromFile(in.c_str());
-		cout << "Done.\n";
+		cout << "Done." << endl;
 
 		if(dBhash->patternLength()!=m){
 			cout << "Error: structure built with pattern length " << dBhash->patternLength() << ", but now searching a pattern of length " << m << endl;

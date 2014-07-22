@@ -77,3 +77,5 @@ If we want to check the consistency of the SA, we can simply convert it back to 
 
 And check with bwt-check the consistency of data/bwt/sources.1MB_copy.bwt against the plain text file data/plain/sources.1MB.
 
+Examples of the dB-hash index usage can be found in the file tools/dB-hash/README
+

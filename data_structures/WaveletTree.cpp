@@ -230,8 +230,12 @@ void WaveletTree::loadFromFile(FILE *fp){
 	numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
 	check_numBytes();
 
+	remapping = new uint[256];
+	inverse_remapping = new uint[sigma];
+
 	numBytes = fread(remapping, sizeof(uint), 256, fp);
 	check_numBytes();
+
 	numBytes = fread(inverse_remapping, sizeof(uint), sigma, fp);
 	check_numBytes();
 

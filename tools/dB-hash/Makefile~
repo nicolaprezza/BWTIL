@@ -32,4 +32,4 @@ example-build:
 
 example-search:
 
-	../../dB-hash search ../../data/plain/50000.fasta.dbh aaatttataacctattgcaccatatactag
+	../../dB-hash search ../../data/plain/50000.fasta.dbh ATCCATGTAGATATAACACAGCTATTTTCA
