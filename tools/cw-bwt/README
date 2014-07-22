@@ -29,14 +29,14 @@ SPACE:	n * Hk + o(n * Hk) bits	(compressed succinct space)
 
 TIME:
 
-------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 		complexity	notes	
 
 expected	O( n * Hk )	uniform text distribution assumed. A factor Hk from optimal. optimal for small alphabets (e.g. DNA)
 
 worst-case	O( n * log n * Hk )	a factor log n * Hk from optimal
 
-------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 
 Notes: 
 The worst-case is a text with large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)

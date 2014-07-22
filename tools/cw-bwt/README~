@@ -25,11 +25,9 @@ cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable 
 n = input length
 Hk = k-th order entropy of the text, where k = log_s( n/log^2 n ) - 1 (Hk <= log s, where s is the alphabet size)
 
-SPACE
+SPACE:	n * Hk + o(n * Hk) bits	(compressed succinct space)
 
-	n * Hk + o(n * Hk)	(compressed succinct space)
-
-TIME
+TIME:
 
 ------------------------------------------------------------------------------------------------
 		complexity	notes	

@@ -11,7 +11,7 @@ bwt-to-sa firstly indexes the bwt using a succinct wavelet-tree based data struc
 
 by default, offset = log n / log s (s being the alphabet size)
 
-INPUT FORMAT: the bwt file is assumed to be the bwt of the input file, with a 0x0 byte (text terminator) appearing only once inside the file.
+INPUT FORMAT: the bwt file is assumed to be a valid bwt of some file, with a 0x0 byte (text terminator) appearing only once inside it.
 
 *** Complexity ***
 
