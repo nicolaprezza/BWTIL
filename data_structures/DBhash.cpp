@@ -262,14 +262,15 @@ void DBhash::freeMemory(){
 
 	auxiliary_hash->freeMemory();
 	text_wv->freeMemory();
+	indexedBWT->freeMemory();
 
 }
 
-void DBhash::saveToFile(const char * path){
+void DBhash::saveToFile(string path){
 
 	FILE *fp;
 
-	if ((fp = fopen(path, "wb")) == NULL) {
+	if ((fp = fopen(path.c_str(), "wb")) == NULL) {
 		VERBOSE_CHANNEL<< "Cannot open file " << path<<endl;
 		exit(1);
 	}
@@ -277,10 +278,10 @@ void DBhash::saveToFile(const char * path){
 	saveToFile(fp);
 
 }
-void DBhash::load(const char * path){
+void DBhash::load(string path){
 	FILE *fp;
 
-	if ((fp = fopen(path, "rb")) == NULL) {
+	if ((fp = fopen(path.c_str(), "rb")) == NULL) {
 		VERBOSE_CHANNEL<< "Cannot open file "  << path<<endl;
 		exit(1);
 	}
@@ -352,7 +353,7 @@ void DBhash::loadFromFile(FILE *fp){
 
 }
 
-DBhash * DBhash::loadFromFile(const char * path){
+DBhash * DBhash::loadFromFile(string path){
 
 	DBhash * dbh = new DBhash();
 	dbh->load(path);

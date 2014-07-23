@@ -48,6 +48,9 @@ public:
 
 	uint TERMINATOR;//terminator character
 
+	//backward search: search pattern P and return interval <lower_included, upper_excluded> on the BWT
+	pair<ulint, ulint> BS(string P);
+
 	//backward search: search the suffix of length 'length' of the word W, where each character is formed by 'log_sigma' bits
 	//returns interval <lower_included, upper_excluded> on the BWT
 	pair<ulint, ulint> BS(ulint W, uint length,pair<ulint, ulint> interval = pair<ulint, ulint>(0,0));

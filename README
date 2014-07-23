@@ -9,10 +9,12 @@ mail: nicolapr@gmail.com
  ***   Brief introduction   ***
 
 
-The BWTIL library offers a set of tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer good performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, and the dB-hash data structure. The available executables (to date) are:
+The BWTIL library offers a set of tools to deal with bwt-based text indexes. The library is specifically designed to deal with huge files (which means up to 2^64 characters) and implements space-and-time efficient algorithms and data structures to offer good performances. BWTIL comes with some sample programs and a set of C++ objects, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, the dB-hash data structure and a succinct wavelet-tree based FM index. The available executables (to date) are:
 
  >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  
+ >> sFM-index : an implementation of a succinct (uncompressed) FM-index (see tools/sFM-index/README)
+
  >> cw-bwt (work in progress) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
  
  >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
@@ -35,7 +37,7 @@ in the main BWTIL/ directory. To compile the executables individually, execute (
 
 > make clean; make tool_name
 
-where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert.
+where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
 
 Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
 
@@ -85,6 +87,13 @@ Then, to search for the occurrencies of the pattern of length 20 "static unsigne
 
 > ./dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
 
+To search the occurrences of a pattern in a text file with the sFM-index data structure, first create the index:
+
+> ./sFM-index build data/plain/sources.1MB
+
+Then, to search for the occurrencies of the pattern "static unsigned long", run
+
+> ./sFM-index search data/plain/sources.1MB.sfm "static unsigned long"
 
 
 

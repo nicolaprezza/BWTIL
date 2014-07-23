@@ -1,0 +1,23 @@
+Welcome to the succinct FM-index data structure!
+
+Authors: Nicola Prezza
+mail: nicolapr@gmail.com
+
+*** Brief introduction: ***
+
+This is a version of the popular alphabet-friendly FM index, but without compression. The index occupies space close to the uncompressed text (succinct space).
+
+*** Compile ***
+
+In the sFM-index/ directory, just execute
+
+> make clean; make
+
+The executable "sFM-index" will be created in the BWTIL/ main folder.
+
+*** Notes ***
+
+please note that, due to the particular suffix array library employed, the builtin construction of the BWT can currently handle only texts shorter than 2^31 characters. We are working to integrate more powerful BWT-construction libraries in our software.
+
+
+

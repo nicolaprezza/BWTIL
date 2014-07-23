@@ -27,13 +27,23 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 	w = ceil(log2(n));
 	if(w<1) w=1;
 
-	//re-mapping
+	ulint nr_of_terminators=0;
+
+	//re-mapping to keep alphabet size to a minimum
 	for(ulint i=0;i<n;i++){
 
-		if(BWT[i]==0)
+		if(BWT[i]==0){
 			terminator_position = i;
-		else
+			nr_of_terminators++;
+		}else
 			BWT[i]--;
+
+	}
+
+	if(nr_of_terminators!=1){
+
+		cout << "Error (IndexedBWT.cpp): the bwt contains no o more than one 0x0 bytes\n";
+		exit(1);
 
 	}
 
@@ -219,7 +229,7 @@ ulint IndexedBWT::rank(unsigned char c, ulint i){//number of characters 'c' befo
 	if(c==TERMINATOR)
 		return i>terminator_position;
 
-	if(c==0 and i>terminator_position)
+	if(c==0 and i>terminator_position)//this because the terminator in the wavelet tree is encoded as 0
 		return bwt_wt->rank(0,i)-1;
 
 	return bwt_wt->rank(c,i);
@@ -277,6 +287,30 @@ pair<ulint, ulint> IndexedBWT::BS(ulint W, uint length,pair<ulint, ulint> interv
 	for(uint i=0;i<length;i++){
 
 		uint c = digitAt(W,i);
+
+		interval.first = FIRST[c] + rank(c,interval.first);
+		interval.second = FIRST[c] + rank(c,interval.second);
+
+	}
+
+	return interval;
+
+}
+
+pair<ulint, ulint> IndexedBWT::BS(string P){
+
+	pair<ulint, ulint> interval = pair<ulint, ulint>(0,n);
+
+	for(uint i=0;i<P.length();i++){
+
+		uint c = (unsigned char)P.at( (P.length()-1)-i );
+
+		if(c==0){
+			cout << "ERROR while searching pattern in the index: the pattern contains a 0x0 byte.\n";
+			exit(0);
+		}
+
+		c--;
 
 		interval.first = FIRST[c] + rank(c,interval.first);
 		interval.second = FIRST[c] + rank(c,interval.second);

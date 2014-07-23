@@ -53,8 +53,8 @@ public:
 
 	void freeMemory();
 
-	void saveToFile(const char * path);
-	static DBhash * loadFromFile(const char * path);
+	void saveToFile(string path);
+	static DBhash * loadFromFile(string path);
 
 	void saveToFile(FILE *fp);
 	void loadFromFile(FILE *fp);
@@ -64,7 +64,7 @@ public:
 
 	HashFunction * hashFunction(){return h;}
 
-	void load(const char * path);
+	void load(string path);
 
 protected:
 

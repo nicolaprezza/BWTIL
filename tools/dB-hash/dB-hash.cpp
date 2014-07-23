@@ -125,7 +125,11 @@ void debug(){
 	if(argc != 4){
 		cout << "*** dB-hash data structure ***\n";
 		cout << "Usage: dB-hash option file [pattern] [pattern_length]\n";
-		cout << "where option = build|search. file=path of the text file (if build mode) or dB-hash .dbh file (if search mode). In build mode, specify also pattern length pattern_length. In search mode, specify a string to be searched (pattern).\n";
+		cout << "where: \n";
+		cout <<	"- option = build|search.\n";
+		cout <<	"- file = path of the text file (if build mode) or dB-hash .dbh file (if search mode). \n";
+		cout << "- pattern_length = In build mode, specify this parameter, which is the pattern length\n";
+		cout << "- pattern = must be specified in search mode. It is the pattern to be searched in the index.\n";
 		exit(0);
 	}
 
@@ -187,7 +191,8 @@ void debug(){
 
 		vector<ulint> occ = dBhash->getOccurrencies( pattern );
 
-		cout << "pattern occurs at the following positions : ";
+		cout << "The pattern occurs " << occ.size() << " times in the text at the following positions : \n";
+
 		for(uint i=0;i<occ.size();i++)
 			cout << occ.at(i) << " ";
 
