@@ -11,6 +11,7 @@
 #include "../../data_structures/StaticBitVector.h"
 #include "../../data_structures/DBhash.h"
 #include "../../data_structures/HashFunction.h"
+#include "../../extern/getRSS.c"
 
 using namespace bwtil;
 using namespace std;
@@ -199,6 +200,8 @@ void debug(){
 		cout << "\n\nDone.\n";
 
 	}
+
+	printRSSstat();
 
 }
 

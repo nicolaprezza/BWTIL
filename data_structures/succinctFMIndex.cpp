@@ -37,7 +37,9 @@ void succinctFMIndex::build(unsigned char * text, ulint n, bool verbose){
 	text[n] = (unsigned char)0;//append 0x0 byte terminator
 
 	//compute the BWT
+	if(verbose) cout << " Computing the BWT ... " << flush;
 	unsigned char * bwt = computeBWT(text, n+1);
+	if(verbose) cout << "done." << endl;
 
 	//detect alphabet size
 	sigma=0;

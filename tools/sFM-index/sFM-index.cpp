@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "../../data_structures/succinctFMIndex.h"
+#include "../../extern/getRSS.c"
 
 using namespace bwtil;
 using namespace std;
@@ -81,6 +82,8 @@ int main(int argc,char** argv) {
 		cout << "\n\nDone.\n";
 
 	}
+
+	printRSSstat();
 
 }
 
