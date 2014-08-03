@@ -64,6 +64,7 @@ DBhash::DBhash(unsigned char * text, ulint n, HashFunction * h, ulint offrate, b
 	if(verbose) cout << " Text fingerprint length = " << text_fingerprint_length<<endl;
 
 	w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h->base) );//log_b n - log_b log_2 n
+
 	auxiliary_hash_size = 1 << (w_aux * h->log_base);
 
 	if(verbose)	cout << " w_aux = " << w_aux <<endl;
@@ -86,9 +87,11 @@ DBhash::DBhash(unsigned char * text, ulint n, HashFunction * h, ulint offrate, b
 
 	delete [] bwt;
 
+	if(verbose)	cout << "\n Building auxiliary hash ... " << flush;
 	initAuxHash();
+	if(verbose)	cout << "Done. " << endl;
 
-	if(verbose)	cout << "Done. Size of the structure = " << (double)size()/(n*8) << "n Bytes" <<endl;
+	if(verbose)	cout << "\nDone. Size of the structure = " << (double)size()/(n*8) << "n Bytes" <<endl;
 
 }
 
@@ -100,7 +103,7 @@ void DBhash::initAuxHash(){
 
 	for (ulint i = 0; i < auxiliary_hash_size; i++){
 
-		pair<ulint,ulint> interval = indexedBWT->BS(i,w_aux);
+		pair<ulint,ulint> interval = indexedBWT->BS(i,w_aux);//TODO bug su build dna.10MB 10
 
 		if(interval.second>interval.first)
 			auxiliary_hash->setWord(i,interval.first);

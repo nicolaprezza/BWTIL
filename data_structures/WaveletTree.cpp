@@ -20,37 +20,18 @@ WaveletTree::WaveletTree(unsigned char * text, ulint n, bool verbose){
 	this->n = n;
 	sigma = 0;
 
-	vector<bool> in_alphabet = vector<bool>(256,false);
-	remapping = new uint[256];
-	for(uint i=0;i<256;i++)
-		remapping[i]=256;
-
 	for(ulint i=0;i<n;i++)
-		if(not in_alphabet.at(text[i])){
-			remapping[text[i]] = sigma;
-			sigma++;
-			in_alphabet.at(text[i]) = true;
-		}
+		if(text[i]>sigma)
+			sigma = text[i];
 
-	if (verbose) cout << "\n  Alphabet size = " << sigma<<endl;
-
-	inverse_remapping = new uint[sigma];
-	for(uint i=0;i<256;i++){
-
-		if(in_alphabet.at(i)){
-
-			inverse_remapping[ remapping[i] ] = i;
-
-		}
-
-	}
+	sigma++;
 
 	log_sigma = ceil(log2(sigma));
 
 	//store text in WordVector format (which offers useful bit operations)
 	WordVector * text_wv = new WordVector(n,log_sigma);
 	for(ulint i = 0;i<n;i++)
-		text_wv->setWord(i,remapping[text[i]]);
+		text_wv->setWord(i,text[i]);
 
 	number_of_nodes = ((ulint)1<<log_sigma)-1;
 
@@ -75,9 +56,9 @@ void WaveletTree::buildRecursive(ulint node, WordVector * text_wv,bool verbose){
 	for(ulint i=0;i<text_wv->length();i++)
 		nodes[node]->setBit(i,text_wv->bitAt(i,0));
 
-	if (verbose) cout << "     Computing rank structure ... ";
+	if (verbose) cout << "     Computing rank structure ... " << flush;
 	nodes[node]->computeRanks();
-	if (verbose) cout << "Done.\n";
+	if (verbose) cout << "Done."<<endl;
 
 	if(text_wv->wordSize()>1){//if there are children
 
@@ -94,9 +75,7 @@ void WaveletTree::buildRecursive(ulint node, WordVector * text_wv,bool verbose){
 				text_child0->setWord(j0,text_wv->wordAt(i));
 				j0++;
 			}else{
-				//cout << "3 " << j1 << "/" << text_child1->length()<<endl;
 				text_child1->setWord(j1,text_wv->wordAt(i));
-				//cout << "4\n";
 				j1++;
 			}
 
@@ -122,7 +101,7 @@ uint WaveletTree::bitInWord(ulint W, uint i){
 
 ulint WaveletTree::rank(unsigned char c, ulint i){//number of characters 'c' before position i excluded
 
-	return recursiveRank(remapping[c], i, root(), 0);
+	return recursiveRank(c, i, root(), 0);
 
 }
 
@@ -150,7 +129,7 @@ ulint WaveletTree::recursiveRank(unsigned char c, ulint i, ulint node, uint leve
 
 unsigned char WaveletTree::charAt(ulint i){
 
-	uint c=0;
+	unsigned char c=0;
 	ulint node = root();
 	uint level = 0;
 	uint bit=0;
@@ -172,7 +151,7 @@ unsigned char WaveletTree::charAt(ulint i){
 
 	}
 
-	return inverse_remapping[c];
+	return c;
 
 }
 
@@ -194,9 +173,6 @@ void WaveletTree::freeMemory(){
 
 	delete [] nodes;
 
-	delete [] remapping;
-	delete [] inverse_remapping;
-
 }
 
 void WaveletTree::saveToFile(FILE *fp){
@@ -205,9 +181,6 @@ void WaveletTree::saveToFile(FILE *fp){
 	fwrite(&sigma, sizeof(uint), 1, fp);
 	fwrite(&log_sigma, sizeof(uint), 1, fp);
 	fwrite(&number_of_nodes, sizeof(ulint), 1, fp);
-
-	fwrite(remapping, sizeof(uint), 256, fp);
-	fwrite(inverse_remapping, sizeof(uint), sigma, fp);
 
 	for(ulint i=0;i<number_of_nodes;i++)
 		nodes[i]->saveToFile(fp);
@@ -228,15 +201,6 @@ void WaveletTree::loadFromFile(FILE *fp){
 	numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
 	check_numBytes();
 	numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
-	check_numBytes();
-
-	remapping = new uint[256];
-	inverse_remapping = new uint[sigma];
-
-	numBytes = fread(remapping, sizeof(uint), 256, fp);
-	check_numBytes();
-
-	numBytes = fread(inverse_remapping, sizeof(uint), sigma, fp);
 	check_numBytes();
 
 	nodes = new StaticBitVector*[number_of_nodes];

@@ -63,7 +63,7 @@ void CwBWT::init(string path, bool verbose){
 
 	initStructures(path, verbose);
 
-	build(verbose);
+	//build(verbose);
 
 	if(verbose) printRSSstat();
 
@@ -261,6 +261,8 @@ void CwBWT::build(bool verbose){
 	dynStrings[terminator_context]->insert(TERMINATOR,terminator_pos);//insert the terminator character
 
 	bwFileReader.close();//close input file
+
+	delete [] context_char;
 
 	if(verbose) cout << " Done." << endl;
 }

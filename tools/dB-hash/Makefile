@@ -8,7 +8,6 @@ dB-hash.cpp \
 ../../data_structures/DBhash.cpp \
 ../../data_structures/HashFunction.cpp \
 ../../data_structures/IndexedBWT.cpp \
-../../extern/Random.cpp \
 ../../data_structures/WaveletTree.cpp \
 ../../data_structures/WordVector.cpp
 

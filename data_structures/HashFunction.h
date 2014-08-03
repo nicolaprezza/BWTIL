@@ -9,7 +9,6 @@
 #ifndef HASHFUNCTION_H_
 #define HASHFUNCTION_H_
 
-#include "../extern/Random.h"
 #include "../common/common.h"
 #include <sstream>
 #include <fstream>
@@ -51,8 +50,6 @@ public:
 
 	//reads the file to detect optimal base (=alphabet cardinality) for the hash function
 	HashFunction(ulint m, const char * file_path, bool verbose = false);
-
-	Random * random;
 
 	// ----- fingerprint computation
 

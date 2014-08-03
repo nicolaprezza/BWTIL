@@ -18,7 +18,6 @@ HashFunction::HashFunction(ulint n, ulint m, hash_type type, bool verbose){
 	this->type = type;
 	this->m=m;
 
-	random = Random::getInstance();
 	code = new uint[256];
 
 	for(uint i=0;i<256;i++)
@@ -57,9 +56,7 @@ HashFunction::HashFunction(ulint n, ulint m, hash_type type, bool verbose){
 
 }
 
-HashFunction::HashFunction(){
-	random = Random::getInstance();
-}
+HashFunction::HashFunction(){}
 
 HashFunction::HashFunction(ulint m, const char * file_path, bool verbose){
 
@@ -67,8 +64,6 @@ HashFunction::HashFunction(ulint m, const char * file_path, bool verbose){
 
 	this->type = DEFAULT;
 	this->m=m;
-
-	random = Random::getInstance();
 
 	code = new uint[256];
 
@@ -267,13 +262,15 @@ unsigned char* HashFunction::hashValue(unsigned char *P, ulint n){
 
 	//there are 'blocks' blocks of length w and a final block of length r (which can be equal to w)
 
+	srand(time(NULL));
+
 	unsigned char *res = new unsigned char[length];//fingerprint of P
 
 	if(m==w){//identity function
 
 		for(ulint i=0;i<length;i++)
 			if(random_char[P[i]])
-				res[i] = random->nextUInt(base);
+				res[i] = rand()%(base);
 			else
 				res[i] = code[P[i]];
 
@@ -286,7 +283,7 @@ unsigned char* HashFunction::hashValue(unsigned char *P, ulint n){
 	//fill buffer with the first m+1 digits
 	for(ulint i=0;i<bufsize;i++){
 		if(random_char[P[i]])
-			buffer[i] = random->nextUInt(base);
+			buffer[i] = rand()%(base);
 		else
 			buffer[i] = code[P[i]];
 	}
@@ -318,7 +315,7 @@ unsigned char* HashFunction::hashValue(unsigned char *P, ulint n){
 		if(newpos<n){
 
 			if(random_char[P[newpos]])
-				buffer[newpos%bufsize] = random->nextUInt(base);
+				buffer[newpos%bufsize] = rand()%(base);
 			else
 				buffer[newpos%bufsize] = code[P[newpos]];
 
@@ -344,6 +341,8 @@ unsigned char* HashFunction::hashValueRemapped(unsigned char *P, ulint n){
 		r=w;
 	}
 
+	srand(time(NULL));
+
 	//there are 'blocks' blocks of length w and a final block of length r (which can be equal to w)
 
 	unsigned char *res = new unsigned char[length+1];//fingerprint of P plus 0x0 byte appended
@@ -352,7 +351,7 @@ unsigned char* HashFunction::hashValueRemapped(unsigned char *P, ulint n){
 
 		for(ulint i=0;i<length;i++)
 			if(random_char[P[i]])
-				res[i] = random->nextUInt(base)+1;
+				res[i] = rand()%(base)+1;
 			else
 				res[i] = code[P[i]]+1;
 
@@ -367,7 +366,7 @@ unsigned char* HashFunction::hashValueRemapped(unsigned char *P, ulint n){
 	//fill buffer with the first m+1 digits
 	for(ulint i=0;i<bufsize;i++){
 		if(random_char[P[i]])
-			buffer[i] = random->nextUInt(base);
+			buffer[i] = rand()%(base);
 		else
 			buffer[i] = code[P[i]];
 	}
@@ -399,7 +398,7 @@ unsigned char* HashFunction::hashValueRemapped(unsigned char *P, ulint n){
 		if(newpos<n){
 
 			if(random_char[P[newpos]])
-				buffer[newpos%bufsize] = random->nextUInt(base);
+				buffer[newpos%bufsize] = rand()%(base);
 			else
 				buffer[newpos%bufsize] = code[P[newpos]];
 
@@ -601,7 +600,7 @@ void HashFunction::quickSort(ulint *arr, uint n) {
 
 	if(n<2) return;
 
-	ulint pivot = arr[random->nextUInt(n)];
+	ulint pivot = arr[rand()%(n)];
 	ulint t;
 	uint i=0,j=0;
 
