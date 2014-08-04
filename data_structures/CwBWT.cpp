@@ -63,7 +63,7 @@ void CwBWT::init(string path, bool verbose){
 
 	initStructures(path, verbose);
 
-	//build(verbose);
+	build(verbose);
 
 	if(verbose) printRSSstat();
 
@@ -368,7 +368,7 @@ symbol * CwBWT::toArray(){//returns CwBWT as a char array of size n+1
 
 }
 
-void CwBWT::toFile(string path){//save CwBWT to file
+void CwBWT::toFile(string path,bool verbose){//save CwBWT to file
 
 	FILE *fp;
 
@@ -382,20 +382,22 @@ void CwBWT::toFile(string path){//save CwBWT to file
 	ulint i=0;
 	symbol c;
 
-	if(n<100) cout << "saving bwt : ";
+	int perc,last_perc=-1;
 
 	while(it.hasNext()){
 
 		c = it.next();
 		fwrite(&c, sizeof(symbol), 1, fp);
 
-		if(n<100){  if(c==0)cout << "#"; else cout << c; }
-
 		i++;
 
-	}
+		perc = (100*i)/n;
+		if(verbose and perc>last_perc and perc%5==0){
+			cout << " " << perc << "% Done." << endl;
+			last_perc=perc;
+		}
 
-	if(n<100) cout<< endl;
+	}
 
 	fclose(fp);
 

@@ -87,9 +87,9 @@ DBhash::DBhash(unsigned char * text, ulint n, HashFunction * h, ulint offrate, b
 
 	delete [] bwt;
 
-	if(verbose)	cout << "\n Building auxiliary hash ... " << flush;
+	if(verbose)	cout << "\n  Building auxiliary hash ... " << endl;
 	initAuxHash();
-	if(verbose)	cout << "Done. " << endl;
+	if(verbose)	cout << "  Done. " << endl;
 
 	if(verbose)	cout << "\nDone. Size of the structure = " << (double)size()/(n*8) << "n Bytes" <<endl;
 
@@ -101,6 +101,8 @@ void DBhash::initAuxHash(){
 
 	ulint empty = text_fingerprint_length+1;
 
+	int perc,last_perc=-1;
+
 	for (ulint i = 0; i < auxiliary_hash_size; i++){
 
 		pair<ulint,ulint> interval = indexedBWT->BS(i,w_aux);//TODO bug su build dna.10MB 10
@@ -109,6 +111,14 @@ void DBhash::initAuxHash(){
 			auxiliary_hash->setWord(i,interval.first);
 		else
 			auxiliary_hash->setWord(i,empty);
+
+		perc = (100*i)/auxiliary_hash_size;
+		if(perc>last_perc and perc%10==0){
+
+			cout << "   " <<  perc << "% done." << endl;
+			last_perc=perc;
+
+		}
 
 	}
 
@@ -155,23 +165,6 @@ ulint DBhash::size(){//returns size of the structure in bits
 	return indexedBWT->size() + text_wv->size() + auxiliary_hash->size();
 
 }
-
-
-void DBhash::test(){
-
-	cout << "\nTEXT = \n";
-
-	for(ulint i=0;i<n;i++)
-		cout << textAt(i);
-
-	cout << endl;
-
-	for(ulint i=0;i<indexedBWT->length();i++)
-		cout << (uint)indexedBWT->charAt_remapped(i);
-
-	cout << endl;
-}
-
 
 void DBhash::initText(unsigned char * text){
 
@@ -372,7 +365,7 @@ vector<ulint> DBhash::getOccurrencies(string P, uint max_errors){
 		exit(1);
 	}
 
-	return filterOutBadOccurrencies(P, getOccurrencies(h->hashValue(P)), max_errors);
+	return filterOutBadOccurrencies(P, getOccurrencies_slow(h->hashValue(P)), max_errors);
 
 }
 

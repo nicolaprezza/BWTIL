@@ -31,18 +31,13 @@ public:
 
 	virtual ~IndexedBWT();
 
-	ulint rank(unsigned char c, ulint i);//number of characters 'c' before position i excluded
-
 	unsigned char at(ulint i);
-	unsigned char charAt_remapped(ulint i);
 
 	ulint length(){return n;}
 
 	ulint LF(ulint i);//LF mapping from last column to first
 
 	ulint convertToTextCoordinate(ulint i);//i=address on BWT (F column). returns corresponding address on text
-
-	void test();
 
 	ulint size();//returns size of the structure in bits
 
@@ -62,9 +57,10 @@ public:
 	void saveToFile(FILE *fp);
 	void loadFromFile(FILE *fp);
 
-
 private:
 
+	unsigned char charAt_remapped(ulint i);
+	ulint rank(unsigned char c, ulint i);//number of characters 'c' before position i excluded
 
 	//returns i-th digit of log_sigma bits from left in the suffix of length 'length' of the word W
 	uint digitAt(ulint W, uint i);
@@ -88,6 +84,9 @@ private:
 	WordVector * text_pointers;//stores sampled text pointers (SA pointers)
 
 	ulint * FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column
+
+	uchar * remapping;//from file's chars to {0,...,sigma-1}
+	uchar * inverse_remapping;
 
 };
 

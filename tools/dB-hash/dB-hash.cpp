@@ -57,7 +57,7 @@ DBhash * buildFromFile(const char * text_path, uint m){
 
 	// 2) create the hash function
 
-	//HashFunction * h = new HashFunction(n,m,DNA_SEARCH);//hash function for DNA search
+	//HashFunction * h = new HashFunction(n,m,DNA_SEARCH);//hash function for DNA search. Use only if the file is on the alphabet {A,C,G,T,N}
 	HashFunction * h = new HashFunction(m,text_path,true);//general purpose hash function: detect automatically alphabet size
 
 	//build dBhash data structure

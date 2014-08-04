@@ -29,15 +29,32 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 
 	ulint nr_of_terminators=0;
 
-	//re-mapping to keep alphabet size to a minimum
+	remapping = new uchar[256];
+	for(uint i=0;i<256;i++)
+		remapping[i]=0;
+
+	//compute re-mapping to keep alphabet size to a minimum
+
+	//detect alphabet
+
+	vector<uchar> alphabet;
+	vector<bool> char_inserted = vector<bool>(256,false);
+
 	for(ulint i=0;i<n;i++){
 
-		if(BWT[i]==0){
+		if(BWT[i]==0){//found terminator. Save position
 			terminator_position = i;
 			nr_of_terminators++;
-		}else
-			BWT[i]--;
+		}else{
 
+			if(not char_inserted.at(BWT[i])){
+
+				alphabet.push_back(BWT[i]);
+				char_inserted.at(BWT[i])=true;
+
+			}
+
+		}
 	}
 
 	if(nr_of_terminators!=1){
@@ -46,6 +63,29 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 		exit(1);
 
 	}
+
+	sigma = alphabet.size();
+
+	//sort alphabet
+
+	std::sort(alphabet.begin(),alphabet.end());
+
+	//calculate remapping
+
+	for(uint i=0;i<alphabet.size();i++)
+		remapping[alphabet.at(i)] = i;
+
+	//calculate inverse remapping
+
+	inverse_remapping = new uchar[sigma];
+
+	for(uint i=0;i<sigma;i++)
+		inverse_remapping[i] = alphabet.at(i);
+
+	//apply remapping
+
+	for(ulint i=0;i<n;i++)
+		BWT[i] = remapping[BWT[i]];//note: remapping of teminator (0x0) is 0
 
 	bwt_wt = new WaveletTree(BWT,n,verbose);
 
@@ -56,7 +96,6 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 
 	text_pointers = new WordVector(number_of_SA_pointers,w);
 
-	sigma = bwt_wt->alphabetSize();
 	log_sigma = bwt_wt->bitsPerSymbol();
 
 	TERMINATOR = 256;
@@ -92,6 +131,9 @@ IndexedBWT::IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose
 		sampleSA(verbose);
 		if(verbose) cout << "  Done.\n";
 	}
+
+	for(ulint i=0;i<n;i++)
+		BWT[i] = inverse_remapping[BWT[i]];//restore original values
 
 }
 
@@ -188,32 +230,6 @@ ulint IndexedBWT::convertToTextCoordinate(ulint i){//i=address on BWT (F column)
 
 }
 
-void IndexedBWT::test(){
-
-	cout << "BEGIN TEST\n";
-
-	/*ulint i = n-1;//position on text
-	ulint j = 0;//position on BWT
-
-	while(i>0){
-		cout << getTextAddress(j) << " ";
-		j=LF(j);
-		i--;
-	}
-
-	cout << getTextAddress(j) << endl;*/
-
-	/*for(ulint i=0;i<n;i++)
-		cout << (uint)charAt(i);*/
-
-	cout << "log sigma = " << log_sigma<<endl;
-	cout << "number of nodes = " << bwt_wt->numberOfNodes()<<endl;
-	cout << "Size of the structure = " << (double)size()/n << "n bits = " << ((double)size()/n)/8 << "n Bytes" <<endl;
-
-	cout << "\nEND TEST\n";
-
-}
-
 vector<ulint> IndexedBWT::convertToTextCoordinates(pair<ulint, ulint> interval){
 
 	vector<ulint> coord;
@@ -224,6 +240,10 @@ vector<ulint> IndexedBWT::convertToTextCoordinates(pair<ulint, ulint> interval){
 
 }
 
+/*
+ * input: already remapped character (or TERMINATOR) and position
+ * output: rank of the character in the bwt
+ */
 ulint IndexedBWT::rank(unsigned char c, ulint i){//number of characters 'c' before position i excluded
 
 	if(c==TERMINATOR)
@@ -241,7 +261,7 @@ unsigned char IndexedBWT::at(ulint i){
 	if(i==terminator_position)
 		return 0;
 
-	return bwt_wt->charAt(i)+1;
+	return inverse_remapping[bwt_wt->charAt(i)];
 
 }
 
@@ -279,6 +299,11 @@ uint IndexedBWT::digitAt(ulint W, uint i){
 
 }
 
+/*
+ *  To be used with the dB-hash data structure
+ * 	search the suffix of length 'length' of the word W, where each character is formed by 'log_sigma' bits
+ *
+ */
 pair<ulint, ulint> IndexedBWT::BS(ulint W, uint length,pair<ulint, ulint> interval){
 
 	if(interval.first==0 and interval.second==0)//if default interval
@@ -286,7 +311,7 @@ pair<ulint, ulint> IndexedBWT::BS(ulint W, uint length,pair<ulint, ulint> interv
 
 	for(uint i=0;i<length;i++){
 
-		uint c = digitAt(W,i);
+		uint c = remapping[digitAt(W,i)+1];//sum 1 since the BWT is built on the remapped text, where 1 is added to each digit
 
 		interval.first = FIRST[c] + rank(c,interval.first);
 		interval.second = FIRST[c] + rank(c,interval.second);
@@ -297,6 +322,10 @@ pair<ulint, ulint> IndexedBWT::BS(ulint W, uint length,pair<ulint, ulint> interv
 
 }
 
+/*
+ * 	backward search: search pattern P and return interval <lower_included, upper_excluded> on the BWT
+ *
+ */
 pair<ulint, ulint> IndexedBWT::BS(string P){
 
 	pair<ulint, ulint> interval = pair<ulint, ulint>(0,n);
@@ -306,11 +335,11 @@ pair<ulint, ulint> IndexedBWT::BS(string P){
 		uint c = (unsigned char)P.at( (P.length()-1)-i );
 
 		if(c==0){
-			cout << "ERROR while searching pattern in the index: the pattern contains a 0x0 byte.\n";
+			cout << "ERROR while searching pattern in the index: the pattern contains a 0x0 byte (not allowed since it is used as text terminator).\n";
 			exit(0);
 		}
 
-		c--;
+		c = remapping[c];//apply remapping
 
 		interval.first = FIRST[c] + rank(c,interval.first);
 		interval.second = FIRST[c] + rank(c,interval.second);
@@ -347,6 +376,8 @@ void IndexedBWT::saveToFile(FILE *fp){
 	text_pointers->saveToFile(fp);
 
 	fwrite(FIRST, sizeof(ulint), 257, fp);
+	fwrite(remapping, sizeof(uchar), 256, fp);
+	fwrite(inverse_remapping, sizeof(uchar), sigma, fp);
 
 }
 
@@ -382,10 +413,15 @@ void IndexedBWT::loadFromFile(FILE *fp){
 	text_pointers->loadFromFile(fp);
 
 	FIRST = new ulint[257];
+	remapping = new uchar[256];
+	inverse_remapping = new uchar[sigma];
 
 	numBytes = fread(FIRST, sizeof(ulint), 257, fp);
 	check_numBytes();
-
+	numBytes = fread(remapping, sizeof(uchar), 256, fp);
+	check_numBytes();
+	numBytes = fread(inverse_remapping, sizeof(uchar), sigma, fp);
+	check_numBytes();
 
 }
 

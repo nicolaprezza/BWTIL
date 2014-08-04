@@ -49,8 +49,6 @@ public:
 
 	ulint size();//returns size of the structure in bits
 
-	void test();
-
 	void freeMemory();
 
 	void saveToFile(string path);

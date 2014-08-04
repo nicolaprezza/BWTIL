@@ -368,7 +368,7 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	if(verbose) cout << "done. " << k_mers.size() << " nonempty contexts of length k = " << k << " (including contexts containing terminator character)"  << endl;
 
-	if(verbose) cout << " building automata edges ... "<< flush;
+	if(verbose) cout << " building automata edges ... "<< endl;
 
 	uint nr_of_prefixes=0;
 	prefix_nr.push_back(nr_of_prefixes);
@@ -416,6 +416,14 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 				setEdge(i, s, searchContext(context_to, k_mers));
 
 			}
+
+		}
+
+		perc = (100*i)/number_of_k_mers;
+		if(verbose and perc>last_perc and perc%10==0){
+
+			last_perc=perc;
+			cout << "  " << perc << "% Done." << endl;
 
 		}
 

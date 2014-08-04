@@ -10,6 +10,9 @@
 
 namespace bwtil {
 
+/*
+ * WARNING: use DNA_SEARCH or BS_SEARCH as hash type only if the text is on the alphabet {A,C,G,T,N}
+ */
 HashFunction::HashFunction(ulint n, ulint m, hash_type type, bool verbose){
 
 	if(verbose)
@@ -67,40 +70,59 @@ HashFunction::HashFunction(ulint m, const char * file_path, bool verbose){
 
 	code = new uint[256];
 
-	uint empty=256;
-	for(uint i=0;i<256;i++)
-		code[i]=empty;
-
 	random_char = new bool[256];
 	for(uint i=0;i<256;i++)
 		random_char[i]=false;
 
 	ulint n=0;
-	base = 0;
 
 	if(verbose)	cout << " Reading input file for detecting alphabet size and file length ... \n";
 
 	unsigned char ch;
 	fstream fin(file_path, fstream::in);
+
+	vector<uchar> alphabet;
+	vector<bool> char_inserted = vector<bool>(256,false);
+
 	while (fin >> noskipws >> ch) {
 
-		if(code[ch]==empty){
-			code[ch] = base;
-			base++;
+		if(not char_inserted.at(ch)){
+
+			alphabet.push_back(ch);
+			char_inserted.at(ch)=true;
+
 		}
 
-	    n++;
-	}
+		n++;
 
-	for(uint i=0;i<256;i++)
-		if(code[i]==empty)
-			code[i]=0;
+	}
 
 	if(n==0){
 		VERBOSE_CHANNEL<< "Empty file. "  << file_path <<endl;
+		fin.close();
 		exit(1);
-	}else
-		n--;//remove terminator char
+	}
+
+	if(alphabet.size()<=1){
+		VERBOSE_CHANNEL<< "Error: alphabet size (" << alphabet.size() << ") is less than or equal to 1." <<endl;
+		fin.close();
+		exit(1);
+	}
+
+	log_base = ceil(log2(alphabet.size()));
+	base = ((ulint)1)<<log_base;
+
+	//sort alphabet
+
+	std::sort(alphabet.begin(),alphabet.end());
+
+	//calculate code
+
+	for(uint i=0;i<256;i++)
+		code[i]=0;
+
+	for(uint i=0;i<alphabet.size();i++)
+		code[alphabet.at(i)] = i;
 
 	fin.close();
 
@@ -108,14 +130,15 @@ HashFunction::HashFunction(ulint m, const char * file_path, bool verbose){
 
 	if(verbose)	cout << " Pattern length : m = " << m<<endl;
 
+	w = ceil(log2(m*n)/log_base);//optimal word size
 
-	w = ceil(log2(m*n)/log2(base));//optimal word size
-	log_base = ceil(log2(base));
+	if(w>m) w=m;
+
 	r = m%w;
 
-	if(verbose)	cout << " Alphabet size : b = " << base<<endl;
+	if(verbose)	cout << " Alphabet size : sigma = " << alphabet.size() << endl;
 
-	if(verbose)	cout << " Fingerprints base : b = " << (1<<log_base)<< " (" << log_base << " bits per digit)" << endl;
+	if(verbose)	cout << " Fingerprints base : b = " << base << " (" << log_base << " bits per digit)" << endl;
 
 	if(verbose) cout << " Optimal word length : w = " << w<<endl << " Building Z set ... ";
 

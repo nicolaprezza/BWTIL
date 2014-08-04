@@ -51,7 +51,7 @@ public:
 
 	CwBWTIterator getIterator(){return CwBWTIterator(this);};
 
-	void toFile(string path);//save BWT to file
+	void toFile(string path,bool verbose=true);//save BWT to file
 	symbol * toArray();//returns BWT as a char array of size n+1
 
 	string toString();
