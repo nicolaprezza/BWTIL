@@ -76,5 +76,17 @@ ulint DummyDynamicBitvector::rank1(ulint i){
 
 }
 
+uint DummyDynamicBitvector::height(){//height of the packed B-tree
+
+	uint ptr_size = ceil(log2(n+1)) +1;
+	uint d = W/ptr_size;//keys per node
+	uint b = sqrt(d);//worst-case fanout
+	if(b<=1) b=2;//fanout at least 2
+
+	uint h = ceil(log2(n)/log2(b));
+
+	return h;
+
+}
 
 } /* namespace compressed_bwt_construction */

@@ -65,6 +65,20 @@ void CwBWT::init(string path, bool verbose){
 
 	build(verbose);
 
+	ulint sum_of_heights=0;
+	ulint sum_of_lenghts=0;
+
+	for(ulint i=0;i<number_of_contexts;i++){
+
+		sum_of_lenghts += dynStrings[i]->numberOfBits();
+		sum_of_heights += dynStrings[i]->sumOfHeights();
+
+	}
+
+	double avg_height = (double)sum_of_heights/(double)sum_of_lenghts;
+
+	if(verbose) cout << "\nAverage packed B-tree height is: " << avg_height << endl;
+
 	if(verbose) printRSSstat();
 
 }

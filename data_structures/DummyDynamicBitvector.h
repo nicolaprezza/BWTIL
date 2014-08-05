@@ -26,7 +26,13 @@ public:
 
 	void print();
 
+	uint height();//height of the tree
+
+	ulint maxSize(){return n;};
+
 private:
+
+	static const uint W = 512;//word length
 
 	ulint rank1(ulint i);
 

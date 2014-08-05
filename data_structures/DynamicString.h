@@ -53,6 +53,9 @@ public:
 		return  bits;
 	}
 
+	ulint numberOfBits();//sum of the lengths of the bitvectors
+	ulint sumOfHeights();//sum of the heights of all bitvectors' B-trees (each multiplied by the length of the bitvector)
+
 private:
 
 	void buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint pos, uint this_node, uint * next_free_node);

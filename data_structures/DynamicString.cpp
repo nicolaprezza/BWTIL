@@ -301,4 +301,32 @@ string DynamicString::toString(){
 
 }
 
+ulint DynamicString::numberOfBits(){//sum of the lengths of the bitvectors
+
+	if(unary_string)
+		return n;
+
+	ulint tot=0;
+
+	for(uint i=0;i<number_of_internal_nodes;i++)
+		tot += wavelet_tree[i].maxSize();
+
+	return tot;
+
+}
+
+ulint  DynamicString::sumOfHeights(){//sum of the heights of all bitvectors' B-trees (each multiplied by the length of the bitvector)
+
+	if(unary_string)
+		return n;
+
+	ulint tot=0;
+
+	for(uint i=0;i<number_of_internal_nodes;i++)
+		tot += wavelet_tree[i].maxSize()*wavelet_tree[i].height();
+
+	return tot;
+
+}
+
 } /* namespace compressed_bwt_construction */
