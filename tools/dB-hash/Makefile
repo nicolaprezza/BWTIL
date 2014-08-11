@@ -21,6 +21,10 @@ $(BINARY): $(SOURCE)
 
 	g++ -O3 $(SOURCE) -o $(BINARY)
 
+debug:
+
+	g++ -O3 -g -DDEBUG $(SOURCE) -o $(BINARY)
+
 clean:
 
 	rm -f $(BINARY)

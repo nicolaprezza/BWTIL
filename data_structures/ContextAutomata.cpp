@@ -162,7 +162,7 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 
 	if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_k_mers << endl;
 
-	while( _k < log_n and (nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * overhead)/100) ){
+	while( _k < log_n and (nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * log2(sigma) * overhead)/100) ){
 
 		_k++;
 
@@ -173,8 +173,10 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 
 	}
 
-	if(_k > 1)//we found the first _k above the threshold, so decrease _k. Minimum _k is 1.
+	if(_k > 2)//we found the first _k above the threshold, so decrease _k.
 		_k--;
+	else
+		_k = 2;//minimum k is 2
 
 	return _k;
 
@@ -423,7 +425,7 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 		if(verbose and perc>last_perc and perc%10==0){
 
 			last_perc=perc;
-			cout << "  " << perc << "% Done." << endl;
+			cout << " " << perc << "% Done." << endl;
 
 		}
 
@@ -431,7 +433,7 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	rewind();//go back to initial state
 
-	if(verbose) cout << "done." << endl;
+	if(verbose) cout << " done." << endl;
 	if(verbose) cout << "\nContext automata completed." << endl;
 
 }

@@ -81,9 +81,10 @@ uint DummyDynamicBitvector::height(){//height of the packed B-tree
 	uint ptr_size = ceil(log2(n+1)) +1;
 	uint d = W/ptr_size;//keys per node
 	uint b = sqrt(d);//worst-case fanout
+	uint nr_of_leafs = n/W;
 	if(b<=1) b=2;//fanout at least 2
 
-	uint h = ceil(log2(n)/log2(b));
+	uint h = ceil(log2(nr_of_leafs)/log2(b));
 
 	return h;
 
