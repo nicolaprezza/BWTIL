@@ -16,7 +16,7 @@ using namespace bv;
 	 ulint N = 50000;
 
 	DummyDynamicBitvector bv_naive(N);
-	bitvector_t<4096, alloc_on_demand> bv_Btree(N,1024);
+	bitvector_t<4096, alloc_on_demand> bv_Btree(N,512);
 
 	//bitvector_t<4096, alloc_on_demand>::test(std::cout, 100000, 512, false, false, false);
 
