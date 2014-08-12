@@ -17,7 +17,7 @@ using namespace bv;
 
 	 exit(0);
 
-	ulint N = 50000;
+	ulint N = 100000;
 
 	DummyDynamicBitvector bv_naive(N);
 	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
@@ -44,7 +44,6 @@ using namespace bv;
 	cout << "d = " << bv_Btree.info().degree << endl;
 	cout << "b = " << bv_Btree.info().buffer << endl;
 	cout << "height = " << bv_Btree.info().height << endl <<endl;
-
 
 	cout << "Checking content correctness ... "<< flush;
 

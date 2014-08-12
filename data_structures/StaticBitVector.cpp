@@ -7,7 +7,7 @@
 
  /*
  *   This class implements a bitvector with constant time support for rank and access queries
- *   space occupancy = n + n/D^2 * log n + n/D * log D^2 (D=24 in the default setting)
+ *   space occupancy = n + n/D^2 * log n + n/D * log D^2 bits (D=63 in the default setting)
  */
 
 //============================================================================
@@ -68,7 +68,7 @@ void StaticBitVector::computeRanks(){//compute rank structures basing on the con
 
 			if(rank_ptrs_2->wordAt((i+1)/D)>1000000000){
 
-				cout << "*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;
+				cout << "*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
 				exit(0);
 
 			}

@@ -200,7 +200,7 @@ symbol DynamicString::access(uint node, ulint i){
 	//else: next_node is a valid address in wavelet_tree
 
 	//ulint next_i = wavelet_tree[node].rank(bit,i); TODO substitution
-	ulint next_i = 0;//TODO integrare rank generale bitvector
+	ulint next_i = wavelet_tree[node].rank(i,bit);
 
 	return access(next_node, next_i);
 
@@ -254,7 +254,7 @@ void DynamicString::insert(vector<bool> * code, uint node, uint pos, ulint i){
 		uint next_node = (bit==0?child0[node]:child1[node]);//find next node
 
 		//ulint next_i = wavelet_tree[node].rank(bit,i); TODO substitution
-		ulint next_i = 0;//TODO integrare rank generico
+		ulint next_i = wavelet_tree[node].rank(i,bit);
 
 		insert(code, next_node, pos+1, next_i);
 
@@ -288,7 +288,7 @@ ulint DynamicString::rank(vector<bool> * code, uint node, uint pos, ulint i){
 
 	bool bit = code->at(pos);
 	//ulint bit_rank = wavelet_tree[node].rank(bit,i); TODO substitution
-	ulint bit_rank = 0;//TODO integrare rank generico
+	ulint bit_rank = wavelet_tree[node].rank(i,bit);
 
 	if(pos+1==code->size())
 		return bit_rank;
