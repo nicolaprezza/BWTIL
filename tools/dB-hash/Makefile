@@ -39,7 +39,7 @@ $(TARGET): $(SOURCES)
 
 debug:
 
-	$(CXX) $(SOURCE) -o $(BINARY) -DDEBUG
+	$(CXX) -o $(TARGET) -DDEBUG $(SOURCES)
 	
 clean:
 	@rm -f $(TARGET)

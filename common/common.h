@@ -30,7 +30,7 @@ using namespace std;
 #define VERBOSE_CHANNEL std::cout
 #define ERROR_CHANNEL std::cerr
 
-typedef unsigned long int ulint;
+typedef uint64_t ulint;
 typedef unsigned int uint;
 typedef unsigned short int t_char; ///< Type for char conversion
 typedef unsigned short int t_errors; ///< Type for ERRORS

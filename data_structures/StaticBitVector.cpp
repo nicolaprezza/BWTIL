@@ -63,8 +63,17 @@ void StaticBitVector::computeRanks(){//compute rank structures basing on the con
 
 		nr_of_ones_global += bitAt(i);
 
-		if((i+1)%D==0)
+		if((i+1)%D==0){
 			rank_ptrs_2->setWord((i+1)/D,nr_of_ones_local);
+
+			if(rank_ptrs_2->wordAt((i+1)/D)>1000000000){
+
+				cout << "*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;
+				exit(0);
+
+			}
+
+		}
 
 		if((i+1)%(D*D)==0)
 			rank_ptrs_1->setWord((i+1)/(D*D),nr_of_ones_global);

@@ -62,9 +62,17 @@ void WaveletTree::buildRecursive(ulint node, WordVector * text_wv,bool verbose){
 
 	if(text_wv->wordSize()>1){//if there are children
 
+		cout << "*** 1.1"<<endl;
+
+		cout << "*** wsize = " << text_wv->wordSize()<<endl;
+		cout << "*** n0 = " << nodes[node]->numberOf0()<<endl;
+		cout << "*** n1 = " << nodes[node]->numberOf1()<<endl;
+
 		//children
 		WordVector * text_child0 = new WordVector(nodes[node]->numberOf0(),text_wv->wordSize()-1);
 		WordVector * text_child1 = new WordVector(nodes[node]->numberOf1(),text_wv->wordSize()-1);
+
+		cout << "*** 1.2"<<endl;
 
 		ulint j0=0;
 		ulint j1=0;

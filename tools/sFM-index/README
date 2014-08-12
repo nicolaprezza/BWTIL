@@ -15,6 +15,18 @@ In the sFM-index/ directory, just execute
 
 The executable "sFM-index" will be created in the BWTIL/ main folder.
 
+*** Test ***
+
+In the sFM-index/ directory, execute
+
+> make example-build
+
+to build a succinct FM-index with pattern on the file BWTIL/data/plain/dna.1MB . This will create the file BWTIL/data/plain/dna.1MB.sfm . After that, execute
+
+> make example-search
+
+to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the inex just created.
+
 *** Notes ***
 
 please note that, due to the particular suffix array library employed, the builtin construction of the BWT can currently handle only texts shorter than 2^31 characters. We are working to integrate more powerful BWT-construction libraries in our software.

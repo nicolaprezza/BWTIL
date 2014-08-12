@@ -13,10 +13,10 @@ using namespace bv;
 
  int main(int argc,char** argv) {
 
-	 ulint N = 50000;
+	ulint N = 1000000;
 
 	DummyDynamicBitvector bv_naive(N);
-	bitvector_t<4096, alloc_on_demand> bv_Btree(N,512);
+	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
 
 	//bitvector_t<4096, alloc_on_demand>::test(std::cout, 100000, 512, false, false, false);
 
@@ -32,18 +32,24 @@ using namespace bv;
 		rand_bit = rand()%2;
 		rand_pos = rand()%(i+1);
 
-		bv_naive.insert(rand_bit,rand_pos);
+		//bv_naive.insert(rand_bit,rand_pos);
 		bv_Btree.insert(rand_pos,rand_bit);
 
 	}
 
 	cout << "done."<< endl;
 
-	info_t info = bv_Btree.info();
-	cout << "d = " << info.degree << endl;
-	cout << "b = " << info.buffer << endl;
+	cout << "d = " << bv_Btree.info().degree << endl;
+	cout << "b = " << bv_Btree.info().buffer << endl;
 
-	cout << "Checking correctness..."<< endl;
+	cout << "Accessing ... "<< flush;
+
+	for(ulint i=0;i<N;i++)
+		bv_Btree.access(i);
+
+	cout << "done."<< endl;
+
+	/*cout << "Checking correctness..."<< endl;
 
 	for(ulint i=0;i<N;i++){
 
@@ -58,7 +64,7 @@ using namespace bv;
 
 	cout << endl;
 
-	cout << "Success! " << endl;
+	cout << "Success! " << endl;*/
 
  }
 

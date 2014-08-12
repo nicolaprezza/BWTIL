@@ -25,17 +25,7 @@
 
 namespace bv
 {
-struct info_t {
-    const size_t capacity;
-    const size_t size;
-    const size_t node_width;
-    const size_t counter_width;
-    const size_t pointer_width;
-    const size_t degree;
-    const size_t buffer;
-    const size_t nodes;
-    const size_t leaves;
-};
+
 
     /*
      * === Bitvector class ===
@@ -104,7 +94,17 @@ struct info_t {
         const_reference operator[](size_t index) const;
         
         // Debugging
-
+        struct info_t {
+            const size_t capacity;
+            const size_t size;
+            const size_t node_width;
+            const size_t counter_width;
+            const size_t pointer_width;
+            const size_t degree;
+            const size_t buffer;
+            const size_t nodes;
+            const size_t leaves;
+        };
         info_t info() const;
         size_t memory() const;
         static void test(std::ostream &stream, size_t N, size_t Wn,

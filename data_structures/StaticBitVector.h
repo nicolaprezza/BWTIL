@@ -61,8 +61,6 @@ protected:
 	WordVector * rank_ptrs_1;//rank pointers sampled every D^2 positions
 	WordVector * rank_ptrs_2;//rank pointers sampled every D positions
 
-	//uint * ones;//number of 1's in a word of max. 20 bits. this structure occupies ~ 8 MB.
-
 	uint D;//size of words
 
 };
