@@ -8,7 +8,7 @@ ifndef STD
 endif
 
 ifndef OPTFLAGS
-	OPTFLAGS=-Ofast -fstrict-aliasing
+	OPTFLAGS=-Ofast -fstrict-aliasing -march=native -mtune=generic
 endif
 
 CCVER=$(shell $(CXX) --version)
