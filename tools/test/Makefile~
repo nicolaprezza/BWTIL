@@ -19,7 +19,11 @@ else
 	MY_CXXFLAGS=$(CLANG_CXXFLAGS) $(CXXFLAGS)
 endif
 
-TARGET=../../test
+ifeq (c++,$(CXX))
+	TARGET=../../test
+else
+	TARGET=../../test-$(CXX)
+endif
 
 SOURCES=\
 test.cpp \
@@ -34,4 +38,4 @@ $(TARGET): $(SOURCES)
 	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o $(TARGET) $(SOURCES)
 
 clean:
-	@rm -f $(TARGET)
+	@rm -f ../../test ../../test-*
