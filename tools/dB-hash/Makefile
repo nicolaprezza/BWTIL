@@ -6,7 +6,17 @@ ifndef STD
 endif
 
 ifndef OPTFLAGS
-	OPTFLAGS=-Ofast -fstrict-aliasing -march=native -mtune=generic
+	ifneq (yes,$(DEBUG))		
+		ARCHFLAGS=-march=native -mtune=generic
+		ifneq (yes, $(ASSERTS))
+			ASSERTSFLAGS=-DNDEBUG
+		else
+			ASSERTSFLAGS=
+		endif
+		OPTFLAGS=-Ofast -fstrict-aliasing $(ASSERTSFLAGS) $(ARCHFLAGS)
+	else
+		OPTFLAGS=-O0 -ggdb
+	endif
 endif
 
 CCVER=$(shell $(CXX) --version)

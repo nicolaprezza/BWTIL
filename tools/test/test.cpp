@@ -13,11 +13,12 @@ using namespace bv;
 
  int main(int argc,char** argv) {
 
-	ulint N = 5;
+	 bitvector_t<2048, alloc_on_demand> aa(5,256);
 
-    bitvector_t<2048>::test(std::cout, 5, 256, false, false, false, false);
 
-    exit(0);
+	 exit(0);
+
+	ulint N = 50000;
 
 	DummyDynamicBitvector bv_naive(N);
 	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
@@ -65,7 +66,7 @@ using namespace bv;
 
 	for(ulint i=0;i<N;i++){
 
-		if(bv_naive.rank(1,i) != bv_Btree.rank(i)){
+		if(bv_naive.rank(1,i) != bv_Btree.rank(i,1)){
 
 			cout << "ERROR: naive bv and Btree bv do not coincide in rank1 \n";
 			exit(1);
@@ -80,7 +81,7 @@ using namespace bv;
 
 	for(ulint i=0;i<N;i++){
 
-		if(bv_naive.rank(0,i) != bv_Btree.zerorank(i)){
+		if(bv_naive.rank(0,i) != bv_Btree.rank(i,0)){
 
 			cout << "ERROR: naive bv and Btree bv do not coincide in rank0 \n";
 			exit(1);
