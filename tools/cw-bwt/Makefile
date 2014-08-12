@@ -1,3 +1,5 @@
+INCLUDE_FLAGS=-I../../extern/bitvector/include/
+
 INCLUDE_FLAGS=-I../../extern/bitvector/include/ 
 
 CLANG_CXXFLAGS=-Weverything -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic

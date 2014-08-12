@@ -26,7 +26,6 @@
 #include <fstream>
 #include "../extern/bitvector/include/bitvector.h"
 
-
 using namespace std;
 using namespace bv;
 

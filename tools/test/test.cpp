@@ -15,7 +15,6 @@ using namespace bv;
 
 	 bitvector_t<2048, alloc_on_demand> aa(5,256);
 
-
 	 exit(0);
 
 	ulint N = 50000;

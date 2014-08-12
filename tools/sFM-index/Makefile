@@ -1,6 +1,8 @@
 CLANG_CXXFLAGS=-Weverything -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic
 GCC_CXXFLAGS=-Wall -pedantic
 
+INCLUDE_FLAGS=-I../../extern/bitvector/include/
+
 ifndef STD
 	STD=c++11
 endif
@@ -45,7 +47,7 @@ nonexistent:
 
 $(TARGET): $(SOURCES)
 	@echo "Compiling with $(CXX)..."
-	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(OPTFLAGS) -o $(TARGET) $(SOURCES)
+	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o $(TARGET) $(SOURCES)
 
 debug:
 
