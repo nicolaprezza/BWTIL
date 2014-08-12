@@ -44,7 +44,7 @@ debug:
 clean:
 	@rm -f $(TARGET)
 	
-	example-build:
+example-build:
 
 	$(TARGET) build ../../data/plain/dna.1MB 30
 

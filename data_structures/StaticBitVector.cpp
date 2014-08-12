@@ -79,7 +79,20 @@ ulint StaticBitVector::size(){
 
 }
 
-/*int popcnt(unsigned long int x){
+string printWord(ulint x){
+
+	string s;
+
+	for(uint i=0;i<64;i++)
+		s += (((x>>(63-i))&1)==0?'0':'1');
+
+	return s;
+
+}
+
+//alternatives for popcount:
+
+/*int popcnt(unsigned long int x){//no need for HW implementation
 
 	x = x - ((x&0xAAAAAAAAAAAAAAAA)>>1);//groups of 2 bits
 	x = (x&0x3333333333333333)+((x&0xCCCCCCCCCCCCCCCC)>>2);//groups of 4 bits
@@ -93,20 +106,10 @@ ulint StaticBitVector::size(){
 
 }*/
 
-string printWord(ulint x){
-
-	string s;
-
-	for(uint i=0;i<64;i++)
-		s += (((x>>(63-i))&1)==0?'0':'1');
-
-	return s;
-
-}
-
-
 //const-time popcnt (if available in hardware)
-#define popcnt(x) __builtin_popcount(x>>32)+__builtin_popcount(x&0x00000000FFFFFFFF);
+//#define popcnt(x) __builtin_popcount(x>>32)+__builtin_popcount(x&0x00000000FFFFFFFF);
+
+#define popcnt(x) __builtin_popcountll(x)
 
 ulint StaticBitVector::rank(ulint W, uint i){//number of 1's before position i (excluded) in the word W (of D bits)
 

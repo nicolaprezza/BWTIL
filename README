@@ -28,19 +28,25 @@ The BWTIL library offers a set of tools to deal with bwt-based text indexes. The
 
  ***   Compile   ***
 
-
 To compile all the executables, run
 
 > make
 
+or (for clang++)
+
+> CXX=clang++ make
+
 in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
 
-> make clean; make tool_name
+> make tool_name
+
+or (for clang++)
+
+> CXX=clang++ make tool_name
 
 where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
 
 Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
-
 
  ***   Test   ***
 
