@@ -13,7 +13,7 @@ using namespace bv;
 
  int main(int argc,char** argv) {
 
-	ulint N = 1000000;
+	ulint N = 40000;
 
 	DummyDynamicBitvector bv_naive(N);
 	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
@@ -25,14 +25,14 @@ using namespace bv;
 	bool rand_bit;
 	ulint rand_pos;
 
-	cout << "Inserting bits ..."<< flush;
+	cout << "Inserting bits ... "<< flush;
 
 	for(ulint i=0;i<N;i++){
 
 		rand_bit = rand()%2;
 		rand_pos = rand()%(i+1);
 
-		//bv_naive.insert(rand_bit,rand_pos);
+		bv_naive.insert(rand_bit,rand_pos);
 		bv_Btree.insert(rand_pos,rand_bit);
 
 	}
@@ -41,30 +41,55 @@ using namespace bv;
 
 	cout << "d = " << bv_Btree.info().degree << endl;
 	cout << "b = " << bv_Btree.info().buffer << endl;
+	cout << "height = " << bv_Btree.info().height << endl <<endl;
 
-	cout << "Accessing ... "<< flush;
 
-	for(ulint i=0;i<N;i++)
-		bv_Btree.access(i);
-
-	cout << "done."<< endl;
-
-	/*cout << "Checking correctness..."<< endl;
+	cout << "Checking content correctness ... "<< flush;
 
 	for(ulint i=0;i<N;i++){
 
 		if(bv_naive.access(i) != bv_Btree.access(i)){
 
-			cout << "ERROR: naive bv and Btree bv do not coincide\n";
+			cout << "ERROR: naive bv and Btree bv do not coincide in content \n";
 			exit(1);
 
 		}
 
 	}
 
-	cout << endl;
+	cout << "ok. " <<  endl;
 
-	cout << "Success! " << endl;*/
+	cout << "Checking rank1 correctness ... "<< flush;
+
+	for(ulint i=0;i<N;i++){
+
+		if(bv_naive.rank(1,i) != bv_Btree.rank(i)){
+
+			cout << "ERROR: naive bv and Btree bv do not coincide in rank1 \n";
+			exit(1);
+
+		}
+
+	}
+
+	cout << "ok. " <<  endl;
+
+	cout << "Checking rank0 correctness ... "<< flush;
+
+	for(ulint i=0;i<N;i++){
+
+		if(bv_naive.rank(0,i) != bv_Btree.zerorank(i)){
+
+			cout << "ERROR: naive bv and Btree bv do not coincide in rank0 \n";
+			exit(1);
+
+		}
+
+	}
+
+	cout << "ok. " <<  endl;
+
+	cout << "Success! " << endl;
 
  }
 
