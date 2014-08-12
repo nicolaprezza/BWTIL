@@ -28,6 +28,7 @@ The BWTIL library offers a set of tools to deal with bwt-based text indexes. The
 
  ***   Compile   ***
 
+
 To compile all the executables, run
 
 > make
@@ -48,6 +49,7 @@ where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-
 
 Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
 
+
  ***   Test   ***
 
 
@@ -59,7 +61,7 @@ The folder BWTIL/data/plain/ contains some small example files to test the libra
 
 After compiling, in the main BWTIL/ directory run
 
-> ./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt 2
+> ./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
 
 To build the BWT of the text data/plain/sources.1MB. The BWT will be saved in data/bwt/sources.1MB.bwt
 
@@ -79,21 +81,21 @@ Now that we have the BWT of data/plain/sources.1MB, we can build its suffix arra
 
 The suffix array of data/plain/sources.1MB will be stored in data/SA/sources.1MB.sa
 
-If we want to check the consistency of the SA, we can simply convert it back to a BWT with
+If we want to check the consistency of the SA, we can simply convert it back to a BWT with (for this we need also the original text file)
 
 > ./sa-to-bwt data/SA/sources.1MB.sa data/plain/sources.1MB data/bwt/sources.1MB_copy.bwt
 
 And check with bwt-check the consistency of data/bwt/sources.1MB_copy.bwt against the plain text file data/plain/sources.1MB.
 
-To search the occurrences of a pattern in a text file with the dB-hash data structure, first create the index (in the example, pattern length is 20):
+To search the occurrences of a pattern in a text file with the dB-hash data structure, first create the index (the file data/plain/sources.1MB.dbh will be created):
 
 > ./dB-hash build data/plain/sources.1MB 20
 
-Then, to search for the occurrencies of the pattern of length 20 "static unsigned long", run
+Where 20 is the pattern length. Then, to search for the occurrencies of the pattern of length 20 "static unsigned long", run
 
 > ./dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
 
-To search the occurrences of a pattern in a text file with the sFM-index data structure, first create the index:
+To search the occurrences of a pattern in a text file with the sFM-index data structure, first create the index (the file data/plain/sources.1MB.sfm will be created):
 
 > ./sFM-index build data/plain/sources.1MB
 

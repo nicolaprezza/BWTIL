@@ -13,7 +13,7 @@
 #define CWBWT_H_
 
 #include "../common/common.h"
-#include "CumulativeCounters.h"
+#include "PartialSums.h"
 #include "DynamicString.h"
 #include "BackwardFileReader.h"
 #include "ContextAutomata.h"
@@ -95,7 +95,7 @@ private:
 	BackwardFileReader bwFileReader;
 
 	//structure for each context block:
-	CumulativeCounters * counters;
+	PartialSums * partial_sums;
 	DynamicString ** dynStrings;
 	vector<ulint> * frequencies;//frequencies[i] = frequency of each symbol in {0,...,sigma-1} in the context i
 

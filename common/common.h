@@ -24,8 +24,11 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <fstream>
+#include "../extern/bitvector/include/bitvector.h"
+
 
 using namespace std;
+using namespace bv;
 
 #define VERBOSE_CHANNEL std::cout
 #define ERROR_CHANNEL std::cerr
@@ -38,6 +41,8 @@ typedef unsigned short int t_errors; ///< Type for ERRORS
 typedef unsigned char uchar;
 typedef unsigned char symbol;
 typedef unsigned char uint8;
+
+typedef bitvector_t<2048> bitv;
 
 enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 

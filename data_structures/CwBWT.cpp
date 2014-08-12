@@ -164,12 +164,19 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	//compute expected packed B-tree height
 	//TODO extract the following 2 values from the bitvector data structure
-	uint W = 512;
+
+	bitv sample_bv(256,10);
+
+	/*uint W = 512;
 	uint node_size = 512;
-	uint nr_of_leafs = exp_context_length/W;
+	uint nr_of_leaves = exp_context_length/W;
 	uint d = node_size/(log2(exp_context_length)+1);//number keys/node
 	uint b = sqrt(d);//worst-case tree fanout
-	double exp_height = (log2(nr_of_leafs)/log2(b));
+	double exp_height = (log2(nr_of_leaves)/log2(b));*/
+
+	uint nr_of_leaves = sample_bv.info().leaves;
+	uint b = sample_bv.info().buffer; //worst-case tree fanout
+	double exp_height = (log2(nr_of_leaves)/log2(b));
 
 	if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl << endl;
 
@@ -209,9 +216,9 @@ void CwBWT::initStructures(string path, bool verbose){
 
 	computeActualEntropy();
 
-	counters = new CumulativeCounters[number_of_contexts];
+	partial_sums = new PartialSums[number_of_contexts];
 	for(ulint i=0;i<number_of_contexts;i++)
-		counters[i] = CumulativeCounters(sigma,lengths[i]);
+		partial_sums[i] = PartialSums(sigma,lengths[i]);
 
 	delete [] lengths;
 
@@ -271,8 +278,8 @@ void CwBWT::build(bool verbose){
 
 		//substitute the terminator with the symbol head (coordinates terminator_context,terminator_pos)
 
-		counters[new_terminator_context].increment(tail);
-		new_terminator_pos = counters[new_terminator_context].getCount(tail) +  dynStrings[terminator_context]->rank(head,terminator_pos);
+		partial_sums[new_terminator_context].increment(tail);
+		new_terminator_pos = partial_sums[new_terminator_context].getCount(tail) +  dynStrings[terminator_context]->rank(head,terminator_pos);
 
 		dynStrings[terminator_context]->insert(head,terminator_pos);
 

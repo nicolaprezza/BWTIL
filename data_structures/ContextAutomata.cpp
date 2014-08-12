@@ -132,7 +132,7 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 	 *
 	 */
 
-	CumulativeCounters sample_cumulative_counter = CumulativeCounters(sigma,n);//sample of cumulative counter to extimate its memory consumption
+	PartialSums sample_cumulative_counter = PartialSums(sigma,n);//sample of cumulative counter to extimate its memory consumption
 	DynamicString sample_dynstring = DynamicString(new vector<ulint>(sigma,1));
 
 	ulint bits_per_k_mer =

@@ -1,15 +1,15 @@
 /*
- * CumulativeCounters.cpp
+ * PartialSums.cpp
  *
  *  Created on: Jun 22, 2014
  *      Author: nicola
  */
 
-#include "CumulativeCounters.h"
+#include "PartialSums.h"
 
 namespace bwtil {
 
-CumulativeCounters::CumulativeCounters(uint sigma, ulint n){//size of the alphabet and maximum number to be stored in a counter
+PartialSums::PartialSums(uint sigma, ulint n){//size of the alphabet and maximum number to be stored in a counter
 
 	if(n==0){//empty counters
 		empty=true;
@@ -64,11 +64,11 @@ CumulativeCounters::CumulativeCounters(uint sigma, ulint n){//size of the alphab
 
 }
 
-string CumulativeCounters::toString(){
+string PartialSums::toString(){
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): toString() called on empty counter\n";
+		cout << "ERROR (PartialSums): toString() called on empty counter\n";
 		exit(0);
 	}
 #endif
@@ -82,18 +82,18 @@ string CumulativeCounters::toString(){
 
 }
 
-void CumulativeCounters::incrementFrom(ulint * node, uint i){
+void PartialSums::incrementFrom(ulint * node, uint i){
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): incrementFrom() called on empty counter\n";
+		cout << "ERROR (PartialSums): incrementFrom() called on empty counter\n";
 		exit(0);
 	}
 #endif
 
 #ifdef DEBUG
 	if(i>d){
-		cout << "ERROR (CumulativeCounters): incrementing counter i>d (" << i << ">" << d << ")\n";
+		cout << "ERROR (PartialSums): incrementing counter i>d (" << i << ">" << d << ")\n";
 		exit(0);
 	}
 #endif
@@ -108,18 +108,18 @@ void CumulativeCounters::incrementFrom(ulint * node, uint i){
 
 }
 
-ulint CumulativeCounters::getCounterNumber(ulint n, uint i){//get value of the counter number 0<=i<d in the node n
+ulint PartialSums::getCounterNumber(ulint n, uint i){//get value of the counter number 0<=i<d in the node n
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): getCounterNumber() called on empty counter\n";
+		cout << "ERROR (PartialSums): getCounterNumber() called on empty counter\n";
 		exit(0);
 	}
 #endif
 
 #ifdef DEBUG
 	if(i>=d){
-		cout << "ERROR (CumulativeCounters): get counter i>=d (" << i << ">=" << d << ")\n";
+		cout << "ERROR (PartialSums): get counter i>=d (" << i << ">=" << d << ")\n";
 		exit(0);
 	}
 #endif
@@ -130,18 +130,18 @@ ulint CumulativeCounters::getCounterNumber(ulint n, uint i){//get value of the c
 
 }
 
-uint16_t CumulativeCounters::child(uint16_t n, uint8_t i){//return child number 0<=i<=d of node n
+uint16_t PartialSums::child(uint16_t n, uint8_t i){//return child number 0<=i<=d of node n
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): child() called on empty counter\n";
+		cout << "ERROR (PartialSums): child() called on empty counter\n";
 		exit(0);
 	}
 #endif
 
 #ifdef DEBUG
 	if(i>d){
-		cout << "ERROR (CumulativeCounters): child number i>d (" << i << ">" << d << ")\n";
+		cout << "ERROR (PartialSums): child number i>d (" << i << ">" << d << ")\n";
 		exit(0);
 	}
 #endif
@@ -151,18 +151,18 @@ uint16_t CumulativeCounters::child(uint16_t n, uint8_t i){//return child number 
 }
 
 
-uint16_t CumulativeCounters::parent(uint16_t n){//return parent of node n
+uint16_t PartialSums::parent(uint16_t n){//return parent of node n
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): parent() called on empty counter\n";
+		cout << "ERROR (PartialSums): parent() called on empty counter\n";
 		exit(0);
 	}
 #endif
 
 #ifdef DEBUG
 	if(n>=nr_of_nodes){
-		cout << "ERROR (CumulativeCounters): parent of inexistent node " << n <<"\n";
+		cout << "ERROR (PartialSums): parent of inexistent node " << n <<"\n";
 		exit(0);
 	}
 #endif
@@ -171,11 +171,11 @@ uint16_t CumulativeCounters::parent(uint16_t n){//return parent of node n
 
 }
 
-uint8_t CumulativeCounters::childNumber(uint16_t n){//return which children number is n in his parent
+uint8_t PartialSums::childNumber(uint16_t n){//return which children number is n in his parent
 
 #ifdef DEBUG
 	if(n>=nr_of_nodes){
-		cout << "ERROR (CumulativeCounters): parent of inexistent node " << n << "\n";
+		cout << "ERROR (PartialSums): parent of inexistent node " << n << "\n";
 		exit(0);
 	}
 #endif
@@ -184,18 +184,18 @@ uint8_t CumulativeCounters::childNumber(uint16_t n){//return which children numb
 
 }
 
-void CumulativeCounters::increment(symbol s){
+void PartialSums::increment(symbol s){
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): increment() called on empty counter\n";
+		cout << "ERROR (PartialSums): increment() called on empty counter\n";
 		exit(0);
 	}
 #endif
 
 #ifdef DEBUG
 	if(s>=sigma){
-		cout << "ERROR (CumulativeCounters): symbol " << s << " not in alphabet.\n";
+		cout << "ERROR (PartialSums): symbol " << s << " not in alphabet.\n";
 		exit(0);
 	}
 #endif
@@ -216,11 +216,11 @@ void CumulativeCounters::increment(symbol s){
 
 }
 
-ulint CumulativeCounters::getCount(symbol s){
+ulint PartialSums::getCount(symbol s){
 
 #ifdef DEBUG
 	if(empty){
-		cout << "ERROR (CumulativeCounters): getCount() called on empty counter\n";
+		cout << "ERROR (PartialSums): getCount() called on empty counter\n";
 		exit(0);
 	}
 #endif
@@ -232,7 +232,7 @@ ulint CumulativeCounters::getCount(symbol s){
 
 #ifdef DEBUG
 	if(s>=sigma){
-		cout << "ERROR (CumulativeCounters): symbol " << s << " not in alphabet.\n";
+		cout << "ERROR (PartialSums): symbol " << s << " not in alphabet.\n";
 		exit(0);
 	}
 #endif

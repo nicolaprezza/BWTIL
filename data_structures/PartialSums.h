@@ -16,14 +16,14 @@
 
 namespace bwtil {
 
-class CumulativeCounters {
+class PartialSums {
 
 public:
 
-	CumulativeCounters(){};
+	PartialSums(){};
 
 	//the structure mantains one counter for each symbol in {0,1,...,sigma-1}.
-	CumulativeCounters(uint sigma, ulint n);//size of the alphabet and maximum number to be stored in a counter
+	PartialSums(uint sigma, ulint n);//size of the alphabet and maximum number to be stored in a counter
 
 	void increment(symbol s);//increment by 1 the counter in s, s+1, s+2, ...
 

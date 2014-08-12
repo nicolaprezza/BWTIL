@@ -80,7 +80,8 @@ private:
 	uint16_t * child0;//for each node, pointer to left child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 	uint16_t * child1;//for each node, pointer to right child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 
-	DummyDynamicBitvector * wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
+	vector<bitv>  wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
+	//DummyDynamicBitvector * wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total) TODO substitution
 	//tree topology
 
 	vector<vector<bool> > codes;//Huffman codes
@@ -92,6 +93,8 @@ private:
 	ulint n;//max size of the string
 
 	bool unary_string;//alphabet has size 1
+
+	const static uint node_bitsize = 256;//number of bits of each packed B-tree internal node
 
 };
 

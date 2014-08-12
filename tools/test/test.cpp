@@ -13,12 +13,14 @@ using namespace bv;
 
  int main(int argc,char** argv) {
 
-	ulint N = 40000;
+	ulint N = 5;
+
+    bitvector_t<2048>::test(std::cout, 5, 256, false, false, false, false);
+
+    exit(0);
 
 	DummyDynamicBitvector bv_naive(N);
 	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
-
-	//bitvector_t<4096, alloc_on_demand>::test(std::cout, 100000, 512, false, false, false);
 
 	srand(time(NULL));
 
