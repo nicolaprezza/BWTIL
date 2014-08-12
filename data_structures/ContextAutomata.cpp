@@ -394,7 +394,6 @@ void ContextAutomata::build(uint k, BackwardFileReader * bfr, bool verbose){
 
 	context = (ulint)0;//first context
 	current_state = 0;
-	symbol s;
 
 	perc=0;
 	last_perc=-1;

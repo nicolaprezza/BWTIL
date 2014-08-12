@@ -1,7 +1,25 @@
-#------------------------------------------------------------------------------
+CLANG_CXXFLAGS=-Weverything -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic
+GCC_CXXFLAGS=-Wall -pedantic
 
-SOURCE=\
-../../common/common.h \
+ifndef STD
+	STD=c++11
+endif
+
+ifndef OPTFLAGS
+	OPTFLAGS=-Ofast -fstrict-aliasing -march=native -mtune=generic
+endif
+
+CCVER=$(shell $(CXX) --version)
+
+ifneq (,$(findstring g++,$(CXX)))
+	MY_CXXFLAGS=$(GCC_CXXFLAGS) $(CXXFLAGS)
+else
+	MY_CXXFLAGS=$(CLANG_CXXFLAGS) $(CXXFLAGS)
+endif
+
+TARGET=../../dB-hash
+
+SOURCES=\
 dB-hash.cpp \
 ../../extern/sais.cpp \
 ../../data_structures/StaticBitVector.cpp \
@@ -11,28 +29,25 @@ dB-hash.cpp \
 ../../data_structures/WaveletTree.cpp \
 ../../data_structures/WordVector.cpp
 
-BINARY=../../dB-hash
+all: $(TARGET)
 
-#------------------------------------------------------------------------------
+nonexistent:
 
-all: $(BINARY)
-
-$(BINARY): $(SOURCE)
-
-	g++ -O3 $(SOURCE) -o $(BINARY)
+$(TARGET): $(SOURCES)
+	@echo "Compiling with $(CXX)..."
+	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(OPTFLAGS) -o $(TARGET) $(SOURCES)
 
 debug:
 
-	g++ -O3 -g -DDEBUG $(SOURCE) -o $(BINARY)
-
+	$(CXX) $(SOURCE) -o $(BINARY) -DDEBUG
+	
 clean:
+	@rm -f $(TARGET)
+	
+	example-build:
 
-	rm -f $(BINARY)
-
-example-build:
-
-	../../dB-hash build ../../data/plain/dna.1MB 30
+	$(TARGET) build ../../data/plain/dna.1MB 30
 
 example-search:
 
-	../../dB-hash search ../../data/plain/dna.1MB.dbh ATCCATGTAGATATAACACAGCTATTTTCA
+	$(TARGET) search ../../data/plain/dna.1MB.dbh ATCCATGTAGATATAACACAGCTATTTTCA

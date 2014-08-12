@@ -301,7 +301,7 @@ unsigned char* HashFunction::hashValue(unsigned char *P, ulint n){
 
 	}
 
-	unsigned char buffer[bufsize];
+	vector<unsigned char> buffer(bufsize);
 
 	//fill buffer with the first m+1 digits
 	for(ulint i=0;i<bufsize;i++){
@@ -384,7 +384,7 @@ unsigned char* HashFunction::hashValueRemapped(unsigned char *P, ulint n){
 
 	}
 
-	unsigned char buffer[bufsize];
+	vector<unsigned char> buffer(bufsize);
 
 	//fill buffer with the first m+1 digits
 	for(ulint i=0;i<bufsize;i++){

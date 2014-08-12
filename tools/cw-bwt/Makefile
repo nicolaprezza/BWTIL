@@ -1,9 +1,27 @@
-#------------------------------------------------------------------------------
+INCLUDE_FLAGS=-I../../extern/bitvector/include/ 
 
-CXX := g++
+CLANG_CXXFLAGS=-Weverything -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic
+GCC_CXXFLAGS=-Wall -pedantic
 
-SOURCE=\
-../../common/common.h \
+ifndef STD
+	STD=c++11
+endif
+
+ifndef OPTFLAGS
+	OPTFLAGS=-Ofast -fstrict-aliasing -march=native -mtune=generic
+endif
+
+CCVER=$(shell $(CXX) --version)
+
+ifneq (,$(findstring g++,$(CXX)))
+	MY_CXXFLAGS=$(GCC_CXXFLAGS) $(CXXFLAGS)
+else
+	MY_CXXFLAGS=$(CLANG_CXXFLAGS) $(CXXFLAGS)
+endif
+
+TARGET=../../cw-bwt
+
+SOURCES=\
 cw-bwt.cpp \
 ../../data_structures/CumulativeCounters.cpp \
 ../../data_structures/DummyDynamicBitvector.cpp \
@@ -14,21 +32,17 @@ cw-bwt.cpp \
 ../../data_structures/HuffmanTree.cpp \
 ../../data_structures/ContextAutomata.cpp
 
+all: $(TARGET)
 
-BINARY=../../cw-bwt
+nonexistent:
 
-#------------------------------------------------------------------------------
-
-all: $(BINARY)
-
-$(BINARY): $(SOURCE)
-
-	$(CXX) -o $(BINARY) -O3 $(SOURCE) 
+$(TARGET): $(SOURCES)
+	@echo "Compiling with $(CXX)..."
+	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o $(TARGET) $(SOURCES)
 
 debug:
 
 	$(CXX) $(SOURCE) -o $(BINARY) -DDEBUG
-
+	
 clean:
-
-	rm -f $(BINARY)
+	@rm -f $(TARGET)

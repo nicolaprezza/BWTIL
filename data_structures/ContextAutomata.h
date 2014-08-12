@@ -107,8 +107,6 @@ private:
 	ulint sigma_pow_k_minus_one;
 	ulint n;
 
-	symbol tail;//symbol
-
 };
 
 } /* namespace bwtil */
