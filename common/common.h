@@ -41,8 +41,6 @@ typedef unsigned char uchar;
 typedef unsigned char symbol;
 typedef unsigned char uint8;
 
-typedef bitvector_t<2048> bitv;
-
 enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 
 #endif /* COMMON_H_ */

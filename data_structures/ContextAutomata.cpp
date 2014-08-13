@@ -133,10 +133,10 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 	 */
 
 	PartialSums sample_cumulative_counter = PartialSums(sigma,n);//sample of cumulative counter to extimate its memory consumption
-	DynamicString sample_dynstring = DynamicString(new vector<ulint>(sigma,1));
+	DynamicString<bitv> sample_dynstring = DynamicString<bitv>(new vector<ulint>(sigma,1));
 
 	ulint bits_per_k_mer =
-			CHAR_BIT * sizeof(DynamicString *) + //pointers to DynamicStrings
+			CHAR_BIT * sizeof(DynamicString<bitv> *) + //pointers to DynamicStrings
 			sample_cumulative_counter.bitSize()  + //cumulative counters
 			sample_dynstring.bitSize() + //DynamicStrings
 			CHAR_BIT*sizeof(vector<uint >) + //vector prefix_nr

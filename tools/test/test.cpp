@@ -11,100 +11,141 @@
 using namespace bwtil;
 using namespace bv;
 
- int main(int argc,char** argv) {
+void test1(){
 
-
-	 ulint nn=7716;
-	 bitvector_t<2048, alloc_on_demand> v(3,256);
-
-	 v.insert(0,1);
-
-	 exit(0);
-
-
-	 /*
-	  * bugs:
-	  *
-	  * bitvector_t<2048, alloc_on_demand> v(4,256);
-	  *
-	  *
-	  *
-	  */
-
-	ulint N = 100000;
-
-	DummyDynamicBitvector bv_naive(N);
-	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
-
+	srand(time(NULL));
 	bool rand_bit;
 	ulint rand_pos;
 
-	cout << "Inserting bits ... "<< flush;
+	 for(ulint N=8193;N<100000;N++){
 
-	for(ulint i=0;i<N;i++){
+		cout << "N = " << N << endl;
 
-		rand_bit = rand()%2;
-		rand_pos = rand()%(i+1);
+		bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
 
-		bv_naive.insert(rand_bit,rand_pos);
-		bv_Btree.insert(rand_pos,rand_bit);
+		cout << "Inserting bits ... "<< flush;
 
-	}
+		for(ulint i=0;i<N;i++){
 
-	cout << "done."<< endl;
+			rand_bit = rand()%2;
+			rand_pos = rand()%(i+1);
 
-	cout << "d = " << bv_Btree.info().degree << endl;
-	cout << "b = " << bv_Btree.info().buffer << endl;
-	cout << "height = " << bv_Btree.info().height << endl <<endl;
-
-	cout << "Checking content correctness ... "<< flush;
-
-	for(ulint i=0;i<N;i++){
-
-		if(bv_naive.access(i) != bv_Btree.access(i)){
-
-			cout << "ERROR: naive bv and Btree bv do not coincide in content \n";
-			exit(1);
+			bv_Btree.insert(rand_pos,rand_bit);
 
 		}
 
-	}
+		cout << "done."<< endl;
 
-	cout << "ok. " <<  endl;
+		cout << "Checking rank1 correctness ... "<< flush;
 
-	cout << "Checking rank1 correctness ... "<< flush;
+		ulint rank=0;
 
-	for(ulint i=0;i<N;i++){
+		for(ulint i=0;i<N;i++){
 
-		if(bv_naive.rank(1,i) != bv_Btree.rank(i,1)){
+			if(rank != bv_Btree.rank(i,1)){
 
-			cout << "ERROR: naive bv and Btree bv do not coincide in rank1 \n";
-			exit(1);
+				cout << "ERROR in rank: \n";
 
-		}
+				cout << "bv_Btree.rank("<<i-1<<",1) = " << bv_Btree.rank(i-1,1)<<endl;
+				cout << "bv_Btree.rank("<<i<<",1) = " << bv_Btree.rank(i,1)<<endl;
 
-	}
+				cout << "correct rank computed on-the fly = " << rank <<endl;
 
-	cout << "ok. " <<  endl;
+				exit(1);
 
-	cout << "Checking rank0 correctness ... "<< flush;
+			}
 
-	for(ulint i=0;i<N;i++){
-
-		if(bv_naive.rank(0,i) != bv_Btree.rank(i,0)){
-
-			cout << "ERROR: naive bv and Btree bv do not coincide in rank0 \n";
-			exit(1);
+			rank += bv_Btree.access(i);
 
 		}
 
-	}
+		cout << "ok. " <<  endl;
 
-	cout << "ok. " <<  endl;
+	 }
 
-	cout << "Success! " << endl;
+}
+
+
+void test2(){
+
+	srand(time(NULL));
+	bool rand_bit;
+	ulint rand_pos;
+
+	 for(ulint N=8193;N<100000;N++){
+
+		cout << "N = " << N << endl;
+
+		DummyDynamicBitvector bv_naive(N);
+		bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
+
+		cout << "Inserting bits ... "<< flush;
+
+		for(ulint i=0;i<N;i++){
+
+			rand_bit = rand()%2;
+			rand_pos = rand()%(i+1);
+
+			bv_naive.insert(rand_bit,rand_pos);
+			bv_Btree.insert(rand_pos,rand_bit);
+
+		}
+
+		cout << "done."<< endl;
+
+		cout << "d = " << bv_Btree.info().degree << endl;
+		cout << "b = " << bv_Btree.info().buffer << endl;
+		cout << "height = " << bv_Btree.info().height << endl <<endl;
+
+		cout << "Checking content correctness ... "<< flush;
+
+		for(ulint i=0;i<N;i++){
+
+			if(bv_naive.access(i) != bv_Btree.access(i)){
+
+				cout << "ERROR: naive bv and Btree bv do not coincide in content \n";
+				exit(1);
+
+			}
+
+		}
+
+		cout << "ok. " <<  endl;
+
+		cout << "Checking rank1 correctness ... "<< flush;
+
+		for(ulint i=0;i<N;i++){
+
+			if(bv_naive.rank(1,i) != bv_Btree.rank(i,1)){
+
+				cout << "ERROR: naive bv and Btree bv do not coincide in rank1 \n";
+
+				cout << "bv_naive.rank(1,"<<i-1<<") = " << bv_naive.rank(1,i-1)<<endl;
+				cout << "bv_Btree.rank(1,"<<i-1<<") = " << bv_Btree.rank(i-1,1)<<endl;
+
+				cout << "bv_naive.rank(1,"<<i<<") = " << bv_naive.rank(1,i)<<endl;
+				cout << "bv_Btree.rank(1,"<<i<<") = " << bv_Btree.rank(i,1)<<endl;
+
+				exit(1);
+
+			}
+
+		}
+
+		cout << "ok. " <<  endl;
+
+	 }
+
+
+}
+
+
+ int main(int argc,char** argv) {
+
+	 test1();
 
  }
+
 
 
 

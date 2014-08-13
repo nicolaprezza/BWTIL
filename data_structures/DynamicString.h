@@ -16,23 +16,42 @@
 
 namespace bwtil {
 
+//definition of the bitvector used
+typedef DummyDynamicBitvector bitv;
+//typedef bitvector_t<2048> bitv;
+
+template <typename bitvector_type>
 class DynamicString {
 
 public:
 
-	DynamicString();
+	DynamicString(){n=0;current_size=0;unary_string=true;sigma=0;sigma_0=0;H0=0;};
 
-	DynamicString(vector<ulint> * freq);//maximum size of the string and absolute frequencies of the characters
+	ulint rank(symbol x, ulint i){
 
-	symbol access(ulint i);
-	void insert(symbol x, ulint i);
-	ulint rank(symbol x, ulint i);
+		if(n==0)
+			return 0;
+
+	#ifdef DEBUG
+		if(i>current_size){
+
+			cout << "ERROR (DynamicString): trying to compute rank in position outside current string : " << i << ">" << current_size << endl;
+			exit(0);
+
+		}
+	#endif
+
+		if(unary_string)
+			return i;
+
+		vector<bool> code = codes.at(x);//bitvector to be searched in the wavelet tree
+		return rank(&code, 0, 0, i);
+
+	}
 
 	ulint size(){return current_size;};//current size
 
 	ulint maxLength(){return n;}
-
-	string toString();
 
 	double entropy(){return H0;}
 
@@ -53,17 +72,313 @@ public:
 		return  bits;
 	}
 
-	ulint numberOfBits();//sum of the lengths of the bitvectors
-	ulint sumOfHeights();//sum of the heights of all bitvectors' B-trees (each multiplied by the length of the bitvector)
+	DynamicString(vector<ulint> * freq){//absolute frequencies of the characters
+
+		n=0;
+
+		for(uint i=0;i<freq->size();i++)
+			n+=freq->at(i);
+
+		if(n==0){
+			current_size=0;
+			unary_string=true;
+			sigma=0;
+			sigma_0=0;
+			H0=0;
+			return;
+		}
+
+	#ifdef DEBUG
+		if(freq->size()>255){
+			cout << "ERROR (DynamicString): Maximum size of the alphabet is 255. (input alphabet size is " << freq->size() << ")\n";
+			exit(0);
+		}
+
+		this->freq = new vector<ulint>(freq->size());
+
+		for(ulint i=0;i<freq->size();i++)
+			this->freq->at(i) = freq->at(i);
+
+	#endif
+
+		sigma = freq->size();
+		sigma_0=0;
+
+		for(uint i=0;i<freq->size();i++)
+			if(freq->at(i)>0)
+				sigma_0++;
+
+	#ifdef DEBUG
+		if(sigma_0==0){
+			cout << "ERROR (DynamicString): trying to build dynamic string on a null alphabet\n";
+			exit(0);
+		}
+
+		current_freqs = new vector<ulint>(freq->size());
+		for(uint i=0;i<freq->size();i++)
+			current_freqs->at(i)=0;
+	#endif
+
+		current_size = 0;
+
+		if(sigma_0==1){
+
+			for(uint i=0;i<freq->size();i++)//search the unique char with freq>0
+				if(freq->at(i)>0)
+					s=i;
+
+			unary_string = true;
+			H0 = (uint)log2(n);
+			return;
+
+		}
+
+		//Alphabet size is > 1
+
+		unary_string = false;
+
+		HuffmanTree ht = HuffmanTree(freq);
+		codes = ht.getCodes();
+
+		H0 = ht.entropy();
+
+		number_of_internal_nodes = sigma_0-1;
+
+		wavelet_tree.resize(number_of_internal_nodes);
+
+		child0 = vector<uint16_t>(number_of_internal_nodes);
+		child1 = vector<uint16_t>(number_of_internal_nodes);
+
+		//child0 = new uint16_t[number_of_internal_nodes];
+		//child1 = new uint16_t[number_of_internal_nodes];
+
+		vector<symbol> alphabet;
+		for(symbol i=0;i<freq->size();i++)
+			if(freq->at(i)>0)
+				alphabet.push_back(i);
+
+		uint next_free_node = 1;
+		buildTree(freq,alphabet,0,0,&next_free_node);
+
+	}
+
+	symbol access(ulint i){
+
+		if(n==0)
+			return 0;
+
+	#ifdef DEBUG
+		if(i>=current_size){
+
+			cout << "ERROR (DynamicString): trying to access position outside current string : " << i << ">=" << current_size << endl;
+			exit(0);
+
+		}
+	#endif
+
+		if(unary_string){
+
+			return s;
+
+		}
+
+		return access(0,i);
+
+	}
+
+	void insert(symbol x, ulint i){
+
+		if(n==0)
+			return;
+
+	#ifdef DEBUG
+		if(i>current_size){
+
+			cout << "ERROR (DynamicString): trying to insert in position outside current string : " << i << ">" << current_size << endl;
+			exit(0);
+
+		}
+
+		if(current_freqs->at(x)>=freq->at(x)){
+
+			cout << "ERROR (DynamicString): too many symbols " << (uint)x << " inserted!" << endl;
+			exit(0);
+
+		}
+
+		current_freqs->at(x) += 1;
+
+	#endif
+
+
+		if(not unary_string){
+
+			vector<bool> code = codes.at(x);//bitvector to be inserted in the wavelet tree
+			insert(&code,0,0,i);
+
+		}
+
+		current_size++;
+
+	}
+
+	string toString(){
+
+		stringstream ss;
+
+		for(ulint i=0;i<size();i++)
+			ss << (uint)access(i);
+
+		return ss.str();
+
+	}
+
+	ulint numberOfBits(){//sum of the lengths of the bitvectors
+
+		if(unary_string)
+			return n;
+
+		ulint tot=0;
+
+		for(uint i=0;i<number_of_internal_nodes;i++)
+			//tot += wavelet_tree[i].maxSize();
+			tot += wavelet_tree[i].info().capacity;
+
+		return tot;
+
+	}
+
+	ulint  sumOfHeights(){//sum of the heights of all bitvectors' B-trees (each multiplied by the length of the bitvector)
+
+		if(unary_string)
+			return n;
+
+		ulint tot=0;
+
+		for(uint i=0;i<number_of_internal_nodes;i++)
+			//tot += wavelet_tree[i].maxSize()*wavelet_tree[i].height();
+			tot += wavelet_tree[i].info().capacity * (wavelet_tree[i].info().height+1);//sum 1 because in bitvector heights start from 0
+
+		return tot;
+
+	}
 
 private:
 
-	void buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint pos, uint this_node, uint * next_free_node);
+	void buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint pos,uint this_node, uint * next_free_node){
 
-	void insert(vector<bool> * code, uint node, uint pos, ulint i);
-	symbol access(uint node, ulint i);
-	ulint rank(vector<bool> * code, uint node, uint pos, ulint i);
+		vector<symbol> alphabet0;
+		vector<symbol> alphabet1;
 
+		ulint size = 0;//size of the current bitvector
+
+		for(uint i=0;i<alphabet.size();i++){
+
+			size += freq->at(alphabet.at(i));
+
+		}
+
+		wavelet_tree[this_node] = bitvector_type(size,node_bitsize);
+
+		for(uint i=0;i<alphabet.size();i++){
+
+			if(codes.at(alphabet.at(i)).at(pos)==0){//left (bit 0)
+
+				if(codes.at(alphabet.at(i)).size()-1==pos){//leaf on left: save character
+
+					child0[this_node] = sigma+alphabet.at(i);
+
+				}else{
+
+					if(alphabet0.size()==0){//if this is the first symbol seen with bit 0, allocate new tree node
+						child0[this_node] = *next_free_node;
+						*next_free_node += 1;
+					}
+
+					alphabet0.push_back(alphabet.at(i));
+
+				}
+
+			}else{//right (bit 1)
+
+				if(codes.at(alphabet.at(i)).size()-1==pos){//leaf on right: save character
+
+					child1[this_node] = sigma+alphabet.at(i);
+
+				}else{
+
+					if(alphabet1.size()==0){//if this is the first symbol seen with bit 1, allocate new tree node
+						child1[this_node] = *next_free_node;
+						*next_free_node += 1;
+					}
+
+					alphabet1.push_back(alphabet.at(i));
+
+				}
+
+			}
+
+		}
+
+		if(alphabet0.size()>0)
+			buildTree(freq,alphabet0,pos+1,child0[this_node],next_free_node);
+
+		if(alphabet1.size()>0)
+			buildTree(freq,alphabet1,pos+1,child1[this_node],next_free_node);
+
+
+	}
+
+	void insert(vector<bool> * code, uint node, uint pos, ulint i){
+
+		bool bit = code->at(pos);
+
+		wavelet_tree[node].insert( i, bit );
+
+		if(pos+1<code->size()){
+
+			uint next_node = (bit==0?child0[node]:child1[node]);//find next node
+
+			//ulint next_i = wavelet_tree[node].rank(bit,i);
+			ulint next_i = wavelet_tree[node].rank(i,bit);
+
+			insert(code, next_node, pos+1, next_i);
+
+		}
+
+	}
+
+	symbol access(uint node, ulint i){
+
+			bool bit = wavelet_tree[node].access(i);
+
+			uint next_node = (bit==0?child0[node]:child1[node]);
+
+			if(next_node>=sigma)//next node is leaf:return symbol
+				return next_node-sigma;
+
+			//else: next_node is a valid address in wavelet_tree
+
+			ulint next_i = wavelet_tree[node].rank(i,bit);
+
+			return access(next_node, next_i);
+
+		}
+
+	ulint rank(vector<bool> * code, uint node, uint pos, ulint i){
+
+		bool bit = code->at(pos);
+		//ulint bit_rank = wavelet_tree[node].rank(bit,i);
+		ulint bit_rank = wavelet_tree[node].rank(i,bit);
+
+		if(pos+1==code->size())
+			return bit_rank;
+
+		uint next_node = (bit==0?child0[node]:child1[node]);//find next node
+
+		return rank(code, next_node, pos+1, bit_rank);
+
+	}
 
 #ifdef DEBUG
 
@@ -77,11 +392,10 @@ private:
 	symbol sigma_0;//number of characters with frequency > 0
 	symbol s;//unique symbol of the string if unary alphabet
 
-	uint16_t * child0;//for each node, pointer to left child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
-	uint16_t * child1;//for each node, pointer to right child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
+	vector<uint16_t> child0;//for each node, pointer to left child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
+	vector<uint16_t> child1;//for each node, pointer to right child in wavelet_tree (if any; otherwise sigma+s, where s is the symbol associated to the leaf)
 
-	vector<bitv>  wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
-	//DummyDynamicBitvector * wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total) TODO substitution
+	vector<bitvector_type>  wavelet_tree;//internal nodes of the wavelet tree (number_of_internal_nodes in total)
 	//tree topology
 
 	vector<vector<bool> > codes;//Huffman codes

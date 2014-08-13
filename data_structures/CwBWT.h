@@ -96,7 +96,7 @@ private:
 
 	//structure for each context block:
 	PartialSums * partial_sums;
-	DynamicString ** dynStrings;
+	vector<DynamicString<bitv> > dynStrings;
 	vector<ulint> * frequencies;//frequencies[i] = frequency of each symbol in {0,...,sigma-1} in the context i
 
 	ulint * lengths;//length of each context

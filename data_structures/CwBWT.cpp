@@ -70,8 +70,8 @@ void CwBWT::init(string path, bool verbose){
 
 	for(ulint i=0;i<number_of_contexts;i++){
 
-		sum_of_lenghts += dynStrings[i]->numberOfBits();
-		sum_of_heights += dynStrings[i]->sumOfHeights();
+		sum_of_lenghts += dynStrings[i].numberOfBits();
+		sum_of_heights += dynStrings[i].sumOfHeights();
 
 	}
 
@@ -194,10 +194,10 @@ void CwBWT::initStructures(string path, bool verbose){
 	perc=0;
 	last_perc=-1;
 
-	dynStrings = new DynamicString*[number_of_contexts];
+	dynStrings = vector<DynamicString<bitv> >(number_of_contexts);
 	for(ulint i=0;i<number_of_contexts;i++){
 
-		dynStrings[i] = new DynamicString(&frequencies[i]);
+		dynStrings[i] = DynamicString<bitv>(&frequencies[i]);
 		frequencies[i].clear();//free memory
 
 		perc = (100*i)/number_of_contexts;
@@ -276,9 +276,9 @@ void CwBWT::build(bool verbose){
 		//substitute the terminator with the symbol head (coordinates terminator_context,terminator_pos)
 
 		partial_sums[new_terminator_context].increment(tail);
-		new_terminator_pos = partial_sums[new_terminator_context].getCount(tail) +  dynStrings[terminator_context]->rank(head,terminator_pos);
+		new_terminator_pos = partial_sums[new_terminator_context].getCount(tail) +  dynStrings[terminator_context].rank(head,terminator_pos);
 
-		dynStrings[terminator_context]->insert(head,terminator_pos);
+		dynStrings[terminator_context].insert(head,terminator_pos);
 
 		//update terminator coordinates
 
@@ -289,7 +289,7 @@ void CwBWT::build(bool verbose){
 
 	}
 
-	dynStrings[terminator_context]->insert(TERMINATOR,terminator_pos);//insert the terminator character
+	dynStrings[terminator_context].insert(TERMINATOR,terminator_pos);//insert the terminator character
 
 	bwFileReader.close();//close input file
 
@@ -352,7 +352,7 @@ void CwBWT::computeActualEntropy(){//actual entropy of order k obtained with the
 
 		if(lengths[i]>0){
 
-			double H0 = dynStrings[i]->entropy();
+			double H0 = dynStrings[i].entropy();
 
 			bits_per_symbol += H0*((double)lengths[i]/(double)n);
 
@@ -436,8 +436,9 @@ void CwBWT::toFile(string path,bool verbose){//save CwBWT to file
 
 void CwBWT::debug(){
 
-	for(uint i=0;i<number_of_contexts;i++)
-		cout << dynStrings[i]->toString() << endl;
+	vector<ulint> freq;
+
+	DynamicString<bitv> aaa;
 
 }
 
@@ -448,7 +449,7 @@ CwBWT::CwBWTIterator::CwBWTIterator(CwBWT * bwt){
 
 	context=0;
 
-	while(context < bwt->number_of_contexts and bwt->dynStrings[context]->size()==0)//search nonempty context
+	while(context < bwt->number_of_contexts and bwt->dynStrings[context].size()==0)//search nonempty context
 		context++;
 
 	i=0;
@@ -464,15 +465,15 @@ symbol CwBWT::CwBWTIterator::next(){
 	if(not hasNext())
 		return 0;
 
-	symbol s = bwt->dynStrings[context]->access(i);
+	symbol s = bwt->dynStrings[context].access(i);
 
 	i++;
 
-	if(i>=bwt->dynStrings[context]->size()){//out of suffix: search new nonempty context
+	if(i>=bwt->dynStrings[context].size()){//out of suffix: search new nonempty context
 
 		context++;
 
-		while(context < bwt->number_of_contexts and bwt->dynStrings[context]->size()==0)//search nonempty context
+		while(context < bwt->number_of_contexts and bwt->dynStrings[context].size()==0)//search nonempty context
 			context++;
 
 		i=0;
