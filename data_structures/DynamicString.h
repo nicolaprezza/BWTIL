@@ -17,8 +17,8 @@
 namespace bwtil {
 
 //definition of the bitvector used
-typedef DummyDynamicBitvector bitv;
-//typedef bitvector_t<2048> bitv;
+//typedef DummyDynamicBitvector bitv;
+typedef bitvector_t<2048> bitv;
 
 template <typename bitvector_type>
 class DynamicString {
@@ -412,5 +412,7 @@ private:
 
 };
 
-} /* namespace compressed_bwt_construction */
+typedef DynamicString<bitv> dynamic_string_t;
+
+} /* namespace bwtil */
 #endif /* DYNAMICSTRING_H_ */

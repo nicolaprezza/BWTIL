@@ -194,10 +194,10 @@ void CwBWT::initStructures(string path, bool verbose){
 	perc=0;
 	last_perc=-1;
 
-	dynStrings = vector<DynamicString<bitv> >(number_of_contexts);
+	dynStrings = vector<dynamic_string_t >(number_of_contexts);
 	for(ulint i=0;i<number_of_contexts;i++){
 
-		dynStrings[i] = DynamicString<bitv>(&frequencies[i]);
+		dynStrings[i] = dynamic_string_t(&frequencies[i]);
 		frequencies[i].clear();//free memory
 
 		perc = (100*i)/number_of_contexts;
@@ -435,10 +435,6 @@ void CwBWT::toFile(string path,bool verbose){//save CwBWT to file
 }
 
 void CwBWT::debug(){
-
-	vector<ulint> freq;
-
-	DynamicString<bitv> aaa;
 
 }
 
