@@ -13,16 +13,28 @@ using namespace bv;
 
  int main(int argc,char** argv) {
 
-	 bitvector_t<2048, alloc_on_demand> aa(5,256);
+
+	 ulint nn=7716;
+	 bitvector_t<2048, alloc_on_demand> v(3,256);
+
+	 v.insert(0,1);
 
 	 exit(0);
+
+
+	 /*
+	  * bugs:
+	  *
+	  * bitvector_t<2048, alloc_on_demand> v(4,256);
+	  *
+	  *
+	  *
+	  */
 
 	ulint N = 100000;
 
 	DummyDynamicBitvector bv_naive(N);
 	bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
-
-	srand(time(NULL));
 
 	bool rand_bit;
 	ulint rand_pos;

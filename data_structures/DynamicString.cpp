@@ -84,7 +84,7 @@ DynamicString::DynamicString(vector<ulint> * freq){//absolute frequencies of the
 	number_of_internal_nodes = sigma_0-1;
 
 	wavelet_tree.resize(number_of_internal_nodes);
-	//wavelet_tree = new DummyDynamicBitvector[number_of_internal_nodes]; TODO substitution
+
 	child0 = new uint16_t[number_of_internal_nodes];
 	child1 = new uint16_t[number_of_internal_nodes];
 
@@ -112,8 +112,6 @@ void DynamicString::buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint 
 	}
 
 	wavelet_tree[this_node] = bitv(size,node_bitsize);
-	//wavelet_tree[this_node] = vector<bitvector_t<2048, alloc_on_demand> >(size,node_bitsize);
-	//wavelet_tree[this_node] = DummyDynamicBitvector(size); TODO substitution
 
 	for(uint i=0;i<alphabet.size();i++){
 
@@ -199,7 +197,6 @@ symbol DynamicString::access(uint node, ulint i){
 
 	//else: next_node is a valid address in wavelet_tree
 
-	//ulint next_i = wavelet_tree[node].rank(bit,i); TODO substitution
 	ulint next_i = wavelet_tree[node].rank(i,bit);
 
 	return access(next_node, next_i);
@@ -247,13 +244,39 @@ void DynamicString::insert(vector<bool> * code, uint node, uint pos, ulint i){
 	bool bit = code->at(pos);
 
 	//wavelet_tree[node].insert( bit, i );//insert the bit in the wavelet tree node
-	wavelet_tree[node].insert( i, bit );//TODO substitution
+
+	/*cout << "node = " << (uint)node << "/" <<  (uint)number_of_internal_nodes << endl;
+	cout << "bitv capacity: " << wavelet_tree[node].info().capacity << endl;
+	cout << "bitv size : " << wavelet_tree[node].info().size << endl;
+	cout << "i,bit = " << i << ", " << bit << endl;*/
+
+	/*if(wavelet_tree[node].info().capacity==7716){
+
+		cout << "Entering test zone"<<endl;
+
+		bitv bbb(7716,256);
+		bbb.insert(0,1);
+
+		cout << "Test works"<<endl;//TODO debugging!!
+
+
+		bitv aaa = wavelet_tree[node];
+
+		cout << "Assigned"<<endl;
+
+		aaa.insert(0,1);
+
+		cout << "Exit test zone"<<endl;
+
+	}*/
+
+	wavelet_tree[node].insert( i, bit );
 
 	if(pos+1<code->size()){
 
 		uint next_node = (bit==0?child0[node]:child1[node]);//find next node
 
-		//ulint next_i = wavelet_tree[node].rank(bit,i); TODO substitution
+		//ulint next_i = wavelet_tree[node].rank(bit,i);
 		ulint next_i = wavelet_tree[node].rank(i,bit);
 
 		insert(code, next_node, pos+1, next_i);
@@ -287,7 +310,7 @@ ulint DynamicString::rank(symbol x, ulint i){
 ulint DynamicString::rank(vector<bool> * code, uint node, uint pos, ulint i){
 
 	bool bit = code->at(pos);
-	//ulint bit_rank = wavelet_tree[node].rank(bit,i); TODO substitution
+	//ulint bit_rank = wavelet_tree[node].rank(bit,i);
 	ulint bit_rank = wavelet_tree[node].rank(i,bit);
 
 	if(pos+1==code->size())
@@ -318,7 +341,7 @@ ulint DynamicString::numberOfBits(){//sum of the lengths of the bitvectors
 	ulint tot=0;
 
 	for(uint i=0;i<number_of_internal_nodes;i++)
-		//tot += wavelet_tree[i].maxSize(); TODO substitution
+		//tot += wavelet_tree[i].maxSize();
 		tot += wavelet_tree[i].info().capacity;
 
 	return tot;
@@ -333,7 +356,7 @@ ulint  DynamicString::sumOfHeights(){//sum of the heights of all bitvectors' B-t
 	ulint tot=0;
 
 	for(uint i=0;i<number_of_internal_nodes;i++)
-		//tot += wavelet_tree[i].maxSize()*wavelet_tree[i].height(); TODO substitution
+		//tot += wavelet_tree[i].maxSize()*wavelet_tree[i].height();
 		tot += wavelet_tree[i].info().capacity * wavelet_tree[i].info().height;
 
 	return tot;

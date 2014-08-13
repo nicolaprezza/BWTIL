@@ -63,7 +63,7 @@ void CwBWT::init(string path, bool verbose){
 
 	initStructures(path, verbose);
 
-	//build(verbose);
+	build(verbose);
 
 	ulint sum_of_heights=0;
 	ulint sum_of_lenghts=0;
@@ -163,22 +163,19 @@ void CwBWT::initStructures(string path, bool verbose){
 	if(verbose) cout << " Expected context size (if uniform text) is " << exp_context_length << " characters" << endl;
 
 	//compute expected packed B-tree height
-	//TODO extract the following 2 values from the bitvector data structure
 
-	bitv sample_bv(256,10);
+	{
 
-	/*uint W = 512;
-	uint node_size = 512;
-	uint nr_of_leaves = exp_context_length/W;
-	uint d = node_size/(log2(exp_context_length)+1);//number keys/node
-	uint b = sqrt(d);//worst-case tree fanout
-	double exp_height = (log2(nr_of_leaves)/log2(b));*/
+		bitv sample_bv(256,exp_context_length);
 
-	uint nr_of_leaves = sample_bv.info().leaves;
-	uint b = sample_bv.info().buffer; //worst-case tree fanout
-	double exp_height = (log2(nr_of_leaves)/log2(b));
+		uint nr_of_leaves = sample_bv.info().leaves;
+		uint b = sample_bv.info().buffer; //worst-case tree fanout
+		if(b<=1) b=2;
+		double exp_height = (log2(nr_of_leaves)/log2(b));
 
-	if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl << endl;
+		if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl << endl;
+
+	}
 
 	if(verbose) cout << " Context length statistics: " << endl;
 

@@ -173,10 +173,10 @@ uint ContextAutomata::optimalK(uint overhead, BackwardFileReader * bfr, bool ver
 
 	}
 
-	if(_k > 2)//we found the first _k above the threshold, so decrease _k.
+	if(_k > 1)//we found the first _k above the threshold, so decrease _k.
 		_k--;
 	else
-		_k = 2;//minimum k is 2
+		_k = 1;//minimum k is 1
 
 	return _k;
 
