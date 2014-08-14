@@ -40,8 +40,7 @@ cw-bwt.cpp \
 ../../data_structures/BackwardFileReader.cpp \
 ../../data_structures/FileReader.cpp \
 ../../data_structures/CwBWT.cpp \
-../../data_structures/HuffmanTree.cpp \
-../../data_structures/ContextAutomata.cpp
+../../data_structures/HuffmanTree.cpp
 
 all: $(TARGET)
 

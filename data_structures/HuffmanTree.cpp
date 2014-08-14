@@ -182,49 +182,6 @@ void HuffmanTree::storeTree(vector<bool> code, Node n,vector<Node> nodes_vec){
 
 }
 
-/*symbol HuffmanTree::decode(vector<bool> c){//from binary Huffman code -> to symbol (decompression)
-
-	return decode(c,0,root_node);
-
-}*/
-
-/*symbol HuffmanTree::decode(vector<bool> c, uint pos, symbol node){
-
-	if(pos>=c.size()){
-		cout << "ERROR DURING DECOMPRESSION: unrecognized Huffman code.\n";
-		exit(0);
-	}
-
-	bool bit = c.at(pos);
-
-	if(bit==0){//go left
-
-		if(left_leafs.at(node)){//left node is leaf
-
-			return left[node];
-
-		}else{//go left
-
-			return decode(c,pos+1,left[node]);
-
-		}
-
-	}else{//go right
-
-		if(right_leafs.at(node)){//right node is leaf
-
-			return right[node];
-
-		}else{//go right
-
-			return decode(c,pos+1,right[node]);
-
-		}
-
-	}
-
-}*/
-
 HuffmanTree::~HuffmanTree() {}
 
 } /* namespace compressed_bwt_construction */
