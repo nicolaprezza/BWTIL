@@ -55,8 +55,6 @@ or (for clang++)
 
 where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
 
-Alternatively, move to the desired tool directory BWTIL/tools/tool_name and execute make.
-
 
  ***   Test   ***
 

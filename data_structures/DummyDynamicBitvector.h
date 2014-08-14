@@ -17,7 +17,8 @@ public:
 
 	DummyDynamicBitvector(){};
 
-	DummyDynamicBitvector(ulint n,size_t node_size) {
+	//create a dynamic bitvector of size n. node_size is an unused parameter (legacy option)
+	DummyDynamicBitvector(ulint n,size_t node_size=0) {
 
 		this->n = n;
 		bitvector = vector<bool>(n);
@@ -25,8 +26,6 @@ public:
 		current_size = 0;
 
 	}
-
-	~DummyDynamicBitvector() {}
 
 	bool access(ulint i){
 
