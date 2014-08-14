@@ -7,8 +7,8 @@ git add data
 git add data_structures
 git add extern
 git add tools
-git add git-commit.sh
-git add git-update-bitv.sh
+git add commit.sh
+git add update-bitv.sh
 git add Makefile
 git add README
 
