@@ -7,7 +7,7 @@
 
 #include "../../common/common.h"
 #include "../../data_structures/FileReader.h"
-#include "../../extern/getRSS.c"
+#include "../../extern/getRSS.h"
 
 using namespace bwtil;
 

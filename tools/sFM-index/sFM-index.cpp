@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "../../data_structures/succinctFMIndex.h"
-#include "../../extern/getRSS.c"
+#include "../../extern/getRSS.h"
 
 using namespace bwtil;
 using namespace std;

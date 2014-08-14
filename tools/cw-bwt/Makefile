@@ -33,9 +33,8 @@ endif
 
 TARGET=../../cw-bwt
 
-SOURCES=\
-cw-bwt.cpp \
-../../data_structures/CwBWT.cpp 
+SOURCES=cw-bwt.cpp 
+
 all: $(TARGET)
 
 nonexistent:

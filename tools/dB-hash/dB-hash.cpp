@@ -11,7 +11,7 @@
 #include "../../data_structures/StaticBitVector.h"
 #include "../../data_structures/DBhash.h"
 #include "../../data_structures/HashFunction.h"
-#include "../../extern/getRSS.c"
+#include "../../extern/getRSS.h"
 
 using namespace bwtil;
 using namespace std;

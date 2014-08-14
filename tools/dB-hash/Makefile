@@ -33,9 +33,7 @@ TARGET=../../dB-hash
 
 SOURCES=\
 dB-hash.cpp \
-../../extern/sais.cpp \
-../../data_structures/DBhash.cpp \
-../../data_structures/HashFunction.cpp
+../../extern/sais.cpp
 
 all: $(TARGET)
 

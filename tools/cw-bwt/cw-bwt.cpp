@@ -5,7 +5,7 @@
  *      Author: nicola
  */
 
-#include "../../data_structures/CwBWT.h"
+#include "../../algorithms/cw_bwt.h"
 
 using namespace bwtil;
 
@@ -28,13 +28,13 @@ using namespace bwtil;
 		exit(0);
 	}
 
-	CwBWT bwt;
+	cw_bwt bwt;
 
 	if(argc==3)//no k
-		bwt = CwBWT(argv[1]);
+		bwt = cw_bwt(argv[1]);
 
 	if(argc==4)
-		bwt = CwBWT(argv[1],atoi(argv[3]),true);
+		bwt = cw_bwt(argv[1],atoi(argv[3]),true);
 
 	cout << "\nSaving BWT in " << argv[2] << endl;
 	bwt.toFile(argv[2]);
