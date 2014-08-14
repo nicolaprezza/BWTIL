@@ -35,8 +35,6 @@ TARGET=../../cw-bwt
 
 SOURCES=\
 cw-bwt.cpp \
-../../data_structures/PartialSums.cpp \
-../../data_structures/DummyDynamicBitvector.cpp \
 ../../data_structures/BackwardFileReader.cpp \
 ../../data_structures/FileReader.cpp \
 ../../data_structures/CwBWT.cpp 
