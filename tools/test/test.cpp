@@ -11,6 +11,33 @@
 using namespace bwtil;
 using namespace bv;
 
+void bug1(){
+
+	srand(time(NULL));
+	bool rand_bit;
+	ulint rand_pos;
+
+	ulint N=4033;
+
+	for(uint j=0;j<10000;j++){
+
+		bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
+
+		for(ulint i=0;i<N;i++){
+
+			rand_bit = rand()%2;
+			rand_pos = rand()%(i+1);
+
+			bv_Btree.insert(rand_pos,rand_bit);
+
+		}
+
+		cout << "done."<< endl;
+
+	}
+
+}
+
 void test1(){
 
 	srand(time(NULL));
@@ -72,7 +99,7 @@ void test2(){
 	bool rand_bit;
 	ulint rand_pos;
 
-	 for(ulint N=8193;N<100000;N++){
+	 for(ulint N=1000;N<100000;N++){
 
 		cout << "N = " << N << endl;
 
@@ -86,7 +113,7 @@ void test2(){
 			rand_bit = rand()%2;
 			rand_pos = rand()%(i+1);
 
-			bv_naive.insert(rand_bit,rand_pos);
+			bv_naive.insert(rand_pos,rand_bit);
 			bv_Btree.insert(rand_pos,rand_bit);
 
 		}
@@ -116,14 +143,11 @@ void test2(){
 
 		for(ulint i=0;i<N;i++){
 
-			if(bv_naive.rank(1,i) != bv_Btree.rank(i,1)){
+			if(bv_naive.rank(i,1) != bv_Btree.rank(i,1)){
 
 				cout << "ERROR: naive bv and Btree bv do not coincide in rank1 \n";
 
-				cout << "bv_naive.rank(1,"<<i-1<<") = " << bv_naive.rank(1,i-1)<<endl;
-				cout << "bv_Btree.rank(1,"<<i-1<<") = " << bv_Btree.rank(i-1,1)<<endl;
-
-				cout << "bv_naive.rank(1,"<<i<<") = " << bv_naive.rank(1,i)<<endl;
+				cout << "bv_naive.rank(1,"<<i<<") = " << bv_naive.rank(i,1)<<endl;
 				cout << "bv_Btree.rank(1,"<<i<<") = " << bv_Btree.rank(i,1)<<endl;
 
 				exit(1);
@@ -142,7 +166,7 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 test1();
+	 bug1();
 
  }
 

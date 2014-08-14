@@ -38,8 +38,10 @@ public:
 
 	void insert(ulint i, bool x){
 
-		if(i>current_size)
-			cout << "WARNING (DummyDynamicBitvector): insert in position " << i << " > current size of the bitvector (" <<  current_size << ")\n";
+		if(i>current_size){
+			cout << "ERROR (DummyDynamicBitvector): insert in position " << i << " > current size of the bitvector (" <<  current_size << ")\n";
+			exit(1);
+		}
 
 		for(ulint j = current_size;j>i;j--)
 			bitvector.at(j) = bitvector.at(j-1);

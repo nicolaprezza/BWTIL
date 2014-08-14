@@ -326,11 +326,11 @@ private:
 
 	void initStructures(string path, bool verbose){
 
-		frequencies = new vector<ulint>[number_of_contexts];
+		frequencies = vector<vector<ulint> >(number_of_contexts);
 		for(ulint i=0;i<number_of_contexts;i++)
 			frequencies[i] = vector<ulint>(sigma,0);
 
-		lengths = new ulint[number_of_contexts];
+		lengths = vector<ulint>(number_of_contexts);
 
 		for(ulint i=0;i<number_of_contexts;i++)
 			lengths[i]=0;
@@ -450,15 +450,11 @@ private:
 
 		}
 
-		delete [] frequencies;
-
 		computeActualEntropy();
 
-		partial_sums = new PartialSums[number_of_contexts];
+		partial_sums = vector<PartialSums>(number_of_contexts);
 		for(ulint i=0;i<number_of_contexts;i++)
 			partial_sums[i] = PartialSums(sigma,lengths[i]);
-
-		delete [] lengths;
 
 		if(verbose){
 
@@ -517,6 +513,7 @@ private:
 			//substitute the terminator with the symbol head (coordinates terminator_context,terminator_pos)
 
 			partial_sums[new_terminator_context].increment(tail);
+
 			new_terminator_pos = partial_sums[new_terminator_context].getCount(tail) +  dynStrings[terminator_context].rank(head,terminator_pos);
 
 			dynStrings[terminator_context].insert(head,terminator_pos);
@@ -547,11 +544,11 @@ private:
 	BackwardFileReader bwFileReader;
 
 	//structure for each context block:
-	PartialSums * partial_sums;
+	vector<PartialSums> partial_sums;
 	vector<dynamic_string_t> dynStrings;
-	vector<ulint> * frequencies;//frequencies[i] = frequency of each symbol in {0,...,sigma-1} in the context i
+	vector<vector<ulint> > frequencies;//frequencies[i] = frequency of each symbol in {0,...,sigma-1} in the context i
 
-	ulint * lengths;//length of each context
+	vector<ulint> lengths;//length of each context
 
 	double Hk,bits_per_symbol;
 

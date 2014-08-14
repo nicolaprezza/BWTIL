@@ -17,8 +17,8 @@
 namespace bwtil {
 
 //definition of the bitvector used
-typedef DummyDynamicBitvector bitv;
-//typedef bitvector_t<2048> bitv;
+//typedef DummyDynamicBitvector bitv;
+typedef bitvector_t<2048> bitv;
 
 template <typename bitvector_type>
 class DynamicString {
@@ -332,6 +332,8 @@ private:
 	inline void insert(vector<bool> * code, uint node, uint pos, ulint i){
 
 		bool bit = code->at(pos);
+
+		//cout << "insert of " << bit << " in position " << i << "of bitv of size " << wavelet_tree[node].info().capacity << endl;
 
 		wavelet_tree[node].insert( i, bit );
 
