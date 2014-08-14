@@ -35,8 +35,7 @@ SOURCES=\
 dB-hash.cpp \
 ../../extern/sais.cpp \
 ../../data_structures/DBhash.cpp \
-../../data_structures/HashFunction.cpp \
-../../data_structures/IndexedBWT.cpp \
+../../data_structures/HashFunction.cpp
 
 all: $(TARGET)
 

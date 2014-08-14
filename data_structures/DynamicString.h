@@ -329,7 +329,7 @@ private:
 
 	}
 
-	void insert(vector<bool> * code, uint node, uint pos, ulint i){
+	inline void insert(vector<bool> * code, uint node, uint pos, ulint i){
 
 		bool bit = code->at(pos);
 
@@ -348,7 +348,7 @@ private:
 
 	}
 
-	symbol access(uint node, ulint i){
+	inline symbol access(uint node, ulint i){
 
 			bool bit = wavelet_tree[node].access(i);
 
@@ -365,7 +365,7 @@ private:
 
 		}
 
-	ulint rank(vector<bool> * code, uint node, uint pos, ulint i){
+	inline ulint rank(vector<bool> * code, uint node, uint pos, ulint i){
 
 		bool bit = code->at(pos);
 		//ulint bit_rank = wavelet_tree[node].rank(bit,i);

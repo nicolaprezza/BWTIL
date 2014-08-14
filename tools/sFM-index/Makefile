@@ -33,10 +33,7 @@ TARGET=../../sFM-index
 
 SOURCES=\
 sFM-index.cpp \
-../../extern/sais.cpp \
-../../data_structures/FileReader.cpp \
-../../data_structures/succinctFMIndex.cpp \
-../../data_structures/IndexedBWT.cpp
+../../extern/sais.cpp
 
 all: $(TARGET)
 

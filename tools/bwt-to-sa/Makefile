@@ -31,10 +31,7 @@ endif
 
 TARGET=../../bwt-to-sa
 
-SOURCES=\
-bwt-to-sa.cpp \
-../../data_structures/IndexedBWT.cpp \
-../../data_structures/FileReader.cpp
+SOURCES=bwt-to-sa.cpp
 
 all: $(TARGET)
 

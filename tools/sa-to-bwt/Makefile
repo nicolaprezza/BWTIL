@@ -31,9 +31,7 @@ endif
 
 TARGET=../../sa-to-bwt
 
-SOURCES=\
-sa-to-bwt.cpp \
-../../data_structures/FileReader.cpp
+SOURCES=sa-to-bwt.cpp
 
 all: $(TARGET)
 

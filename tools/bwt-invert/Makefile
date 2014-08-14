@@ -31,10 +31,7 @@ endif
 
 TARGET=../../bwt-invert
 
-SOURCES=\
-bwt-invert.cpp \
-../../data_structures/IndexedBWT.cpp \
-../../data_structures/FileReader.cpp
+SOURCES=bwt-invert.cpp
 
 all: $(TARGET)
 

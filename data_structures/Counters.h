@@ -19,14 +19,56 @@ public:
 	~Counters(){ delete [] words; }
 
 	//the structure mantains one counter for each symbol in {0,1,...,sigma-1}.
-	Counters(uint sigma, ulint n);//size of the alphabet and maximum number to be stored in a counter
+	Counters(uint sigma, ulint n){
 
-	void increment(symbol s);//increment by 1 the counter in s
+		if(n==0)//empty counters
+			return;
 
-	//returns counter in s
-	ulint at(symbol s);
+		this->sigma=sigma;
 
-	string toString();
+		log2n = ceil(log2(n+1));
+
+		uint w=64;
+		d = w/log2n;
+
+		nr_of_words = sigma/d + (sigma%d==0?0:1);//words storing the counters
+
+		words = new ulint[nr_of_words];
+		for(uint i=0;i<nr_of_words;i++)//reset all counters
+			words[i]=0;
+
+	}
+
+	void increment(symbol s){//increment by 1 the counter in s
+
+		uint word_nr = s/d;
+		uint offset = s%d;
+
+		words[word_nr] += ((ulint)1)<<((d-offset-1)*log2n);
+
+	}
+
+	ulint at(symbol s){
+
+		uint word_nr = s/d;
+		uint offset = s%d;
+		ulint MASK = (((ulint)1)<<log2n)-1;
+
+		return (words[word_nr]>>((d-offset-1)*log2n)) & MASK;
+
+	}
+
+	string toString(){
+
+		stringstream ss;
+
+		for(uint i=0;i<sigma;i++)
+			ss << at(i) << " ";
+
+		return ss.str();
+
+	}
+
 
 	uint size(){return sigma;}
 
