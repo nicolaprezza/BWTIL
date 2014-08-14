@@ -34,12 +34,9 @@ TARGET=../../dB-hash
 SOURCES=\
 dB-hash.cpp \
 ../../extern/sais.cpp \
-../../data_structures/StaticBitVector.cpp \
 ../../data_structures/DBhash.cpp \
 ../../data_structures/HashFunction.cpp \
 ../../data_structures/IndexedBWT.cpp \
-../../data_structures/WaveletTree.cpp \
-../../data_structures/WordVector.cpp
 
 all: $(TARGET)
 

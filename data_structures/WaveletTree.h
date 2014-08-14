@@ -21,38 +21,218 @@ class WaveletTree {
 public:
 
 	WaveletTree(){};
-	WaveletTree(unsigned char * text, ulint n, bool verbose=false);
+
+	WaveletTree(unsigned char * text, ulint n, bool verbose=false){
+
+		if (verbose) cout << "  Building Wavelet tree"<<endl;
+
+		this->n = n;
+		sigma = 0;
+
+		for(ulint i=0;i<n;i++)
+			if(text[i]>sigma)
+				sigma = text[i];
+
+		sigma++;
+
+		log_sigma = ceil(log2(sigma));
+
+		//store text in WordVector format (which offers useful bit operations)
+		WordVector * text_wv = new WordVector(n,log_sigma);
+		for(ulint i = 0;i<n;i++)
+			text_wv->setWord(i,text[i]);
+
+		number_of_nodes = ((ulint)1<<log_sigma)-1;
+
+		if (verbose) cout << "   Number of nodes = "<< number_of_nodes << endl;
+
+		nodes = new StaticBitVector * [number_of_nodes];
+
+		//ROOT
+
+		if (verbose) cout << "   Recursively building nodes" << endl;
+		buildRecursive(root(),text_wv,verbose);
+
+	}
+
+	inline ulint rank(unsigned char c, ulint i){//number of characters 'c' before position i excluded
+
+		return recursiveRank(c, i, root(), 0);
+
+	}
+
+	inline unsigned char charAt(ulint i){
+
+		unsigned char c=0;
+		ulint node = root();
+		uint level = 0;
+		uint bit=0;
+
+		while(level<height()){
+
+			bit = nodes[node]->bitAt(i);
+			c = c*2 + bit;
+
+			if(bit==0){
+				i = nodes[node]->rank0(i);
+				node = child0(node);
+			}else{
+				i = nodes[node]->rank1(i);
+				node = child1(node);
+			}
+
+			level++;
+
+		}
+
+		return c;
+
+	}
+
+	ulint size(){//returns size of the structure in bits
+
+		ulint size = 0;
+
+		for(uint i=0;i<number_of_nodes;i++)
+			size += nodes[i]->size();
+
+		return size;
+
+	}
+
+	void freeMemory(){
+
+		for(ulint i=0;i<number_of_nodes;i++)
+			nodes[i]->freeMemory();
+
+		delete [] nodes;
+
+	}
+
+	void saveToFile(FILE *fp){
+
+		fwrite(&n, sizeof(ulint), 1, fp);
+		fwrite(&sigma, sizeof(uint), 1, fp);
+		fwrite(&log_sigma, sizeof(uint), 1, fp);
+		fwrite(&number_of_nodes, sizeof(ulint), 1, fp);
+
+		for(ulint i=0;i<number_of_nodes;i++)
+			nodes[i]->saveToFile(fp);
+
+
+	}
+
+	void loadFromFile(FILE *fp){
+
+		ulint numBytes;
+
+		numBytes = fread(&n, sizeof(ulint), 1, fp);
+		check_numBytes();
+		numBytes = fread(&sigma, sizeof(uint), 1, fp);
+		check_numBytes();
+		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
+		check_numBytes();
+		numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
+		check_numBytes();
+
+		nodes = new StaticBitVector*[number_of_nodes];
+
+		for(ulint i=0;i<number_of_nodes;i++)
+			nodes[i] = new StaticBitVector();
+
+		for(ulint i=0;i<number_of_nodes;i++)
+			nodes[i]->loadFromFile(fp);
+
+	}
 
 	ulint numberOfNodes(){return number_of_nodes;};
 	ulint height(){return log_sigma;};
 
-	ulint rank(unsigned char c, ulint i);//number of characters 'c' before position i excluded
-	unsigned char charAt(ulint i);
-
 	ulint length(){return n;}
-
-	virtual ~WaveletTree();
 
 	uint alphabetSize(){return sigma;}
 	uint bitsPerSymbol(){return log_sigma;}
 
-	ulint size();//returns size of the structure in bits
-
-	void freeMemory();
-
-	void saveToFile(FILE *fp);
-	void loadFromFile(FILE *fp);
-
 private:
 
-	void buildRecursive(ulint node, WordVector * text_wv,bool verbose);
-	uint bitInWord(ulint W, uint i);//i-th bit from left in the word w (of log_sigma bits)
-	ulint recursiveRank(unsigned char c, ulint i, ulint node, uint level);
+	void buildRecursive(ulint node, WordVector * text_wv,bool verbose){
 
-	ulint root(){return 0;}
-	ulint child0(ulint node){return 2*node+1;}
-	ulint child1(ulint node){return 2*node+2;}
+		if (verbose) cout << "    Building node number " << node << endl;
+		if (verbose) cout << "     Node length = " << text_wv->length() << " bits" << endl;
 
+		nodes[node] = new StaticBitVector(text_wv->length());
+
+		for(ulint i=0;i<text_wv->length();i++)
+			nodes[node]->setBit(i,text_wv->bitAt(i,0));
+
+		if (verbose) cout << "     Computing rank structure ... " << flush;
+		nodes[node]->computeRanks();
+		if (verbose) cout << "Done."<<endl;
+
+		if(text_wv->wordSize()>1){//if there are children
+
+			//children
+			WordVector * text_child0 = new WordVector(nodes[node]->numberOf0(),text_wv->wordSize()-1);
+			WordVector * text_child1 = new WordVector(nodes[node]->numberOf1(),text_wv->wordSize()-1);
+
+			ulint j0=0;
+			ulint j1=0;
+
+			for(ulint i=0;i<text_wv->length();i++){//for each symbol in text_wv
+
+				if(nodes[node]->bitAt(i)==0){//if first bit is 0
+					text_child0->setWord(j0,text_wv->wordAt(i));
+					j0++;
+				}else{
+					text_child1->setWord(j1,text_wv->wordAt(i));
+					j1++;
+				}
+
+			}
+
+			text_wv->freeMemory();
+
+			//call recursively
+
+			buildRecursive(child0(node),text_child0,verbose);
+			buildRecursive(child1(node),text_child1,verbose);
+
+		}
+
+		if(text_wv->wordSize()==1)
+			text_wv->freeMemory();
+
+	}
+
+	inline uint bitInWord(ulint W, uint i){
+		return (W>>(log_sigma-i-1))&1;
+	}
+
+	ulint recursiveRank(unsigned char c, ulint i, ulint node, uint level){//number of characters 'c' before position i excluded
+
+		if(nodes[node]->length()==0)//empty node
+			return 0;
+
+		uint bit = bitInWord(c,level);
+		uint rank;
+
+		if(bit==0)
+			rank = nodes[node]->rank0(i);
+		else
+			rank = nodes[node]->rank1(i);
+
+		if(level==log_sigma-1)//leaf
+			return rank;
+
+		//not a leaf: proceed recursively
+
+		return recursiveRank(c, rank, (bit==0?child0(node):child1(node)), level+1);
+
+	}
+
+	inline ulint root(){return 0;}
+	inline ulint child0(ulint node){return 2*node+1;}
+	inline ulint child1(ulint node){return 2*node+2;}
 
 	ulint n;//text length
 

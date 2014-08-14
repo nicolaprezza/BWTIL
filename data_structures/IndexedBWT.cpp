@@ -381,8 +381,6 @@ void IndexedBWT::saveToFile(FILE *fp){
 
 }
 
-#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading dB-hash file (IndexedBWT error)" << endl << flush; exit(1); }
-
 void IndexedBWT::loadFromFile(FILE *fp){
 
 	ulint numBytes;

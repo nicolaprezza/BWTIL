@@ -43,4 +43,25 @@ typedef unsigned char uint8;
 
 enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 
+/*int popcnt(unsigned long int x){//no need for HW implementation
+
+	x = x - ((x&0xAAAAAAAAAAAAAAAA)>>1);//groups of 2 bits
+	x = (x&0x3333333333333333)+((x&0xCCCCCCCCCCCCCCCC)>>2);//groups of 4 bits
+	x = (x&0x0F0F0F0F0F0F0F0F)+((x&0xF0F0F0F0F0F0F0F0)>>4);//groups of 8 bits
+
+	x = x+(x>>32);//accumulate 8 counters of 8 bits in 4 counters of 8 bits
+	x = x+(x>>16);//accumulate 4 counters of 8 bits in 2 counters of 8 bits
+	x = x+(x>>8);//accumulate 2 counters of 8 bits in 1 counter of 8 bits
+
+	return x&0x00000000000000FF;
+
+}*/
+
+//const-time popcnt (if available in hardware)
+//#define popcnt(x) __builtin_popcount(x>>32)+__builtin_popcount(x&0x00000000FFFFFFFF);
+
+#define popcnt(x) __builtin_popcountll(x)
+
+#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading dB-hash file (StaticBitVector error)" << endl << flush; exit(1); }
+
 #endif /* COMMON_H_ */

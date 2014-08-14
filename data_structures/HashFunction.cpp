@@ -743,8 +743,6 @@ void HashFunction::saveToFile(FILE *fp){
 
 }
 
-#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading dB-hash file (HashFunction error)" << endl << flush; exit(1); }
-
 void HashFunction::loadFromFile(FILE *fp){
 
 	ulint numBytes;

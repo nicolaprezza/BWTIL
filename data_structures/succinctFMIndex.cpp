@@ -151,7 +151,6 @@ void succinctFMIndex::saveToFile(FILE *fp){
 	idxBWT.saveToFile(fp);
 
 }
-#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading SuccinctFMIndex file (SuccinctFMIndex error)" << endl << flush; exit(1); }
 
 void succinctFMIndex::loadFromFile(FILE *fp){
 
