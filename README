@@ -26,10 +26,18 @@ The BWTIL library offers a set of tools to deal with bwt-based text indexes. The
  >> bwt-invert : invert a BWT file to reconstruct the original text (see tools/bwt-invert/README)
 
 
+ ***   Download  ***
+
+
+Since BWTIL includes extern git repositories, clone it using the --recursive option:
+
+> git clone --recursive https://github.com/nicolaprezza/BWTIL
+
+
  ***   Compile   ***
 
 
-To compile all the executables, run
+To compile, run
 
 > make
 
