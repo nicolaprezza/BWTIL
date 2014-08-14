@@ -36,8 +36,7 @@ Since BWTIL includes extern git repositories, clone it using the --recursive opt
 
  ***   Compile   ***
 
-
-To compile, run
+The library has been tested under gcc 4.8.2. To compile, run
 
 > make
 

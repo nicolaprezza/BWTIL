@@ -17,7 +17,7 @@ void test1(){
 	bool rand_bit;
 	ulint rand_pos;
 
-	 for(ulint N=8193;N<100000;N++){
+	 for(ulint N=1000;N<100000;N++){
 
 		cout << "N = " << N << endl;
 

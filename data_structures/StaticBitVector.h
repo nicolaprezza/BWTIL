@@ -92,7 +92,10 @@ public:
 
 				if(rank_ptrs_2->wordAt((i+1)/D)>1000000000){
 
-					cout << "*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
+					cout << "\n*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
+					cout << "*** Position: " << (i+1)/D << endl;//TODO debugging
+					cout << "*** max size: " << rank_ptrs_2->length() << endl;//TODO debugging
+
 					cout << "This error shows up when compiling with clang++ and needs debugging. Please, switch to g++." << endl;
 					exit(0);
 
