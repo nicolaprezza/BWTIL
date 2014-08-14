@@ -9,25 +9,18 @@ The dB-hash is a succinct data structure that simulates a hash table efficiently
 
 The dB-hash is particularly useful in approximate string matching under the Hamming distance, being the first succinct index offering expected O((log n)^k + m) time for a search with maximum Hamming distance k.
 
-*** Compile ***
-
-In the dB-hash/ directory, just execute
-
-> make clean; make
-
-The executable "dB-hash" will be created in the BWTIL/ main folder.
 
 *** Test ***
 
-In the dB-hash/ directory, execute
+After compiling (see BWTIL/README), In the BWTIL/tools/dB-hash/ directory execute
 
 > make example-build
 
-to build a dB-hash with pattern length=30 on the file BWTIL/data/plain/50000.fasta . This will create the file BWTIL/data/plain/50000.fasta.dbh . After that, execute
+to build a dB-hash with pattern length=30 on the file BWTIL/data/plain/dna.1MB . This will create the file BWTIL/data/plain/dna.1MB.dbh . After that, execute
 
 > make example-search
 
-to search the pattern "aaatttataacctattgcaccatatactag" (exact search) in the dB-hash just created.
+to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the dB-hash just created.
 
 *** Notes ***
 

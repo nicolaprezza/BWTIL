@@ -21,7 +21,7 @@ to build a succinct FM-index with pattern on the file BWTIL/data/plain/dna.1MB .
 
 > make example-search
 
-to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the index just created.
+to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the inex just created.
 
 
 *** Notes ***

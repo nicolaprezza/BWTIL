@@ -1,7 +1,7 @@
 example-build:
 
-	$(TARGET) build ../../data/plain/dna.1MB 30
+	../../dB-hash build ../../data/plain/dna.1MB 30
 
 example-search:
 
-	$(TARGET) search ../../data/plain/dna.1MB.dbh ATCCATGTAGATATAACACAGCTATTTTCA
+	../../dB-hash search ../../data/plain/dna.1MB.dbh ATCCATGTAGATATAACACAGCTATTTTCA
