@@ -217,7 +217,7 @@ private:
 
 		if(verbose) cout << "  Number of " << _k << "-mers : " << nr_of_k_mers << endl;
 
-		while( _k < log_n and (nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * log2(sigma) * overhead)/100) ){
+		while( _k < log_n and (nr_of_k_mers * bits_per_k_mer + nr_of_k_1_mers * bits_per_k_1_mer <= (n * overhead)/100) ){
 
 			_k++;
 

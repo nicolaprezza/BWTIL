@@ -18,7 +18,7 @@ namespace bwtil {
 
 //definition of the bitvector used
 //typedef DummyDynamicBitvector bitv;
-typedef bitvector_t<2048> bitv;
+typedef bitvector_t<W_leafs> bitv;
 
 template <typename bitvector_type>
 class DynamicString {
@@ -278,7 +278,7 @@ private:
 
 		}
 
-		wavelet_tree[this_node] = bitvector_type(size,node_bitsize);
+		wavelet_tree[this_node] = bitvector_type(size,W_nodes);
 
 		for(uint i=0;i<alphabet.size();i++){
 
@@ -409,8 +409,6 @@ private:
 	ulint n;//max size of the string
 
 	bool unary_string;//alphabet has size 1
-
-	const static uint node_bitsize = 256;//number of bits of each packed B-tree internal node
 
 };
 

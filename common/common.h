@@ -41,6 +41,9 @@ typedef unsigned char uchar;
 typedef unsigned char symbol;
 typedef unsigned char uint8;
 
+constexpr uint W_leafs = 2048;
+constexpr uint W_nodes = 256;
+
 enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 
 /*int popcnt(unsigned long int x){//no need for HW implementation

@@ -94,7 +94,7 @@ public:
 		bwFileReader = BackwardFileReader(path);
 		n = bwFileReader.length();
 
-		ca = ContextAutomata(&bwFileReader, 5, true);//Default automata overhead
+		ca = ContextAutomata(&bwFileReader, 10, true);//Default automata overhead
 		k = ca.contextLength();
 
 		init(path, verbose);
@@ -407,12 +407,13 @@ private:
 
 		{
 
-			bitv sample_bv(256,exp_context_length);
-
-			uint nr_of_leaves = sample_bv.info().leaves;
-			uint b = sample_bv.info().buffer; //worst-case tree fanout
+			uint nr_of_leaves = exp_context_length/W_leafs + 1;
+			uint log2n = log2(exp_context_length+1);
+			uint d = W_nodes/(log2n+1);
+			uint b = sqrt(d); //worst-case tree fanout
 			if(b<=1) b=2;
 			double exp_height = (log2(nr_of_leaves)/log2(b));
+			if(exp_height<=0) exp_height = 1;
 
 			if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl << endl;
 
