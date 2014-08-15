@@ -4,23 +4,14 @@ Authors: Nicola Prezza, Nicola Gigante, and Alberto Policriti
 mail: nicolapr@gmail.com
 
 
-
-
-
- ************************************************************* WARNING : *********************************************************
-
-	the tool is still under development!!! at the moment, cw.bwt works BUT very inefficient data structures are used!!!
-	DO NOT use the tool on large files!
-
- *********************************************************************************************************************************
-
-
-
 *** Brief introduction: ***
+
 
 cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for certain text distributions (nearly uniform) and small alphabets (e.g. DNA) cw-bwt is optimal in both time and space.
 
+
 *** Complexity ***
+
 
 n = input length
 Hk = k-th order entropy of the text, where k = log_s( n/log^2 n ) - 1 (Hk <= log s, where s is the alphabet size)

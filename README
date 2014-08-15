@@ -15,7 +15,7 @@ The BWTIL library offers a set of tools, classes and functions appositely design
  
  >> sFM-index : an implementation of a succinct (uncompressed) FM-index (see tools/sFM-index/README)
 
- >> cw-bwt (work in progress, paper coming soon) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
+ >> cw-bwt (paper coming soon) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
  
  >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
  
@@ -58,7 +58,7 @@ where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-
  ***   Test   ***
 
 
-The folder BWTIL/data/plain/ contains some small example files to test the library. All files have been obtained taking the first 1M characters from the sample files of the pizza&chili text collection (http://pizzachili.dcc.uchile.cl/).
+The folder BWTIL/data/plain/ contains some sample files to test the library. All files have been obtained taking the first 1M characters from the sample files of the pizza&chili text collection (http://pizzachili.dcc.uchile.cl/).
 
 
  *** Some examples ***
