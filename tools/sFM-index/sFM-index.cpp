@@ -27,6 +27,10 @@ int main(int argc,char** argv) {
 		exit(0);
 	}
 
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+
 	int build=0,search=1;
 
 	int mode;
@@ -49,6 +53,8 @@ int main(int argc,char** argv) {
 	if(mode==search){
 		pattern = string(argv[3]);
 	}
+
+    auto t1 = high_resolution_clock::now();
 
 	succinctFMIndex SFMI;
 
@@ -84,6 +90,9 @@ int main(int argc,char** argv) {
 	}
 
 	printRSSstat();
+	auto t2 = high_resolution_clock::now();
+	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+	cout << "Total time: " << total << "s.\n";
 
 }
 

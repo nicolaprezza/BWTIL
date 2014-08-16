@@ -134,6 +134,10 @@ void debug(){
 		exit(0);
 	}
 
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+
 	int build=0,search=1;
 
 	int mode;
@@ -163,9 +167,12 @@ void debug(){
 	if(mode==build)
 		m = atoi(argv[3]);
 
+    auto t1 = high_resolution_clock::now();
+
 	DBhash dBhash;
 
 	if(mode==build){
+
 
 		cout << "Building dB-hash of file "<< in<<endl;
 		dBhash = buildFromFile(in.c_str(),m);
@@ -202,6 +209,9 @@ void debug(){
 	}
 
 	printRSSstat();
+	auto t2 = high_resolution_clock::now();
+	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+	cout << "Total time: " << total << "s.\n";
 
 }
 
