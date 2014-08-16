@@ -9,7 +9,8 @@
 #define CONTEXTAUTOMATA_H_
 
 #include "../common/common.h"
-#include "BackwardFileReader.h"
+#include "BackwardFileIterator.h"
+#include "../data_structures/BackwardStringIterator.h"
 #include "PartialSums.h"
 #include "DynamicString.h"
 
@@ -22,7 +23,7 @@ public:
 	ContextAutomata(){};
 
 	//ASSUMPTION: alphabet is {0,...,sigma-1}, where 0 is the terminator character (appearing only at the end of file)
-	ContextAutomata(uint k, BackwardFileReader * bfr, bool verbose){
+	ContextAutomata(uint k, BackwardIterator * bfr, bool verbose){
 
 		init(bfr, verbose);
 		build(k, bfr, verbose);
@@ -30,7 +31,7 @@ public:
 	}
 
 	//overhead : k will be chosen such that the automata will require approximately space n*overhead/100 bits, where n is the text length
-	ContextAutomata(BackwardFileReader * bfr, uint overhead, bool verbose){
+	ContextAutomata(BackwardIterator * bfr, uint overhead, bool verbose){
 
 		init(bfr, verbose);
 
@@ -48,7 +49,7 @@ public:
 	}
 
 	//default 5% of overhead
-	ContextAutomata(BackwardFileReader * bfr, bool verbose){
+	ContextAutomata(BackwardIterator * bfr, bool verbose){
 
 		init(bfr, verbose);
 
@@ -115,7 +116,7 @@ private:
 
 	}
 
-	uint optimalK(uint overhead, BackwardFileReader * bfr, bool verbose){
+	uint optimalK(uint overhead, BackwardIterator * bfr, bool verbose){
 
 		//strategy: sample randomly n/log n characters of the text (in contiguous blocks of size B)
 		//and try k=1,... until suitable k is found. There will be at most log_sigma n iterations, so work is linear.
@@ -139,7 +140,7 @@ private:
 			cout << "  Sampling text ... " << endl;
 
 		ulint pos = n-1;//current position in the text
-		while(not bfr->BeginOfFile()){
+		while(not bfr->begin()){
 
 			if(((n-1)-pos)%B==0){
 
@@ -272,13 +273,13 @@ private:
 
 	}
 
-	void init(BackwardFileReader * bfr, bool verbose){
+	void init(BackwardIterator * bfr, bool verbose){
 
 		if(verbose) cout << "\n*** Building context automata ***\n\n";
 
-		bwFileReader = bfr;
+		bwIt = bfr;
 
-		n = bwFileReader->length();
+		n = bwIt->length();
 		null_ptr = ~((uint)0);
 
 		if(verbose) cout << " Text length is " << n << endl;
@@ -300,13 +301,13 @@ private:
 
 		int perc,last_perc=-1;
 
-		while(not bwFileReader->BeginOfFile()){
+		while(not bwIt->begin()){
 
-			symbol s = bwFileReader->read();
+			symbol s = bwIt->read();
 
 			if(s==0){
 
-				cout << "ERROR while reading file " << bwFileReader->getPath() << " : the file contains a 0x0 byte.\n";
+				cout << "ERROR while reading input text : the text contains a 0x0 byte.\n";
 				exit(0);
 
 			}
@@ -367,14 +368,14 @@ private:
 
 		inverse_remapping[TERMINATOR] = 0;//0 is the terminator appended in the file
 
-		bwFileReader->rewind();
+		bwIt->rewind();
 
 	}
 
-	void build(uint k, BackwardFileReader * bfr, bool verbose){
+	void build(uint k, BackwardIterator * bfr, bool verbose){
 
 		this->k=k;
-		this->bwFileReader = bfr;
+		this->bwIt = bfr;
 
 		sigma_pow_k_minus_one = 1;
 		for(uint i=0;i<k-1;i++)
@@ -392,7 +393,7 @@ private:
 
 		int perc,last_perc=-1,symbols_read=0;
 
-		while(not bfr->BeginOfFile()){
+		while(not bfr->begin()){
 
 			context = shift(context, ASCIItoCode(bfr->read()) );
 
@@ -496,7 +497,7 @@ private:
 
 	symbol TERMINATOR;//0x0
 
-	BackwardFileReader * bwFileReader;
+	BackwardIterator * bwIt;
 
 	symbol * inverse_remapping;//from symbol -> to char (file)
 	uint * remapping;//from char (file) -> to symbols in {0,...,sigma-1}

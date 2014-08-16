@@ -28,17 +28,41 @@ using namespace bwtil;
 		exit(0);
 	}
 
-	cw_bwt bwt;
+	cw_bwt cwbwt;
 
 	if(argc==3)//no k
-		bwt = cw_bwt(argv[1]);
+		cwbwt = cw_bwt(argv[1],cw_bwt::path);
 
 	if(argc==4)
-		bwt = cw_bwt(argv[1],atoi(argv[3]),true);
+		cwbwt = cw_bwt(argv[1],cw_bwt::path,atoi(argv[3]),true);
+
+	/*
+	 * If, instead, you want to compute the bwt of a string object, build cw_bwt with
+	 *
+	 * cw_bwt(your_string,cw_bwt::text) // optimal k autodetected
+	 *
+	 * or
+	 *
+	 * cw_bwt(your_string,cw_bwt::text, your_k_value,true) // you choose k (faster since k has not to be autodetected)
+	 *
+	 * However, this requires more space in RAM since the input text string is kept in memory together with the structures of cwbwt
+	 *
+	 */
 
 	cout << "\nSaving BWT in " << argv[2] << endl;
-	bwt.toFile(argv[2]);
+	cwbwt.toFile(argv[2]);
 	cout << "Done. " << endl;
+
+	/*
+	 *
+	 * If, instead, you want a string object containing the bwt, call
+	 *
+	 * string bwt = cwbwt.toString();
+	 *
+	 * However, this requires more space in RAM since the string bwt is kept in memory together with the structures of cwbwt
+	 * WARNING: if you directly print cwbwt.toString(), you won't see the terminator character since it is a 0x0 byte.
+	 *
+	 */
 
  }
 

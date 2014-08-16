@@ -15,7 +15,8 @@
 #include "../common/common.h"
 #include "../data_structures/PartialSums.h"
 #include "../data_structures/DynamicString.h"
-#include "../data_structures/BackwardFileReader.h"
+#include "../data_structures/BackwardFileIterator.h"
+#include "../data_structures/BackwardStringIterator.h"
 #include "../data_structures/ContextAutomata.h"
 #include "../extern/getRSS.h"
 
@@ -24,6 +25,8 @@ namespace bwtil {
 class cw_bwt {
 
 public:
+
+	enum cw_bwt_input_type {path,text};
 
 	class cw_bwt_iterator{
 
@@ -89,20 +92,24 @@ public:
 	cw_bwt(){};
 
 	//creates cw_bwt with default number of contexts ( O(n/(log^3 n)) )
-	cw_bwt(string path, bool verbose=true){
+	cw_bwt(string input_string, cw_bwt_input_type input_type, bool verbose=true){
 
-		bwFileReader = BackwardFileReader(path);
-		n = bwFileReader.length();
+		if(input_type==path)
+			bwIt = new BackwardFileIterator(input_string);
+		else
+			bwIt = new BackwardStringIterator(input_string);
 
-		ca = ContextAutomata(&bwFileReader, 10, true);//Default automata overhead
+		n = bwIt->length();
+
+		ca = ContextAutomata(bwIt, 10, true);//Default automata overhead
 		k = ca.contextLength();
 
-		init(path, verbose);
+		init(input_string, verbose);
 
 	}
 
 	//creates cw_bwt with desired context length k
-	cw_bwt(string path, uint k, bool verbose){
+	cw_bwt(string input_string, cw_bwt_input_type input_type, uint k, bool verbose=true){
 
 		this->k = k;
 
@@ -113,8 +120,12 @@ public:
 
 		if(verbose) cout << "\nContext length is k = " << k << endl;
 
-		bwFileReader = BackwardFileReader(path);
-		n = bwFileReader.length();
+		if(input_type==path)
+			bwIt = new BackwardFileIterator(input_string);
+		else
+			bwIt = new BackwardStringIterator(input_string);
+
+		n = bwIt->length();
 
 		if(n<=k){
 			cout << "Error: File length n must be n>k, where k is the context length." << endl;
@@ -128,9 +139,9 @@ public:
 			exit(0);
 		}
 
-		ca = ContextAutomata(k, &bwFileReader, true);
+		ca = ContextAutomata(k, bwIt, true);
 
-		init(path, verbose);
+		init(input_string, verbose);
 
 	}
 
@@ -145,8 +156,6 @@ public:
 		while(it.hasNext()){
 			c = it.next();
 
-			if(c==0) c = '#';//since 0x0 byte cannot be visualized, in the string version it is printed as #
-
 			s += c;
 		}
 
@@ -154,7 +163,7 @@ public:
 
 	}
 
-	symbol * toArray(){//returns cw_bwt as a char array of size n+1
+	/*symbol * toArray(){//returns cw_bwt as a char array of size n+1
 
 		symbol * bwt = new symbol[n+1];
 
@@ -170,7 +179,7 @@ public:
 
 		return bwt;
 
-	}
+	}*/
 
 	void toFile(string path,bool verbose=true){//save cw_bwt to file
 
@@ -343,9 +352,9 @@ private:
 
 		int perc,last_perc=-1;
 
-		while(not bwFileReader.BeginOfFile()){
+		while(not bwIt->begin()){
 
-			s = ca.ASCIItoCode( bwFileReader.read() );//this symbol has as context the current state of the automata
+			s = ca.ASCIItoCode( bwIt->read() );//this symbol has as context the current state of the automata
 
 			lengths[ ca.currentState() ]++;//new symbol in this context:increment
 
@@ -474,7 +483,7 @@ private:
 		ulint terminator_context,terminator_pos, new_terminator_context,new_terminator_pos;//coordinates of the terminator character
 
 		ca.rewind();//go back to first state
-		bwFileReader.rewind();
+		bwIt->rewind();
 
 		//context of length k before position n (excluded):
 		terminator_context = ca.currentState();//context
@@ -494,7 +503,7 @@ private:
 
 		int perc,last_percentage=-1;
 
-		while(not bwFileReader.BeginOfFile()){
+		while(not bwIt->begin()){
 
 			perc = (100*(n-pos-1))/n;
 
@@ -503,7 +512,7 @@ private:
 				last_percentage = perc;
 			}
 
-			head = ca.ASCIItoCode( bwFileReader.read() );//this symbol has context corresponding to ca.currentState(). symbol entering from left in context
+			head = ca.ASCIItoCode( bwIt->read() );//this symbol has context corresponding to ca.currentState(). symbol entering from left in context
 			tail = context_char[pos%k];// = (pos+k)%k . Symbol exiting from right of the context
 
 			context_char[pos%k] = head;//buffer head symbol, overwriting the symbol exiting from tail of the context
@@ -530,7 +539,7 @@ private:
 
 		dynStrings[terminator_context].insert(TERMINATOR,terminator_pos);//insert the terminator character
 
-		bwFileReader.close();//close input file
+		bwIt->close();//close input file
 
 		delete [] context_char;
 
@@ -542,7 +551,7 @@ private:
 	uint k;//context length and order of compression (entropy H_k). default: k = ceil( log_sigma(n/log^3 n) )
 	uint sigma;
 
-	BackwardFileReader bwFileReader;
+	BackwardIterator * bwIt;
 
 	//structure for each context block:
 	vector<PartialSums> partial_sums;

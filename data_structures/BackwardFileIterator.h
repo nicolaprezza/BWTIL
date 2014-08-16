@@ -1,30 +1,29 @@
 /*
- * BackwardFileReader.h
+ * BackwardFileIterator.h
  *
  *  Created on: Jun 24, 2014
  *      Author: nicola
  *
- *      Description: given a text file path, reads it backwards.
+ *      Description: this class offers a simple view to scan efficiently a file backwards.
  *      The backward read of the file is implemented buffering chunks of size n/(log^2(n)) from the end
  *      In this way, only log^2(n) calls to fseek are necessary and the total RAM occupancy is only n/(log^2(n))
  *
  *
  */
 
-#ifndef BACKWARDFILEREADER_H_
-#define BACKWARDFILEREADER_H_
+#ifndef BACKWARDFILEITERATOR_H_
+#define BACKWARDFILEITERATOR_H_
 
 #include "../common/common.h"
+#include "BackwardIterator.h"
 
 namespace bwtil {
 
-class BackwardFileReader {
+class BackwardFileIterator  : public BackwardIterator{
 
 public:
 
-	BackwardFileReader(){};
-
-	BackwardFileReader(string path){
+	BackwardFileIterator(string path){
 
 		this->path=path;
 
@@ -108,14 +107,11 @@ public:
 
 	}
 
-
-	bool BeginOfFile(){return begin_of_file;};//no more symbols to be read
+	bool begin(){return begin_of_file;};//no more symbols to be read
 
 	void close(){fclose(fp);delete [] buffer;};//close file
 
 	ulint length(){return n;};
-
-	string getPath(){return path;}
 
 private:
 
@@ -137,4 +133,4 @@ private:
 };
 
 } /* namespace compressed_bwt_construction */
-#endif /* BACKWARDFILEREADER_H_ */
+#endif /* BACKWARDFILEITERATOR_H_ */
