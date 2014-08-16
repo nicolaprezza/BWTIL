@@ -27,6 +27,12 @@ using namespace bwtil;
 		exit(0);
 	}
 
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+
+    auto t1 = high_resolution_clock::now();
+
 	cw_bwt cwbwt;
 
 	/*
@@ -83,6 +89,10 @@ using namespace bwtil;
 	 * WARNING: if you directly print cwbwt.toString(), you won't see the terminator character since it is a 0x0 byte.
 	 *
 	 */
+
+	auto t2 = high_resolution_clock::now();
+	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+	cout << "\nTotal time: " << total << "s.\n";
 
  }
 

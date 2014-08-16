@@ -93,6 +93,18 @@ test:
 
 	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o test $(SOURCES_TEST)
 
+example:
+
+	./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
+	./bwt-check data/bwt/sources.1MB.bwt data/plain/sources.1MB
+	./bwt-invert data/bwt/sources.1MB.bwt data/plain/sources.1MB_copy
+	./bwt-to-sa data/bwt/sources.1MB.bwt data/SA/sources.1MB.sa
+	./sa-to-bwt data/SA/sources.1MB.sa data/plain/sources.1MB data/bwt/sources.1MB_copy.bwt
+	./dB-hash build data/plain/sources.1MB 20
+	./dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
+	./sFM-index build data/plain/sources.1MB
+	./sFM-index search data/plain/sources.1MB.sfm "static unsigned long"
+
 clean:
 
 	rm -f dB-hash cw-bwt bwt-check bwt-to-sa sa-to-bwt bwt-invert sFM-index test

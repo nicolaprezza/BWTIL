@@ -29,6 +29,12 @@ using namespace bwtil;
 		exit(0);
 	}
 
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+
+    auto t1 = high_resolution_clock::now();
+
 	string bwt_path = string(argv[2]).append(".bwt");
 
 	if(argc==4){
@@ -120,6 +126,10 @@ using namespace bwtil;
 	fclose(fp_sa);
 
 	printRSSstat();
+
+	auto t2 = high_resolution_clock::now();
+	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+	cout << "Total time: " << total << "s.\n";
 
  }
 
