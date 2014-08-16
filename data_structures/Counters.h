@@ -33,9 +33,7 @@ public:
 
 		nr_of_words = sigma/d + (sigma%d==0?0:1);//words storing the counters
 
-		words = new ulint[nr_of_words];
-		for(uint i=0;i<nr_of_words;i++)//reset all counters
-			words[i]=0;
+		words = vector<ulint>(nr_of_words,0);
 
 	}
 
@@ -79,7 +77,7 @@ private:
 	uint8_t log2n;//number of bits of each counter
 	uint8_t d;//number of counters per node = 64/log2(n)
 
-	ulint * words;//64-bit words
+	vector<ulint> words;//64-bit words
 
 
 };

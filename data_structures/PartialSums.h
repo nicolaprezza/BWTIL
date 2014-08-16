@@ -74,7 +74,7 @@ public:
 		cout << "height="<<height<<endl;
 		cout << "nr_of_nodes="<<(uint)nr_of_nodes<<endl;*/
 
-		nodes = new ulint[nr_of_nodes];
+		nodes = vector<ulint>(nr_of_nodes);
 		for(uint i=0;i<nr_of_nodes;i++)//reset all counters
 			nodes[i]=0;
 
@@ -117,14 +117,14 @@ public:
 		uint current_node = (nr_of_nodes - nr_of_leafs) + (s/d);//offset leafs + leaf number
 		uint offset_in_node = s%d;//number of the counter inside the node
 
-		incrementFrom(&nodes[current_node], offset_in_node);//increment counters in the leaf
+		incrementFrom(&nodes, current_node, offset_in_node);//increment counters in the leaf
 
 		while(current_node>0){//repeat while current node is not the root
 
 			offset_in_node = childNumber(current_node);
 			current_node = parent(current_node);
 
-			incrementFrom(nodes+current_node, offset_in_node);
+			incrementFrom(&nodes, current_node, offset_in_node);
 
 		}
 
@@ -183,7 +183,7 @@ public:
 private:
 
 	//increment counters in node by 1 starting from counter number i (from left)
-	inline void incrementFrom(ulint * node, uint i){
+	inline void incrementFrom(vector<ulint> * nodes, ulint node_nr, uint i){
 
 	#ifdef DEBUG
 		if(empty){
@@ -205,7 +205,7 @@ private:
 
 		//printWord(MASK&ones);
 
-		*node = *node + (MASK&ones);
+		nodes->at(node_nr) += (MASK&ones);
 
 	}
 
@@ -299,7 +299,7 @@ private:
 	uint16_t nr_of_nodes;
 
 	ulint ones;//1^d in base 2^log2n
-	ulint * nodes;//each node is a 64-bits word and stores d counters
+	vector<ulint> nodes;//each node is a 64-bits word and stores d counters
 
 };
 

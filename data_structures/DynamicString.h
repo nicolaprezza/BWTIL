@@ -72,12 +72,12 @@ public:
 		return  bits;
 	}
 
-	DynamicString(vector<ulint> * freq){//absolute frequencies of the characters
+	DynamicString(vector<ulint> freq){//absolute frequencies of the characters
 
 		n=0;
 
-		for(uint i=0;i<freq->size();i++)
-			n+=freq->at(i);
+		for(uint i=0;i<freq.size();i++)
+			n+=freq.at(i);
 
 		if(n==0){
 			current_size=0;
@@ -89,23 +89,23 @@ public:
 		}
 
 	#ifdef DEBUG
-		if(freq->size()>255){
-			cout << "ERROR (DynamicString): Maximum size of the alphabet is 255. (input alphabet size is " << freq->size() << ")\n";
+		if(freq.size()>255){
+			cout << "ERROR (DynamicString): Maximum size of the alphabet is 255. (input alphabet size is " << freq.size() << ")\n";
 			exit(0);
 		}
 
-		this->freq = new vector<ulint>(freq->size());
+		this->freq = vector<ulint>(freq.size());
 
-		for(ulint i=0;i<freq->size();i++)
-			this->freq->at(i) = freq->at(i);
+		for(ulint i=0;i<freq.size();i++)
+			this->freq.at(i) = freq.at(i);
 
 	#endif
 
-		sigma = freq->size();
+		sigma = freq.size();
 		sigma_0=0;
 
-		for(uint i=0;i<freq->size();i++)
-			if(freq->at(i)>0)
+		for(uint i=0;i<freq.size();i++)
+			if(freq.at(i)>0)
 				sigma_0++;
 
 	#ifdef DEBUG
@@ -114,17 +114,17 @@ public:
 			exit(0);
 		}
 
-		current_freqs = new vector<ulint>(freq->size());
-		for(uint i=0;i<freq->size();i++)
-			current_freqs->at(i)=0;
+		current_freqs = vector<ulint>(freq.size());
+		for(uint i=0;i<freq.size();i++)
+			current_freqs.at(i)=0;
 	#endif
 
 		current_size = 0;
 
 		if(sigma_0==1){
 
-			for(uint i=0;i<freq->size();i++)//search the unique char with freq>0
-				if(freq->at(i)>0)
+			for(uint i=0;i<freq.size();i++)//search the unique char with freq>0
+				if(freq.at(i)>0)
 					s=i;
 
 			unary_string = true;
@@ -149,12 +149,9 @@ public:
 		child0 = vector<uint16_t>(number_of_internal_nodes);
 		child1 = vector<uint16_t>(number_of_internal_nodes);
 
-		//child0 = new uint16_t[number_of_internal_nodes];
-		//child1 = new uint16_t[number_of_internal_nodes];
-
 		vector<symbol> alphabet;
-		for(symbol i=0;i<freq->size();i++)
-			if(freq->at(i)>0)
+		for(symbol i=0;i<freq.size();i++)
+			if(freq.at(i)>0)
 				alphabet.push_back(i);
 
 		uint next_free_node = 1;
@@ -199,14 +196,14 @@ public:
 
 		}
 
-		if(current_freqs->at(x)>=freq->at(x)){
+		if(current_freqs.at(x)>=freq.at(x)){
 
 			cout << "ERROR (DynamicString): too many symbols " << (uint)x << " inserted!" << endl;
 			exit(0);
 
 		}
 
-		current_freqs->at(x) += 1;
+		current_freqs.at(x) += 1;
 
 	#endif
 
@@ -265,7 +262,7 @@ public:
 
 private:
 
-	void buildTree(vector<ulint> * freq,vector<symbol> alphabet,uint pos,uint this_node, uint * next_free_node){
+	void buildTree(vector<ulint> freq,vector<symbol> alphabet,uint pos,uint this_node, uint * next_free_node){
 
 		vector<symbol> alphabet0;
 		vector<symbol> alphabet1;
@@ -274,7 +271,7 @@ private:
 
 		for(uint i=0;i<alphabet.size();i++){
 
-			size += freq->at(alphabet.at(i));
+			size += freq.at(alphabet.at(i));
 
 		}
 
@@ -384,8 +381,8 @@ private:
 
 #ifdef DEBUG
 
-	vector<ulint> * freq;//debug only: absolute frequencies of the symbols
-	vector<ulint> * current_freqs;//debug only: number of symbols inserted
+	vector<ulint> freq;//debug only: absolute frequencies of the symbols
+	vector<ulint> current_freqs;//debug only: number of symbols inserted
 
 #endif
 

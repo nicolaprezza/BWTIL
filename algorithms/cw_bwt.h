@@ -106,6 +106,8 @@ public:
 
 		init(input_string, verbose);
 
+		delete bwIt;
+
 	}
 
 	//creates cw_bwt with desired context length k
@@ -143,6 +145,8 @@ public:
 
 		init(input_string, verbose);
 
+		delete bwIt;
+
 	}
 
 	string toString(){
@@ -162,24 +166,6 @@ public:
 		return s;
 
 	}
-
-	/*symbol * toArray(){//returns cw_bwt as a char array of size n+1
-
-		symbol * bwt = new symbol[n+1];
-
-		cw_bwt_iterator it = getIterator();
-
-		ulint i=0;
-		while(it.hasNext()){
-
-			bwt[i] = it.next();
-			i++;
-
-		}
-
-		return bwt;
-
-	}*/
 
 	void toFile(string path,bool verbose=true){//save cw_bwt to file
 
@@ -448,7 +434,7 @@ private:
 		dynStrings = vector<dynamic_string_t >(number_of_contexts);
 		for(ulint i=0;i<number_of_contexts;i++){
 
-			dynStrings[i] = dynamic_string_t(&frequencies[i]);
+			dynStrings[i] = dynamic_string_t(frequencies[i]);
 			frequencies[i].clear();//free memory
 
 			perc = (100*i)/number_of_contexts;
@@ -487,7 +473,7 @@ private:
 
 		//context of length k before position n (excluded):
 		terminator_context = ca.currentState();//context
-		symbol * context_char = new symbol[k];//context in char format
+		vector<symbol> context_char = vector<symbol>(k);//context in char format
 
 		for(uint i=0;i<k;i++)
 			context_char[i] = 0;
@@ -540,8 +526,6 @@ private:
 		dynStrings[terminator_context].insert(TERMINATOR,terminator_pos);//insert the terminator character
 
 		bwIt->close();//close input file
-
-		delete [] context_char;
 
 		if(verbose) cout << " Done." << endl;
 	}

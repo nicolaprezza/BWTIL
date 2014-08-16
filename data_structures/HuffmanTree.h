@@ -62,10 +62,10 @@ public:
 
 	HuffmanTree(){};
 
-	//freq = array containing absolute number of occurrencies of each symbol {0,...,freq->size()-1}
-	HuffmanTree(vector<ulint> * freq){
+	//freq = array containing absolute number of occurrencies of each symbol {0,...,freq.size()-1}
+	HuffmanTree(vector<ulint> freq){
 
-		sigma_0 = freq->size();
+		sigma_0 = freq.size();
 
 		sigma = 0;//number of symbols with frequency > 0
 
@@ -75,11 +75,11 @@ public:
 
 		for(uint i=0;i<sigma_0;i++){
 
-			frequencies->at(i) = freq->at(i);
+			frequencies.at(i) = freq.at(i);
 
-			tot+=frequencies->at(i);
+			tot+=frequencies.at(i);
 
-			if(freq->at(i)>0)
+			if(freq.at(i)>0)
 				sigma++;
 
 		}
@@ -98,8 +98,8 @@ public:
 
 		//create leafs
 		for(uint i=0;i<sigma_0;i++)
-			if(frequencies->at(i)>0)
-				nodes.insert(Node(i,frequencies->at(i)));
+			if(frequencies.at(i)>0)
+				nodes.insert(Node(i,frequencies.at(i)));
 
 		//Huffman's algorithm
 
@@ -167,7 +167,7 @@ public:
 		double tot=0;
 
 		for(uint i=0;i<sigma_0;i++)
-			tot+=frequencies->at(i);
+			tot+=frequencies.at(i);
 
 		if(tot==0){
 			cout << "Error (HuffmanTree entropy): Empty Huffman tree.\n";
@@ -177,7 +177,7 @@ public:
 		for(uint i=0;i<sigma_0;i++){
 
 			double l = codes[i].size();
-			double f = (double)frequencies->at(i)/tot;
+			double f = (double)frequencies.at(i)/tot;
 
 			entropy += l*f;
 
@@ -187,7 +187,7 @@ public:
 
 	}
 
-	ulint numberOfOccurrencies(symbol s){return frequencies->at(s);};//number of occurrencies of the symbol s
+	ulint numberOfOccurrencies(symbol s){return frequencies.at(s);};//number of occurrencies of the symbol s
 
 	vector<vector<bool> > getCodes(){return codes;}
 
@@ -256,7 +256,7 @@ private:
 	//vector<bool> left_leafs;//for each internal node i, memorizes if the symbol in left is pointer to internal nodes (0) or leaf label (1)
 	//vector<bool> right_leafs;//for each internal node i, memorizes if the symbol in left is pointer to internal nodes (0) or leaf label (1)
 
-	vector<ulint> * frequencies;//table of sigma_0 entries. Symbol -> number of occurrencies.
+	vector<ulint> frequencies;//table of sigma_0 entries. Symbol -> number of occurrencies.
 
 	vector<vector<bool> > codes;
 

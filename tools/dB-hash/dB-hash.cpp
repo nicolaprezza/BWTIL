@@ -21,7 +21,7 @@ using namespace std;
  * input: path of a text file, pattern length m
  * returns: a dB-hash data structure built on the text. Hash function used is the default (base b=4). word size w used is the optimal w=log_b(m*n), where n=text length
  */
-DBhash * buildFromFile(const char * text_path, uint m){
+DBhash buildFromFile(const char * text_path, uint m){
 
 	// 1) read text from file
 
@@ -58,11 +58,11 @@ DBhash * buildFromFile(const char * text_path, uint m){
 	// 2) create the hash function
 
 	//HashFunction * h = new HashFunction(n,m,DNA_SEARCH);//hash function for DNA search. Use only if the file is on the alphabet {A,C,G,T,N}
-	HashFunction * h = new HashFunction(m,text_path,true);//general purpose hash function: detect automatically alphabet size
+	HashFunction h = HashFunction(m,text_path,true);//general purpose hash function: detect automatically alphabet size
 
 	//build dBhash data structure
 
-	DBhash * dBhash = new DBhash(text,n,h,4,true);
+	DBhash dBhash = DBhash(text,n,h,4,true);
 
 	return dBhash;
 
@@ -163,7 +163,7 @@ void debug(){
 	if(mode==build)
 		m = atoi(argv[3]);
 
-	DBhash * dBhash;
+	DBhash dBhash;
 
 	if(mode==build){
 
@@ -171,7 +171,7 @@ void debug(){
 		dBhash = buildFromFile(in.c_str(),m);
 
 		cout << "\nStoring dB-hash in "<< out<<endl;
-		dBhash->saveToFile(out.c_str());
+		dBhash.saveToFile(out.c_str());
 
 		cout << "Done.\n";
 
@@ -183,14 +183,14 @@ void debug(){
 		dBhash = DBhash::loadFromFile(in.c_str());
 		cout << "Done." << endl;
 
-		if(dBhash->patternLength()!=m){
-			cout << "Error: structure built with pattern length " << dBhash->patternLength() << ", but now searching a pattern of length " << m << endl;
+		if(dBhash.patternLength()!=m){
+			cout << "Error: structure built with pattern length " << dBhash.patternLength() << ", but now searching a pattern of length " << m << endl;
 			exit(1);
 		}
 
 		cout << "\nSearching pattern "<< pattern <<endl;
 
-		vector<ulint> occ = dBhash->getOccurrencies( pattern );
+		vector<ulint> occ = dBhash.getOccurrencies( pattern );
 
 		cout << "The pattern occurs " << occ.size() << " times in the text at the following positions : \n";
 

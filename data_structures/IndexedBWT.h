@@ -47,9 +47,7 @@ public:
 
 		ulint nr_of_terminators=0;
 
-		remapping = new uchar[256];
-		for(uint i=0;i<256;i++)
-			remapping[i]=0;
+		remapping = vector<uchar>(256,0);
 
 		//compute re-mapping to keep alphabet size to a minimum
 
@@ -95,7 +93,7 @@ public:
 
 		//calculate inverse remapping
 
-		inverse_remapping = new uchar[sigma];
+		inverse_remapping = vector<uchar>(sigma);
 
 		for(uint i=0;i<sigma;i++)
 			inverse_remapping[i] = alphabet.at(i);
@@ -105,29 +103,26 @@ public:
 		for(ulint i=0;i<n;i++)
 			BWT[i] = remapping[BWT[i]];//note: remapping of teminator (0x0) is 0
 
-		bwt_wt = new WaveletTree(BWT,n,verbose);
+		bwt_wt =  WaveletTree(BWT,n,verbose);
 
 		if(offrate>0)
-			marked_positions = new StaticBitVector(n);
+			marked_positions =  StaticBitVector(n);
 		else
-			marked_positions = new StaticBitVector(0);
+			marked_positions =  StaticBitVector(0);
 
-		text_pointers = new WordVector(number_of_SA_pointers,w);
+		text_pointers =  WordVector(number_of_SA_pointers,w);
 
-		log_sigma = bwt_wt->bitsPerSymbol();
+		log_sigma = bwt_wt.bitsPerSymbol();
 
 		TERMINATOR = 256;
 
-		FIRST = new ulint [257];
-
-		for(uint i=0;i<257;i++)
-			FIRST[i]=0;
+		FIRST = vector<ulint>(257,0);
 
 		FIRST[TERMINATOR]=0;//first occurrence of terminator char in the first column is at the beginning
 
 		for(ulint i=0;i<n;i++)
 			if(i!=terminator_position)
-				FIRST[bwt_wt->charAt(i)]++;
+				FIRST[bwt_wt.charAt(i)]++;
 
 		for(uint i=1;i<256;i++)
 			FIRST[i] += FIRST[i-1];
@@ -159,7 +154,7 @@ public:
 
 		ulint l = 0;//number of LF steps
 
-		while(marked_positions->bitAt(i) == 0){
+		while(marked_positions.bitAt(i) == 0){
 			i = LF(i);
 			l++;
 
@@ -170,9 +165,9 @@ public:
 
 		}
 
-		//here marked_positions->bitAt(i) == 1
+		//here marked_positions.bitAt(i) == 1
 
-		return text_pointers->wordAt( marked_positions->rank1(i) ) + l;
+		return text_pointers.wordAt( marked_positions.rank1(i) ) + l;
 
 	}
 
@@ -191,7 +186,7 @@ public:
 		if(i==terminator_position)
 			return 0;
 
-		return inverse_remapping[bwt_wt->charAt(i)];
+		return inverse_remapping[bwt_wt.charAt(i)];
 
 	}
 
@@ -207,7 +202,7 @@ public:
 
 		ulint FIRST_size = (sigma+1)*64;
 
-		return bwt_wt->size() + marked_positions->size() + text_pointers->size() + FIRST_size;
+		return bwt_wt.size() + marked_positions.size() + text_pointers.size() + FIRST_size;
 
 	}
 
@@ -266,9 +261,9 @@ public:
 
 	void freeMemory(){
 
-		bwt_wt->freeMemory();
-		marked_positions->freeMemory();
-		text_pointers->freeMemory();
+		bwt_wt.freeMemory();
+		marked_positions.freeMemory();
+		text_pointers.freeMemory();
 
 	}
 
@@ -283,13 +278,13 @@ public:
 		fwrite(&w, sizeof(uint), 1, fp);
 		fwrite(&n, sizeof(ulint), 1, fp);
 
-		bwt_wt->saveToFile(fp);
-		marked_positions->saveToFile(fp);
-		text_pointers->saveToFile(fp);
+		bwt_wt.saveToFile(fp);
+		marked_positions.saveToFile(fp);
+		text_pointers.saveToFile(fp);
 
-		fwrite(FIRST, sizeof(ulint), 257, fp);
-		fwrite(remapping, sizeof(uchar), 256, fp);
-		fwrite(inverse_remapping, sizeof(uchar), sigma, fp);
+		fwrite(FIRST.data(), sizeof(ulint), 257, fp);
+		fwrite(remapping.data(), sizeof(uchar), 256, fp);
+		fwrite(inverse_remapping.data(), sizeof(uchar), sigma, fp);
 
 	}
 
@@ -314,23 +309,23 @@ public:
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
 		check_numBytes();
 
-		bwt_wt = new WaveletTree();
-		marked_positions = new StaticBitVector();
-		text_pointers = new WordVector();
+		bwt_wt =  WaveletTree();
+		marked_positions =  StaticBitVector();
+		text_pointers =  WordVector();
 
-		bwt_wt->loadFromFile(fp);
-		marked_positions->loadFromFile(fp);
-		text_pointers->loadFromFile(fp);
+		bwt_wt.loadFromFile(fp);
+		marked_positions.loadFromFile(fp);
+		text_pointers.loadFromFile(fp);
 
-		FIRST = new ulint[257];
-		remapping = new uchar[256];
-		inverse_remapping = new uchar[sigma];
+		FIRST = vector<ulint>(257);
+		remapping = vector<uchar>(256);
+		inverse_remapping = vector<uchar>(sigma);
 
-		numBytes = fread(FIRST, sizeof(ulint), 257, fp);
+		numBytes = fread(FIRST.data(), sizeof(ulint), 257, fp);
 		check_numBytes();
-		numBytes = fread(remapping, sizeof(uchar), 256, fp);
+		numBytes = fread(remapping.data(), sizeof(uchar), 256, fp);
 		check_numBytes();
-		numBytes = fread(inverse_remapping, sizeof(uchar), sigma, fp);
+		numBytes = fread(inverse_remapping.data(), sizeof(uchar), sigma, fp);
 		check_numBytes();
 
 	}
@@ -346,7 +341,7 @@ private:
 		if(i==terminator_position)
 			return TERMINATOR;
 
-		return bwt_wt->charAt(i);
+		return bwt_wt.charAt(i);
 
 	}
 
@@ -360,9 +355,9 @@ private:
 			return i>terminator_position;
 
 		if(c==0 and i>terminator_position)//this because the terminator in the wavelet tree is encoded as 0
-			return bwt_wt->rank(0,i)-1;
+			return bwt_wt.rank(0,i)-1;
 
-		return bwt_wt->rank(c,i);
+		return bwt_wt.rank(c,i);
 
 	}
 
@@ -397,7 +392,7 @@ private:
 				}
 
 			if(i%offrate==0)
-				marked_positions->setBit(j,1);
+				marked_positions.setBit(j,1);
 
 			j = LF(j);
 
@@ -406,9 +401,9 @@ private:
 		}
 
 		//i=0
-		marked_positions->setBit(j,1);
+		marked_positions.setBit(j,1);
 
-		marked_positions->computeRanks();
+		marked_positions.computeRanks();
 
 	}
 
@@ -433,8 +428,8 @@ private:
 
 				}
 
-			if(marked_positions->bitAt(j)==1)
-				text_pointers->setWord( marked_positions->rank1(j), i );
+			if(marked_positions.bitAt(j)==1)
+				text_pointers.setWord( marked_positions.rank1(j), i );
 
 			j = LF(j);
 			i--;
@@ -442,7 +437,7 @@ private:
 		}
 
 		//i=0
-		text_pointers->setWord( marked_positions->rank1(j), 0 );
+		text_pointers.setWord( marked_positions.rank1(j), 0 );
 
 
 	}
@@ -458,14 +453,14 @@ private:
 
 	uint w;//size of a pointer = log2 n
 
-	WaveletTree * bwt_wt;//BWT stored as a wavelet tree
-	StaticBitVector * marked_positions;//marks positions on the BWT having a text-pointer
-	WordVector * text_pointers;//stores sampled text pointers (SA pointers)
+	WaveletTree bwt_wt;//BWT stored as a wavelet tree
+	StaticBitVector marked_positions;//marks positions on the BWT having a text-pointer
+	WordVector text_pointers;//stores sampled text pointers (SA pointers)
 
-	ulint * FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column
+	vector<ulint> FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column
 
-	uchar * remapping;//from file's chars to {0,...,sigma-1}
-	uchar * inverse_remapping;
+	vector<uchar> remapping;//from file's chars to {0,...,sigma-1}
+	vector<uchar> inverse_remapping;
 
 };
 

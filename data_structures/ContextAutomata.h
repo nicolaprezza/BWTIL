@@ -189,7 +189,7 @@ private:
 		 */
 
 		PartialSums sample_cumulative_counter = PartialSums(sigma,n);//sample of cumulative counter to extimate its memory consumption
-		DynamicString<bitv> sample_dynstring = DynamicString<bitv>(new vector<ulint>(sigma,1));
+		DynamicString<bitv> sample_dynstring = DynamicString<bitv>(vector<ulint>(sigma,1));
 
 		ulint bits_per_k_mer =
 				CHAR_BIT * sizeof(DynamicString<bitv> *) + //pointers to DynamicStrings
@@ -284,8 +284,8 @@ private:
 
 		if(verbose) cout << " Text length is " << n << endl;
 
-		remapping = new uint[256];
-		inverse_remapping = new symbol[256];
+		remapping = vector<uint>(256);
+		inverse_remapping = vector<symbol>(256);
 
 		for(uint i=0;i<256;i++){
 			remapping[i]=empty;
@@ -499,8 +499,8 @@ private:
 
 	BackwardIterator * bwIt;
 
-	symbol * inverse_remapping;//from symbol -> to char (file)
-	uint * remapping;//from char (file) -> to symbols in {0,...,sigma-1}
+	vector<symbol> inverse_remapping;//from symbol -> to char (file)
+	vector<uint> remapping;//from char (file) -> to symbols in {0,...,sigma-1}
 
 	ulint current_state;
 	uint null_ptr;

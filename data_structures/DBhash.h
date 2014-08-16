@@ -23,7 +23,7 @@ public:
 
 	DBhash(){};
 
-	DBhash(unsigned char * text, unsigned char * bwt, ulint n, HashFunction * h, ulint offrate = 4, bool verbose = false){
+	DBhash(unsigned char * text, unsigned char * bwt, ulint n, HashFunction h, ulint offrate = 4, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
@@ -31,15 +31,15 @@ public:
 		this->h = h;
 		this->offrate = offrate;
 
-		m = h->m;
-		w = h->w;
+		m = h.m;
+		w = h.w;
 
 		text_fingerprint_length = n-m+w+1;
 
 		if(verbose)	cout << " Text fingerprint length = " << text_fingerprint_length<<endl;
 
-		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h->base) );//log_b n - log_b log_2 n
-		auxiliary_hash_size = 1 << (w_aux * h->log_base);
+		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h.base) );//log_b n - log_b log_2 n
+		auxiliary_hash_size = 1 << (w_aux * h.log_base);
 
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
@@ -53,7 +53,7 @@ public:
 
 		if(verbose)	cout << " Done.\n";
 
-		indexedBWT = new IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
+		indexedBWT =  IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
 
 		initAuxHash();
 
@@ -61,7 +61,7 @@ public:
 
 	}
 
-	DBhash(unsigned char * text, ulint n, HashFunction * h, ulint offrate = 4, bool verbose = false){
+	DBhash(unsigned char * text, ulint n, HashFunction h, ulint offrate = 4, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
@@ -69,21 +69,21 @@ public:
 		this->h = h;
 		this->offrate = offrate;
 
-		m = h->m;
-		w = h->w;
+		m = h.m;
+		w = h.w;
 
 		text_fingerprint_length = n-m+w+1;
 
 		if(verbose) cout << " Text fingerprint length = " << text_fingerprint_length<<endl;
 
-		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h->base) );//log_b n - log_b log_2 n
+		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h.base) );//log_b n - log_b log_2 n
 
-		auxiliary_hash_size = 1 << (w_aux * h->log_base);
+		auxiliary_hash_size = 1 << (w_aux * h.log_base);
 
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
 		if(verbose)	cout << " Computing hash value h(T) of the text ...";
-		unsigned char * fingerprint = h->hashValueRemapped(text,n);
+		unsigned char * fingerprint = h.hashValueRemapped(text,n);
 		if(verbose)	cout << " Done.\n";
 
 		if(verbose)	cout << " Storing text T in plain format ...";
@@ -96,7 +96,7 @@ public:
 
 		delete [] fingerprint;
 
-		indexedBWT = new IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
+		indexedBWT =  IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
 
 		delete [] bwt;
 
@@ -111,7 +111,7 @@ public:
 	//doesn't use auxiliary hash.
 	vector<ulint> getOccurrencies_slow(ulint fingerprint){
 
-		return indexedBWT->convertToTextCoordinates( indexedBWT->BS(fingerprint,w) );
+		return indexedBWT.convertToTextCoordinates( indexedBWT.BS(fingerprint,w) );
 
 	}
 
@@ -121,29 +121,29 @@ public:
 		ulint mask = auxiliary_hash_size-1;
 
 		ulint suffix = fingerprint & mask;//suffix of length w_aux. Searched in the auxiliary hash
-		ulint prefix = fingerprint >> (w_aux*h->log_base);//prefix of the fingerprint of length log m/log base to be searched with backward search
+		ulint prefix = fingerprint >> (w_aux*h.log_base);//prefix of the fingerprint of length log m/log base to be searched with backward search
 
 		pair<ulint, ulint> interval;
 
-		interval.first = auxiliary_hash->wordAt(suffix);
+		interval.first = auxiliary_hash.wordAt(suffix);
 
 		if (suffix + 1 == auxiliary_hash_size)
 			interval.second = text_fingerprint_length + 1;
 		else
-			interval.second = auxiliary_hash->wordAt(suffix+1);
+			interval.second = auxiliary_hash.wordAt(suffix+1);
 
-		return indexedBWT->convertToTextCoordinates( indexedBWT->BS(prefix,w-w_aux,interval) );
+		return indexedBWT.convertToTextCoordinates( indexedBWT.BS(prefix,w-w_aux,interval) );
 
 	}
 
 	ulint size(){//returns size of the structure in bits
 
-		return indexedBWT->size() + text_wv->size() + auxiliary_hash->size();
+		return indexedBWT.size() + text_wv.size() + auxiliary_hash.size();
 
 	}
 
 	unsigned char textAt(ulint i){
-		return int_to_char[text_wv->wordAt(i)];
+		return int_to_char[text_wv.wordAt(i)];
 	}
 
 	unsigned char * computeBWT(unsigned char* text, ulint length){
@@ -186,17 +186,6 @@ public:
 
 	}
 
-	void freeMemory(){
-
-		delete [] char_to_int;
-		delete [] int_to_char;
-
-		auxiliary_hash->freeMemory();
-		text_wv->freeMemory();
-		indexedBWT->freeMemory();
-
-	}
-
 	void saveToFile(string path){
 
 		FILE *fp;
@@ -231,13 +220,13 @@ public:
 		fwrite(&text_fingerprint_length, sizeof(ulint), 1, fp);
 		fwrite(&sigma, sizeof(uint), 1, fp);
 		fwrite(&log_sigma, sizeof(uint), 1, fp);
-		fwrite(char_to_int, sizeof(uint), 256, fp);
-		fwrite(int_to_char, sizeof(unsigned char), sigma, fp);
+		fwrite(char_to_int.data(), sizeof(uint), 256, fp);
+		fwrite(int_to_char.data(), sizeof(unsigned char), sigma, fp);
 
-		h->saveToFile(fp);
-		indexedBWT->saveToFile(fp);
-		text_wv->saveToFile(fp);
-		auxiliary_hash->saveToFile(fp);
+		h.saveToFile(fp);
+		indexedBWT.saveToFile(fp);
+		text_wv.saveToFile(fp);
+		auxiliary_hash.saveToFile(fp);
 
 	}
 
@@ -262,30 +251,30 @@ public:
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
 		check_numBytes();
 
-		char_to_int = new uint[256];
-		int_to_char = new unsigned char[sigma];
+		char_to_int = vector<uint>(256);
+		int_to_char = vector<uchar>(sigma);
 
-		numBytes = fread(char_to_int, sizeof(uint), 256, fp);
+		numBytes = fread(char_to_int.data(), sizeof(uint), 256, fp);
 		check_numBytes();
-		numBytes = fread(int_to_char, sizeof(unsigned char), sigma, fp);
+		numBytes = fread(int_to_char.data(), sizeof(unsigned char), sigma, fp);
 		check_numBytes();
 
-		h = new HashFunction();
-		indexedBWT = new IndexedBWT();
-		text_wv = new WordVector();
-		auxiliary_hash = new WordVector();
+		h = HashFunction();
+		indexedBWT =  IndexedBWT();
+		text_wv =  WordVector();
+		auxiliary_hash =  WordVector();
 
-		h->loadFromFile(fp);
-		indexedBWT->loadFromFile(fp);
-		text_wv->loadFromFile(fp);
-		auxiliary_hash->loadFromFile(fp);
+		h.loadFromFile(fp);
+		indexedBWT.loadFromFile(fp);
+		text_wv.loadFromFile(fp);
+		auxiliary_hash.loadFromFile(fp);
 
 	}
 
-	static DBhash * loadFromFile(string path){
+	static DBhash loadFromFile(string path){
 
-		DBhash * dbh = new DBhash();
-		dbh->load(path);
+		DBhash dbh = DBhash();
+		dbh.load(path);
 		return dbh;
 
 	}
@@ -297,7 +286,7 @@ public:
 			exit(1);
 		}
 
-		return filterOutBadOccurrencies(P, getOccurrencies_slow(h->hashValue(P)), max_errors);
+		return filterOutBadOccurrencies(P, getOccurrencies_slow(h.hashValue(P)), max_errors);
 
 	}
 
@@ -330,13 +319,13 @@ public:
 	ulint textLength(){return n;}
 	ulint patternLength(){return m;}
 
-	HashFunction * hashFunction(){return h;}
+	HashFunction hashFunction(){return h;}
 
 protected:
 
 	void initText(unsigned char * text){
 
-		char_to_int = new uint[256];
+		char_to_int = vector<uint>(256);
 
 		ulint empty=256;
 
@@ -355,7 +344,7 @@ protected:
 
 		}
 
-		int_to_char = new unsigned char[sigma];
+		int_to_char = vector<uchar>(sigma);
 
 		for(ulint i=0;i<256;i++){
 
@@ -367,16 +356,16 @@ protected:
 		log_sigma = ceil(log2(sigma));
 		if(log_sigma==0) log_sigma=1;
 
-		text_wv = new WordVector(n,log_sigma);
+		text_wv =  WordVector(n,log_sigma);
 
 		for(ulint i = 0;i<n;i++)
-			text_wv->setWord(i,char_to_int[text[i]]);
+			text_wv.setWord(i,char_to_int[text[i]]);
 
 	}
 
 	void initAuxHash(){
 
-		auxiliary_hash = new WordVector(auxiliary_hash_size,ceil(log2(n+1)));
+		auxiliary_hash =  WordVector(auxiliary_hash_size,ceil(log2(n+1)));
 
 		ulint empty = text_fingerprint_length+1;
 
@@ -384,12 +373,12 @@ protected:
 
 		for (ulint i = 0; i < auxiliary_hash_size; i++){
 
-			pair<ulint,ulint> interval = indexedBWT->BS(i,w_aux);//TODO bug su build dna.10MB 10
+			pair<ulint,ulint> interval = indexedBWT.BS(i,w_aux);
 
 			if(interval.second>interval.first)
-				auxiliary_hash->setWord(i,interval.first);
+				auxiliary_hash.setWord(i,interval.first);
 			else
-				auxiliary_hash->setWord(i,empty);
+				auxiliary_hash.setWord(i,empty);
 
 			perc = (100*i)/auxiliary_hash_size;
 			if(perc>last_perc and perc%10==0){
@@ -401,13 +390,13 @@ protected:
 
 		}
 
-		if (auxiliary_hash->wordAt(auxiliary_hash_size-1) == empty)
-			auxiliary_hash->setWord(auxiliary_hash_size-1,text_fingerprint_length);
+		if (auxiliary_hash.wordAt(auxiliary_hash_size-1) == empty)
+			auxiliary_hash.setWord(auxiliary_hash_size-1,text_fingerprint_length);
 
 		for (ulint i = auxiliary_hash_size - 1; i >= 1; i--) {
 
-			if (auxiliary_hash->wordAt(i-1) == empty)
-				auxiliary_hash->setWord(i-1,auxiliary_hash->wordAt(i));
+			if (auxiliary_hash.wordAt(i-1) == empty)
+				auxiliary_hash.setWord(i-1,auxiliary_hash.wordAt(i));
 
 		}
 
@@ -420,18 +409,18 @@ protected:
 
 	ulint text_fingerprint_length;
 
-	HashFunction * h;
+	HashFunction h;
 	ulint offrate;
 
-	IndexedBWT * indexedBWT;
-	WordVector * text_wv;//the plain text
-	WordVector * auxiliary_hash;
+	IndexedBWT indexedBWT;
+	WordVector text_wv;//the plain text
+	WordVector auxiliary_hash;
 
 	uint sigma;//alphabet size
 	uint log_sigma;//log2(sigma)
 
-	uint * char_to_int;//conversion from a char in the text to an integer in the range {0,...,sigma-1}
-	unsigned char * int_to_char;//conversion from int in the range {0,...,sigma-1} to a char
+	vector<uint> char_to_int;//conversion from a char in the text to an integer in the range {0,...,sigma-1}
+	vector<uchar> int_to_char;//conversion from int in the range {0,...,sigma-1} to a char
 
 };
 

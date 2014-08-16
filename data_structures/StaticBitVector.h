@@ -61,9 +61,9 @@ public:
 		 *
 		 */
 
-		bitvector = new WordVector( ceil((double)(n+1)/D) , D);// the bitvector
-		rank_ptrs_1 = new WordVector( ceil((double)(n+1)/(D*D)) , w);//log n bits every D^2 positions
-		rank_ptrs_2 = new WordVector( ceil((double)(n+1)/D) , 2*ceil(log2(D)));//2 log D bits every D positions
+		bitvector = WordVector( ceil((double)(n+1)/D) , D);// the bitvector
+		rank_ptrs_1 = WordVector( ceil((double)(n+1)/(D*D)) , w);//log n bits every D^2 positions
+		rank_ptrs_2 = WordVector( ceil((double)(n+1)/D) , 2*ceil(log2(D)));//2 log D bits every D positions
 
 	}
 
@@ -72,8 +72,8 @@ public:
 		ulint nr_of_ones_global = 0;
 		ulint nr_of_ones_local = 0;
 
-		rank_ptrs_1->setWord(0,0);
-		rank_ptrs_2->setWord(0,0);
+		rank_ptrs_1.setWord(0,0);
+		rank_ptrs_2.setWord(0,0);
 
 		if(n==0)
 			return;
@@ -88,13 +88,13 @@ public:
 			nr_of_ones_global += bitAt(i);
 
 			if((i+1)%D==0){
-				rank_ptrs_2->setWord((i+1)/D,nr_of_ones_local);
+				rank_ptrs_2.setWord((i+1)/D,nr_of_ones_local);
 
-				if(rank_ptrs_2->wordAt((i+1)/D)>1000000000){
+				if(rank_ptrs_2.wordAt((i+1)/D)>1000000000){
 
-					cout << "\n*** ERR : read "<<rank_ptrs_2->wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
+					cout << "\n*** ERR : read "<<rank_ptrs_2.wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
 					cout << "*** Position: " << (i+1)/D << endl;//TODO debugging
-					cout << "*** max size: " << rank_ptrs_2->length() << endl;//TODO debugging
+					cout << "*** max size: " << rank_ptrs_2.length() << endl;//TODO debugging
 
 					cout << "This error shows up when compiling with clang++ and needs debugging. Please, switch to g++." << endl;
 					exit(0);
@@ -104,7 +104,7 @@ public:
 			}
 
 			if((i+1)%(D*D)==0)
-				rank_ptrs_1->setWord((i+1)/(D*D),nr_of_ones_global);
+				rank_ptrs_1.setWord((i+1)/(D*D),nr_of_ones_global);
 
 		}
 
@@ -112,13 +112,13 @@ public:
 
 	ulint size(){
 
-		return bitvector->size() + rank_ptrs_1->size() + rank_ptrs_2->size();
+		return bitvector.size() + rank_ptrs_1.size() + rank_ptrs_2.size();
 
 	}
 
 	inline ulint rank1(ulint i){//number of 1's before position i (excluded) in the bitvector
 
-		return rank_ptrs_1->wordAt(i/(D*D)) + rank_ptrs_2->wordAt(i/D) + rank(bitvector->wordAt(i/D),i%D);
+		return rank_ptrs_1.wordAt(i/(D*D)) + rank_ptrs_2.wordAt(i/D) + rank(bitvector.wordAt(i/D),i%D);
 
 	}
 
@@ -126,33 +126,33 @@ public:
 
 	inline uint bitAt(ulint i){//get value of the i-th bit
 
-		return bitvector->bitAt(i);
+		return bitvector.bitAt(i);
 
 	}
 
 	inline void setBit(ulint i, uint b){//set bit in position i
 
-		bitvector->setBit(i,b);
+		bitvector.setBit(i,b);
 
 	}
 
 	void test(){
 
-		for(uint i=0;i<rank_ptrs_1->length();i++)
-			cout << rank_ptrs_1->wordAt(i) << ", ";
+		for(uint i=0;i<rank_ptrs_1.length();i++)
+			cout << rank_ptrs_1.wordAt(i) << ", ";
 
 		cout << endl;
-		for(uint i=0;i<rank_ptrs_2->length();i++)
-			cout << rank_ptrs_2->wordAt(i) << ", ";
+		for(uint i=0;i<rank_ptrs_2.length();i++)
+			cout << rank_ptrs_2.wordAt(i) << ", ";
 
 
 	}
 
 	void freeMemory(){
 
-		bitvector->freeMemory();
-		rank_ptrs_1->freeMemory();
-		rank_ptrs_2->freeMemory();
+		bitvector.freeMemory();
+		rank_ptrs_1.freeMemory();
+		rank_ptrs_2.freeMemory();
 
 	}
 
@@ -162,9 +162,9 @@ public:
 		fwrite(&w, sizeof(uint), 1, fp);
 		fwrite(&D, sizeof(uint), 1, fp);
 
-		bitvector->saveToFile(fp);
-		rank_ptrs_1->saveToFile(fp);
-		rank_ptrs_2->saveToFile(fp);
+		bitvector.saveToFile(fp);
+		rank_ptrs_1.saveToFile(fp);
+		rank_ptrs_2.saveToFile(fp);
 
 	}
 
@@ -179,13 +179,13 @@ public:
 		numBytes = fread(&D, sizeof(uint), 1, fp);
 		check_numBytes();
 
-		bitvector = new WordVector();
-		rank_ptrs_1 = new WordVector();
-		rank_ptrs_2 = new WordVector();
+		bitvector = WordVector();
+		rank_ptrs_1 = WordVector();
+		rank_ptrs_2 = WordVector();
 
-		bitvector->loadFromFile(fp);
-		rank_ptrs_1->loadFromFile(fp);
-		rank_ptrs_2->loadFromFile(fp);
+		bitvector.loadFromFile(fp);
+		rank_ptrs_1.loadFromFile(fp);
+		rank_ptrs_2.loadFromFile(fp);
 
 	}
 
@@ -210,9 +210,9 @@ protected:
 	ulint n;//length of the bitvector
 	uint w;//size of the word = log2 n
 
-	WordVector * bitvector;//the bits are stored in a WordVector, so that they can be accessed in blocks of size D
-	WordVector * rank_ptrs_1;//rank pointers sampled every D^2 positions
-	WordVector * rank_ptrs_2;//rank pointers sampled every D positions
+	WordVector bitvector;//the bits are stored in a WordVector, so that they can be accessed in blocks of size D
+	WordVector rank_ptrs_1;//rank pointers sampled every D^2 positions
+	WordVector rank_ptrs_2;//rank pointers sampled every D positions
 
 	uint D;//size of words
 
