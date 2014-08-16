@@ -29,6 +29,24 @@ using namespace bwtil;
 
 	cw_bwt cwbwt;
 
+	/*
+	 * Note: in this example, the text is loaded from disk and the bwt is directly saved to disk. The total RAM occupancy is therefore COMPRESSED, i.e.
+	 * comparable to the size of the compressed input text file.
+	 *
+	 * It is possible (see comments below) also to build the bwt from/to strings, but in this way also the input/output strings will be stored in memory,
+	 * resulting in higher RAM requirements.
+	 *
+	 * If you want to keep RAM usage to a minimum, it is recommended that you proceed as follows:
+	 *
+	 * 1) save your text (string/array) to disk
+	 * 2) free memory
+	 * 3) run cw-bwt loading the text from the file created in step 1) (see below)
+	 * 4) save directly the bwt to disk (see below)
+	 * 5) free memory
+	 * 6) load in RAM the bwt created in step 4)
+	 *
+	 */
+
 	//build bwt from a text file:
 
 	if(argc==3)//k autodetected
