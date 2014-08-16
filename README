@@ -36,7 +36,10 @@ Since BWTIL includes extern git repositories, clone it using the --recursive opt
 
  ***   Compile   ***
 
-The library has been tested under gcc 4.8.2. To compile, run
+
+The library has been extensively tested under linux using gcc 4.8.2. The Makefile supports also clang++; however, some bugs seem to appear when compiling with clang++ and still need to be fixed. If any program crashes with clang++, please re-compile with gcc >= 4.8.2.
+
+To compile, run
 
 > make
 
