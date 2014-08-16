@@ -4,23 +4,14 @@ Authors: Nicola Prezza, Nicola Gigante, and Alberto Policriti
 mail: nicolapr@gmail.com
 
 
-
-
-
- ************************************************************* WARNING : *********************************************************
-
-	the tool is still under development!!! at the moment, cw.bwt works BUT very inefficient data structures are used!!!
-	DO NOT use the tool on large files!
-
- *********************************************************************************************************************************
-
-
-
 *** Brief introduction: ***
 
-cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for certain text distributions (nearly uniform) and small alphabets (e.g. DNA) cw-bwt is optimal in both time and space.
+
+cw-bwt builds the BWT of a text (ASCII) file, using an amount of RAM comparable with the size of the compressed text. The algorithm exploits the partitioning induced by the length-k contexts to reduce the size of internal dynamic data structures used. As a result, for most text distributions of interest cw-bwt is optimal in both time and space. This is confirmed in practice: on a 2.4Ghz, core i7 PC, cw-bwt is able to build the bwt of the Human genome (3.2 billions of characters) in 4 hours and 30 minutes using only 992MB of RAM.
+
 
 *** Complexity ***
+
 
 n = input length
 Hk = k-th order entropy of the text, where k = log_s( n/log^2 n ) - 1 (Hk <= log s, where s is the alphabet size)
@@ -32,14 +23,17 @@ TIME:
 ---------------------------------------------------------------------------------------------
 		complexity	notes	
 
-expected	O( n * Hk )	uniform text distribution assumed. A factor Hk from optimal. optimal for small alphabets (e.g. DNA)
+expected/avg	O( n * Hk )	(*)
 
-worst-case	O( n * log n * Hk )	a factor log n * Hk from optimal
+worst-case	O( n * log n * Hk )	(**)
 
 ---------------------------------------------------------------------------------------------
 
 Notes: 
-The worst-case is a text with large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
+
+(*) Despite the worst case time of O(n log n Hk), by analysing the load of the internal data structures on a variety of texts (pizza&chilli repository) we can safely state that cw-bwt runs in average O(n Hk) time on most of the text of interest (i.e. are excluded only texts with extreme high redundancy).
+
+(**) A factor log n * Hk from being optimal. The worst-case is a text with large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
 
 
 *** Compile ***
