@@ -109,7 +109,7 @@ public:
 	}
 
 	//creates cw_bwt with desired context length k
-	cw_bwt(string input_string, cw_bwt_input_type input_type, uint k, bool verbose=true){
+	cw_bwt(string input_string, cw_bwt_input_type input_type, uint k, bool verbose){
 
 		this->k = k;
 

@@ -17,44 +17,46 @@ using namespace bwtil;
 
 	if(argc != 3 and argc != 4){
 		cout << "*** context-wise BWT construction in compressed space ***\n";
-		cout << "*** WARNING: the tool is still under development and at the moment inefficient data structures are used. Use the tool only on small files (max 10MB) ***\n";
 		cout << "Usage: cw-bwt text_file bwt_file [k]\n";
 		cout << "where:\n";
 		cout << "- text_file is the input text file. Input file must not contain a 0x0 byte since the algorithm uses it as text terminator.\n";
 		cout << "- bwt_file is the output bwt file. This output file will contain a 0x0 terminator and thus will be 1 byte longer than the input file.\n";
-		cout << "- k (automatic if not specified) is the entropy order.\n";
-		cout << "WARNING: sigma^k space will be allocated, where sigma is the alphabet size. If you specify k, choose it carefully!\n";
+		cout << "- k (automatically detected if not specified) is the entropy order (context length).\n";
+		cout << "WARNING: for high values of k, the memory requirements approach n log n. If you specify k, choose it carefully!\n";
 		cout << "For more informations, read the file README.\n";
 		exit(0);
 	}
 
 	cw_bwt cwbwt;
 
-	if(argc==3)//no k
-		cwbwt = cw_bwt(argv[1],cw_bwt::path);
+	//build bwt from a text file:
 
-	if(argc==4)
+	if(argc==3)//k autodetected
+		cwbwt = cw_bwt(argv[1],cw_bwt::path);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
+
+	if(argc==4)//the user has specified k
 		cwbwt = cw_bwt(argv[1],cw_bwt::path,atoi(argv[3]),true);
 
 	/*
-	 * If, instead, you want to compute the bwt of a string object, build cw_bwt with
+	 * If, instead, you want to compute the bwt of a string, create a cw_bwt object as follows:
 	 *
-	 * cw_bwt(your_string,cw_bwt::text) // optimal k autodetected
+	 *
+	 * string str = "mississippi";
+	 * cwbwt = cw_bwt(str,cw_bwt::text); // optimal k autodetected
 	 *
 	 * or
 	 *
-	 * cw_bwt(your_string,cw_bwt::text, your_k_value,true) // you choose k (faster since k has not to be autodetected)
+	 * cwbwt = cw_bwt(str,cw_bwt::text, your_k_value,true); // you choose k (faster since k has not to be autodetected)
 	 *
 	 * However, this requires more space in RAM since the input text string is kept in memory together with the structures of cwbwt
 	 *
 	 */
 
 	cout << "\nSaving BWT in " << argv[2] << endl;
-	cwbwt.toFile(argv[2]);
+	cwbwt.toFile(argv[2]);//this saves to file the bwt without occupying additional RAM
 	cout << "Done. " << endl;
 
 	/*
-	 *
 	 * If, instead, you want a string object containing the bwt, call
 	 *
 	 * string bwt = cwbwt.toString();
