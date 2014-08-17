@@ -166,7 +166,10 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 auto pv = packed_view_t(3,10);
+	 auto pv = new packed_view_t(3,10);
+
+	 (*pv)[1] = 3;
+	 cout << (*pv)[1];
 
 	 cout << endl;
 

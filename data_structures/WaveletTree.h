@@ -38,9 +38,9 @@ public:
 		log_sigma = ceil(log2(sigma));
 
 		//store text in WordVector format (which offers useful bit operations)
-		auto text_wv = packed_view_t(log_sigma,n);
+		auto text_wv = new packed_view_t(log_sigma,n);
 		for(ulint i = 0;i<n;i++)
-			text_wv[i] = text[i];
+			(*text_wv)[i] = text[i];
 
 		number_of_nodes = ((ulint)1<<log_sigma)-1;
 
@@ -146,17 +146,17 @@ public:
 
 private:
 
-	void buildRecursive(ulint node, packed_view_t text_wv,bool verbose){
+	void buildRecursive(ulint node, packed_view_t * text_wv,bool verbose){
 
 		if (verbose) cout << "    Building node number " << node << endl;
-		if (verbose) cout << "     Node length = " << text_wv.size() << " bits" << endl;
+		if (verbose) cout << "     Node length = " << text_wv->size() << " bits" << endl;
 
-		nodes[node] = StaticBitVector(text_wv.size());
+		nodes[node] = StaticBitVector(text_wv->size());
 
-		uint width = text_wv.width();
+		uint width = text_wv->width();
 
-		for(ulint i=0;i<text_wv.size();i++)
-			nodes[node].setBit(i,((ulint)text_wv[i])>>(width-1));//leftmost bit of the i-th word in text_wv
+		for(ulint i=0;i<text_wv->size();i++)
+			nodes[node].setBit(i,((ulint)(*text_wv)[i])>>(width-1));//leftmost bit of the i-th word in text_wv
 
 		if (verbose) cout << "     Computing rank structure ... " << flush;
 		nodes[node].computeRanks();
@@ -165,37 +165,35 @@ private:
 		if(width>1){//if there are children
 
 			//children
-			auto text_child0 = packed_view_t(width-1,nodes[node].numberOf0());
-			auto text_child1 = packed_view_t(width-1,nodes[node].numberOf1());
+			auto text_child0 = new packed_view_t(width-1,nodes[node].numberOf0());
+			auto text_child1 = new packed_view_t(width-1,nodes[node].numberOf1());
 
 			ulint j0=0;
 			ulint j1=0;
 
 			ulint MASK = (((ulint)1)<<(width-1))-1;
 
-			for(ulint i=0;i<text_wv.size();i++){//for each symbol in text_wv
+			for(ulint i=0;i<text_wv->size();i++){//for each symbol in text_wv
 
 				if(nodes[node].bitAt(i)==0){//if first bit is 0
-					text_child0[j0] = ((ulint)text_wv[i] & MASK);//we take the word in position i and we remove the leftmost bit
+					(*text_child0)[j0] = ((ulint)(*text_wv)[i] & MASK);//we take the word in position i and we remove the leftmost bit
 					j0++;
 				}else{
-					text_child1[j1] = ((ulint)text_wv[i] & MASK);
+					(*text_child1)[j1] = ((ulint)(*text_wv)[i] & MASK);
 					j1++;
 				}
 
 			}
 
-			//text_wv->freeMemory();
+			delete text_wv;
 
 			//call recursively
 
 			buildRecursive(child0(node),text_child0,verbose);
 			buildRecursive(child1(node),text_child1,verbose);
 
-		}
-
-		//if(text_wv->wordSize()==1)
-			//text_wv->freeMemory();
+		}else
+			delete text_wv;//delete leaf
 
 	}
 
