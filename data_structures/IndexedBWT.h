@@ -110,7 +110,7 @@ public:
 		else
 			marked_positions =  StaticBitVector(0);
 
-		text_pointers =  WordVector(number_of_SA_pointers,w);
+		text_pointers =  packed_view_t(w,number_of_SA_pointers);
 
 		log_sigma = bwt_wt.bitsPerSymbol();
 
@@ -167,7 +167,7 @@ public:
 
 		//here marked_positions.bitAt(i) == 1
 
-		return text_pointers.wordAt( marked_positions.rank1(i) ) + l;
+		return text_pointers[marked_positions.rank1(i)] + l;
 
 	}
 
@@ -202,7 +202,7 @@ public:
 
 		ulint FIRST_size = (sigma+1)*64;
 
-		return bwt_wt.size() + marked_positions.size() + text_pointers.size() + FIRST_size;
+		return bwt_wt.size() + marked_positions.size() + text_pointers.size()*text_pointers.width() + FIRST_size;
 
 	}
 
@@ -259,14 +259,6 @@ public:
 
 	~IndexedBWT() {}
 
-	void freeMemory(){
-
-		bwt_wt.freeMemory();
-		marked_positions.freeMemory();
-		text_pointers.freeMemory();
-
-	}
-
 	void saveToFile(FILE *fp){
 
 		fwrite(&TERMINATOR, sizeof(uint), 1, fp);
@@ -280,7 +272,8 @@ public:
 
 		bwt_wt.saveToFile(fp);
 		marked_positions.saveToFile(fp);
-		text_pointers.saveToFile(fp);
+		//text_pointers.saveToFile(fp);
+		save_packed_view_to_file(text_pointers,fp);
 
 		fwrite(FIRST.data(), sizeof(ulint), 257, fp);
 		fwrite(remapping.data(), sizeof(uchar), 256, fp);
@@ -311,11 +304,12 @@ public:
 
 		bwt_wt =  WaveletTree();
 		marked_positions =  StaticBitVector();
-		text_pointers =  WordVector();
+		//text_pointers =  WordVector();
 
 		bwt_wt.loadFromFile(fp);
 		marked_positions.loadFromFile(fp);
-		text_pointers.loadFromFile(fp);
+		//text_pointers.loadFromFile(fp);
+		text_pointers = load_packed_view_from_file(w, number_of_SA_pointers, fp);
 
 		FIRST = vector<ulint>(257);
 		remapping = vector<uchar>(256);
@@ -429,7 +423,7 @@ private:
 				}
 
 			if(marked_positions.bitAt(j)==1)
-				text_pointers.setWord( marked_positions.rank1(j), i );
+				text_pointers[marked_positions.rank1(j)] = i;
 
 			j = LF(j);
 			i--;
@@ -437,7 +431,7 @@ private:
 		}
 
 		//i=0
-		text_pointers.setWord( marked_positions.rank1(j), 0 );
+		text_pointers[marked_positions.rank1(j)] = 0;
 
 
 	}
@@ -455,7 +449,8 @@ private:
 
 	WaveletTree bwt_wt;//BWT stored as a wavelet tree
 	StaticBitVector marked_positions;//marks positions on the BWT having a text-pointer
-	WordVector text_pointers;//stores sampled text pointers (SA pointers)
+	//WordVector text_pointers;//stores sampled text pointers (SA pointers)
+	packed_view_t text_pointers;
 
 	vector<ulint> FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column
 

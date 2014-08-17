@@ -166,7 +166,9 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 bug1();
+	 auto pv = packed_view_t(3,10);
+
+	 cout << endl;
 
  }
 

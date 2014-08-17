@@ -38,15 +38,15 @@ public:
 		log_sigma = ceil(log2(sigma));
 
 		//store text in WordVector format (which offers useful bit operations)
-		WordVector * text_wv = new WordVector(n,log_sigma);
+		auto text_wv = packed_view_t(log_sigma,n);
 		for(ulint i = 0;i<n;i++)
-			text_wv->setWord(i,text[i]);
+			text_wv[i] = text[i];
 
 		number_of_nodes = ((ulint)1<<log_sigma)-1;
 
 		if (verbose) cout << "   Number of nodes = "<< number_of_nodes << endl;
 
-		nodes = new StaticBitVector * [number_of_nodes];
+		nodes = vector<StaticBitVector>(number_of_nodes);
 
 		//ROOT
 
@@ -70,14 +70,14 @@ public:
 
 		while(level<height()){
 
-			bit = nodes[node]->bitAt(i);
+			bit = nodes[node].bitAt(i);
 			c = c*2 + bit;
 
 			if(bit==0){
-				i = nodes[node]->rank0(i);
+				i = nodes[node].rank0(i);
 				node = child0(node);
 			}else{
-				i = nodes[node]->rank1(i);
+				i = nodes[node].rank1(i);
 				node = child1(node);
 			}
 
@@ -94,18 +94,9 @@ public:
 		ulint size = 0;
 
 		for(uint i=0;i<number_of_nodes;i++)
-			size += nodes[i]->size();
+			size += nodes[i].size();
 
 		return size;
-
-	}
-
-	void freeMemory(){
-
-		for(ulint i=0;i<number_of_nodes;i++)
-			nodes[i]->freeMemory();
-
-		delete [] nodes;
 
 	}
 
@@ -117,7 +108,7 @@ public:
 		fwrite(&number_of_nodes, sizeof(ulint), 1, fp);
 
 		for(ulint i=0;i<number_of_nodes;i++)
-			nodes[i]->saveToFile(fp);
+			nodes[i].saveToFile(fp);
 
 
 	}
@@ -135,13 +126,13 @@ public:
 		numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
 		check_numBytes();
 
-		nodes = new StaticBitVector*[number_of_nodes];
+		nodes = vector<StaticBitVector>(number_of_nodes);
 
 		for(ulint i=0;i<number_of_nodes;i++)
-			nodes[i] = new StaticBitVector();
+			nodes[i] = StaticBitVector();
 
 		for(ulint i=0;i<number_of_nodes;i++)
-			nodes[i]->loadFromFile(fp);
+			nodes[i].loadFromFile(fp);
 
 	}
 
@@ -155,42 +146,46 @@ public:
 
 private:
 
-	void buildRecursive(ulint node, WordVector * text_wv,bool verbose){
+	void buildRecursive(ulint node, packed_view_t text_wv,bool verbose){
 
 		if (verbose) cout << "    Building node number " << node << endl;
-		if (verbose) cout << "     Node length = " << text_wv->length() << " bits" << endl;
+		if (verbose) cout << "     Node length = " << text_wv.size() << " bits" << endl;
 
-		nodes[node] = new StaticBitVector(text_wv->length());
+		nodes[node] = StaticBitVector(text_wv.size());
 
-		for(ulint i=0;i<text_wv->length();i++)
-			nodes[node]->setBit(i,text_wv->bitAt(i,0));
+		uint width = text_wv.width();
+
+		for(ulint i=0;i<text_wv.size();i++)
+			nodes[node].setBit(i,((ulint)text_wv[i])>>(width-1));//leftmost bit of the i-th word in text_wv
 
 		if (verbose) cout << "     Computing rank structure ... " << flush;
-		nodes[node]->computeRanks();
+		nodes[node].computeRanks();
 		if (verbose) cout << "Done."<<endl;
 
-		if(text_wv->wordSize()>1){//if there are children
+		if(width>1){//if there are children
 
 			//children
-			WordVector * text_child0 = new WordVector(nodes[node]->numberOf0(),text_wv->wordSize()-1);
-			WordVector * text_child1 = new WordVector(nodes[node]->numberOf1(),text_wv->wordSize()-1);
+			auto text_child0 = packed_view_t(width-1,nodes[node].numberOf0());
+			auto text_child1 = packed_view_t(width-1,nodes[node].numberOf1());
 
 			ulint j0=0;
 			ulint j1=0;
 
-			for(ulint i=0;i<text_wv->length();i++){//for each symbol in text_wv
+			ulint MASK = (((ulint)1)<<(width-1))-1;
 
-				if(nodes[node]->bitAt(i)==0){//if first bit is 0
-					text_child0->setWord(j0,text_wv->wordAt(i));
+			for(ulint i=0;i<text_wv.size();i++){//for each symbol in text_wv
+
+				if(nodes[node].bitAt(i)==0){//if first bit is 0
+					text_child0[j0] = ((ulint)text_wv[i] & MASK);//we take the word in position i and we remove the leftmost bit
 					j0++;
 				}else{
-					text_child1->setWord(j1,text_wv->wordAt(i));
+					text_child1[j1] = ((ulint)text_wv[i] & MASK);
 					j1++;
 				}
 
 			}
 
-			text_wv->freeMemory();
+			//text_wv->freeMemory();
 
 			//call recursively
 
@@ -199,8 +194,8 @@ private:
 
 		}
 
-		if(text_wv->wordSize()==1)
-			text_wv->freeMemory();
+		//if(text_wv->wordSize()==1)
+			//text_wv->freeMemory();
 
 	}
 
@@ -210,16 +205,16 @@ private:
 
 	ulint recursiveRank(unsigned char c, ulint i, ulint node, uint level){//number of characters 'c' before position i excluded
 
-		if(nodes[node]->length()==0)//empty node
+		if(nodes[node].length()==0)//empty node
 			return 0;
 
 		uint bit = bitInWord(c,level);
 		uint rank;
 
 		if(bit==0)
-			rank = nodes[node]->rank0(i);
+			rank = nodes[node].rank0(i);
 		else
-			rank = nodes[node]->rank1(i);
+			rank = nodes[node].rank1(i);
 
 		if(level==log_sigma-1)//leaf
 			return rank;
@@ -236,7 +231,7 @@ private:
 
 	ulint n;//text length
 
-	StaticBitVector ** nodes;//the tree: a vector of bitvectors
+	vector<StaticBitVector> nodes;//the tree: a vector of bitvectors
 	uint sigma;//alphabet size
 	uint log_sigma;//number of bits for each symbol
 	ulint number_of_nodes;
