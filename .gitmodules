@@ -1,3 +1,0 @@
-[submodule "extern/bitvector"]
-	path = extern/bitvector
-	url = https://github.com/nicola-gigante/bitvector
