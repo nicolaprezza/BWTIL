@@ -9,9 +9,7 @@ mail: nicolapr@gmail.com
 
 This is a version of the popular alphabet-friendly FM index, but without compression. The index occupies space close to the uncompressed text (succinct space).
 
-
-*** Test ***
-
+### Test 
 
 After compiling (see BWTIL/README), in the sFM-index/ directory execute
 
@@ -23,11 +21,10 @@ to build a succinct FM-index with pattern on the file BWTIL/data/plain/dna.1MB .
 
 to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the index just created.
 
+### Execute
 
-*** Notes ***
+In the BWTIL/ directory, execute
 
+> ./sFM-index
 
-please note that, due to the particular suffix array library employed, the builtin construction of the BWT can currently handle only texts shorter than 2^31 characters. We are working to integrate more powerful BWT-construction libraries in our software.
-
-
-
+to display info about the tool usage.

@@ -1,0 +1,22 @@
+bwt-invert
+===============
+Welcome to the bwt inverter bwt-invert!
+
+Authors: Nicola Prezza
+mail: nicolapr@gmail.com
+
+### Brief description
+
+This tool can be used to invert a BWT file.
+
+bwt-invert operates building a (wavelet-tree based) succinct index (n+o(n) bytes) over the bwt file. This index is then used to navigate backwards the bwt in order to invert it and reconstruct the original text.
+
+INPUT FORMAT: the bwt file is assumed to be a valid bwt of some text file, with a 0x0 byte (text terminator) appearing only once inside it.
+
+### Execute
+
+In the BWTIL/ directory, execute
+
+> ./bwt-invert
+
+to display info about the tool usage.

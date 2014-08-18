@@ -22,12 +22,3 @@ to build a dB-hash with pattern length=30 on the file BWTIL/data/plain/dna.1MB .
 > make example-search
 
 to search the pattern "ATCCATGTAGATATAACACAGCTATTTTCA" (exact search) in the dB-hash just created.
-
-
-*** Notes ***
-
-
-please note that, due to the particular suffix array library employed, the builtin construction of the BWT can currently handle only texts shorter than 2^31 characters. To build the structure on longer texts, an external tool can be used to compute the BWT (which can then be given as input to one of the constructors of the dB-hash data structure). We are working to integrate more powerful BWT-construction libraries in our software.
-
-
-
