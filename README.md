@@ -7,19 +7,19 @@ mail: nicolapr@gmail.com
 
 The BWTIL library offers a set of tools, classes and functions appositely designed to facilitate operations that involve manipulating the Burrows-Wheeler text transform (example: computing/inverting the BWT or checking its correctness) and indexes based on the BWT. The library is specifically designed to deal with large files (which means up to 2^64 characters) and implements efficient algorithms and data structures to offer good time-and-space performances. BWTIL comes with some sample programs and classes, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, the dB-hash data structure (paper under review) and a succinct wavelet-tree based FM index. The available executables (to date) are:
 
- >> dB-hash : an implementation of the dB-hash data structure (see tools/dB-hash/README)
+ >> **dB-hash** : an implementation of the dB-hash data structure (see tools/dB-hash/README)
  
- >> sFM-index : an implementation of a succinct (uncompressed) FM-index (see tools/sFM-index/README)
+ >> **sFM-index** : an implementation of a succinct (uncompressed) FM-index (see tools/sFM-index/README)
 
- >> cw-bwt (paper coming soon) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
+ >> **cw-bwt** (paper coming soon) : a novel context-wise bwt construction algorithm (see tools/cw-bwt/README)
  
- >> bwt-check : check consistency of a BWT file (see tools/bwt-check/README)
+ >> **bwt-check** : check consistency of a BWT file (see tools/bwt-check/README)
  
- >> bwt-to-sa : build the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
+ >> **bwt-to-sa** : build the Suffix Array from a BWT file (see tools/bwt-to-sa/README)
  
- >> sa-to-bwt : build the BWT from a suffix array file (see tools/sa-to-bwt/README)
+ >> **sa-to-bwt** : build the BWT from a suffix array file (see tools/sa-to-bwt/README)
  
- >> bwt-invert : invert a BWT file to reconstruct the original text (see tools/bwt-invert/README)
+ >> **bwt-invert** : invert a BWT file to reconstruct the original text (see tools/bwt-invert/README)
 
 ### Download
 
