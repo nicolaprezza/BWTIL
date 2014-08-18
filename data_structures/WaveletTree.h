@@ -13,7 +13,6 @@
 #define WAVELETTREE_H_
 
 #include "StaticBitVector.h"
-#include "WordVector.h"
 
 namespace bwtil {
 
@@ -37,7 +36,6 @@ public:
 
 		log_sigma = ceil(log2(sigma));
 
-		//store text in WordVector format (which offers useful bit operations)
 		auto text_wv = new packed_view_t(log_sigma,n);
 		for(ulint i = 0;i<n;i++)
 			(*text_wv)[i] = text[i];

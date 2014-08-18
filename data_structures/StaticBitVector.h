@@ -17,7 +17,6 @@
 #ifndef STATICBITVECTOR_H_
 #define STATICBITVECTOR_H_
 
-#include "WordVector.h"
 #include "../common/common.h"
 
 namespace bwtil {
@@ -49,7 +48,7 @@ public:
 
 		if(w<1) w=1;
 
-		D = 63;
+		D = 64;
 
 		/*
 		 * bits are grouped in words of D bits.
@@ -61,7 +60,7 @@ public:
 		 *
 		 */
 
-		bitvector = WordVector( ceil((double)(n+1)/D) , D);// the bitvector
+		bitvector = bitview_t(n);
 		rank_ptrs_1 = packed_view_t( w, ceil((double)(n+1)/(D*D)) );//log n bits every D^2 positions
 		rank_ptrs_2 = packed_view_t( 2*ceil(log2(D)), ceil((double)(n+1)/D));//2 log D bits every D positions
 
@@ -90,17 +89,6 @@ public:
 			if((i+1)%D==0){
 				rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
 
-				/*if(rank_ptrs_2.wordAt((i+1)/D)>1000000000){
-
-					cout << "\n*** ERR : read "<<rank_ptrs_2.wordAt((i+1)/D)<< " but write " << nr_of_ones_local << endl;//TODO debugging
-					cout << "*** Position: " << (i+1)/D << endl;//TODO debugging
-					cout << "*** max size: " << rank_ptrs_2.length() << endl;//TODO debugging
-
-					cout << "This error shows up when compiling with clang++ and needs debugging. Please, switch to g++." << endl;
-					exit(0);
-
-				}*/
-
 			}
 
 			if((i+1)%(D*D)==0)
@@ -118,7 +106,8 @@ public:
 
 	inline ulint rank1(ulint i){//number of 1's before position i (excluded) in the bitvector
 
-		return rank_ptrs_1[i/(D*D)] + rank_ptrs_2[i/D] + rank(bitvector.wordAt(i/D),i%D);
+		//rank(bitvector.wordAt(i/D),i%D);
+		return rank_ptrs_1[i/(D*D)] + rank_ptrs_2[i/D] + popcnt( bitvector.get((i/D)*D,i) );//  [i/D],i%D);// bitvector.bits().popcount((i/D)*D, i);
 
 	}
 
@@ -126,13 +115,13 @@ public:
 
 	inline uint bitAt(ulint i){//get value of the i-th bit
 
-		return bitvector.bitAt(i);
+		return bitvector[i];
 
 	}
 
-	inline void setBit(ulint i, uint b){//set bit in position i
+	inline void setBit(ulint i, bool b){//set bit in position i
 
-		bitvector.setBit(i,b);
+		bitvector[i] = b;
 
 	}
 
@@ -145,15 +134,16 @@ public:
 		ulint rank_ptrs_1_size = rank_ptrs_1.size();
 		ulint rank_ptrs_2_width = rank_ptrs_2.width();
 		ulint rank_ptrs_2_size = rank_ptrs_2.size();
+		ulint bitvector_size = bitvector.size();
 
 		fwrite(&rank_ptrs_1_size, sizeof(ulint), 1, fp);
 		fwrite(&rank_ptrs_2_width, sizeof(ulint), 1, fp);
 		fwrite(&rank_ptrs_2_size, sizeof(ulint), 1, fp);
+		fwrite(&bitvector_size, sizeof(ulint), 1, fp);
 
 		save_packed_view_to_file(rank_ptrs_1,rank_ptrs_1_size,fp);
 		save_packed_view_to_file(rank_ptrs_2,rank_ptrs_2_size,fp);
-
-		bitvector.saveToFile(fp);
+		save_bitview_to_file(bitvector,bitvector_size,fp);
 
 	}
 
@@ -171,6 +161,7 @@ public:
 		ulint rank_ptrs_1_size;
 		ulint rank_ptrs_2_width;
 		ulint rank_ptrs_2_size;
+		ulint bitvector_size;
 
 		numBytes = fread(&rank_ptrs_1_size, sizeof(ulint), 1, fp);
 		check_numBytes();
@@ -178,12 +169,12 @@ public:
 		check_numBytes();
 		numBytes = fread(&rank_ptrs_2_size, sizeof(ulint), 1, fp);
 		check_numBytes();
+		numBytes = fread(&bitvector_size, sizeof(ulint), 1, fp);
+		check_numBytes();
 
 		rank_ptrs_1 = load_packed_view_from_file(w, rank_ptrs_1_size,fp);
 		rank_ptrs_2 = load_packed_view_from_file(rank_ptrs_2_width, rank_ptrs_2_size,fp);
-
-		bitvector = WordVector();
-		bitvector.loadFromFile(fp);
+		bitvector = load_bitview_from_file(bitvector_size,fp);
 
 	}
 
@@ -194,21 +185,10 @@ public:
 
 protected:
 
-	ulint rank(ulint W, uint i){//number of 1's before position i (excluded) in the word W (of D bits)
-
-		//warning: i must be <D
-
-		ulint mask = (((ulint)1<<i)-1)<<(D-i);
-		ulint masked = W & mask;
-
-		return popcnt(masked);
-
-	}
-
 	ulint n;//length of the bitvector
 	uint w;//size of the word = log2 n
 
-	WordVector bitvector;//the bits are stored in a WordVector, so that they can be accessed in blocks of size D
+	bitview_t bitvector;//the bits are stored in a WordVector, so that they can be accessed in blocks of size D
 	packed_view_t rank_ptrs_1;//rank pointers sampled every D^2 positions
 	packed_view_t rank_ptrs_2;//rank pointers sampled every D positions
 

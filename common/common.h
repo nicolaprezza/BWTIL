@@ -129,6 +129,61 @@ packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp)
 
 }
 
+void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
+
+	ulint i = 0;
+	ulint x;
+
+	while(i+64<=size){
+
+		x = bv.get(i,i+64);
+		fwrite(&x, sizeof(ulint), 1, fp);
+
+		i+=64;
+
+	}
+
+	if(i<size){
+
+		x = bv.get(i,size);
+		fwrite(&x, sizeof(ulint), 1, fp);
+
+	}
+
+}
+
+bitview_t load_bitview_from_file(size_t size, FILE * fp){
+
+	ulint i = 0;
+	ulint x;
+
+	bitview_t bv = bitview_t(size);
+	ulint numBytes;
+
+	while(i+64<=size){
+
+		numBytes=fread(&x, sizeof(ulint), 1, fp);
+		check_numBytes();
+
+		bv.set(i,i+64,x);
+
+		i+=64;
+
+	}
+
+	if(i<size){
+
+		numBytes=fread(&x, sizeof(ulint), 1, fp);
+		check_numBytes();
+
+		bv.set(i,size,x);
+
+	}
+
+	return bv;
+
+}
+
 void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
 
 	if(pv.width()<=8)

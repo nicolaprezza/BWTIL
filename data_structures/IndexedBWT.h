@@ -19,7 +19,6 @@
 
 #include "WaveletTree.h"
 #include "StaticBitVector.h"
-#include "WordVector.h"
 
 namespace bwtil {
 
@@ -446,7 +445,6 @@ private:
 
 	WaveletTree bwt_wt;//BWT stored as a wavelet tree
 	StaticBitVector marked_positions;//marks positions on the BWT having a text-pointer
-	//WordVector text_pointers;//stores sampled text pointers (SA pointers)
 	packed_view_t text_pointers;
 
 	vector<ulint> FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column

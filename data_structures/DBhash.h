@@ -12,7 +12,6 @@
 #include "../common/common.h"
 #include "HashFunction.h"
 #include "IndexedBWT.h"
-#include "WordVector.h"
 #include "../extern/sais.h"
 
 namespace bwtil {
@@ -125,12 +124,12 @@ public:
 
 		pair<ulint, ulint> interval;
 
-		interval.first = auxiliary_hash.wordAt(suffix);
+		interval.first = auxiliary_hash[suffix];
 
 		if (suffix + 1 == auxiliary_hash_size)
 			interval.second = text_fingerprint_length + 1;
 		else
-			interval.second = auxiliary_hash.wordAt(suffix+1);
+			interval.second = auxiliary_hash[suffix+1];
 
 		return indexedBWT.convertToTextCoordinates( indexedBWT.BS(prefix,w-w_aux,interval) );
 
@@ -138,7 +137,7 @@ public:
 
 	ulint size(){//returns size of the structure in bits
 
-		return indexedBWT.size() + text_wv.size()*text_wv.width() + auxiliary_hash.size();
+		return indexedBWT.size() + text_wv.size()*text_wv.width() + auxiliary_hash.size()*auxiliary_hash.width();
 
 	}
 
@@ -228,7 +227,7 @@ public:
 		indexedBWT.saveToFile(fp);
 
 		save_packed_view_to_file(text_wv,n,fp);
-		auxiliary_hash.saveToFile(fp);
+		save_packed_view_to_file(auxiliary_hash,auxiliary_hash_size,fp);
 
 	}
 
@@ -269,8 +268,7 @@ public:
 
 		text_wv = load_packed_view_from_file(log_sigma,n,fp);
 
-		auxiliary_hash =  WordVector();
-		auxiliary_hash.loadFromFile(fp);
+		auxiliary_hash = load_packed_view_from_file(ceil(log2(n+1)),auxiliary_hash_size,fp);
 
 	}
 
@@ -368,7 +366,7 @@ protected:
 
 	void initAuxHash(){
 
-		auxiliary_hash =  WordVector(auxiliary_hash_size,ceil(log2(n+1)));
+		auxiliary_hash =  packed_view_t(ceil(log2(n+1)),auxiliary_hash_size);
 
 		ulint empty = text_fingerprint_length+1;
 
@@ -379,9 +377,9 @@ protected:
 			pair<ulint,ulint> interval = indexedBWT.BS(i,w_aux);
 
 			if(interval.second>interval.first)
-				auxiliary_hash.setWord(i,interval.first);
+				auxiliary_hash[i] = interval.first;
 			else
-				auxiliary_hash.setWord(i,empty);
+				auxiliary_hash[i] = empty;
 
 			perc = (100*i)/auxiliary_hash_size;
 			if(perc>last_perc and perc%10==0){
@@ -393,13 +391,13 @@ protected:
 
 		}
 
-		if (auxiliary_hash.wordAt(auxiliary_hash_size-1) == empty)
-			auxiliary_hash.setWord(auxiliary_hash_size-1,text_fingerprint_length);
+		if (auxiliary_hash[auxiliary_hash_size-1] == empty)
+			auxiliary_hash[auxiliary_hash_size-1] = text_fingerprint_length;
 
 		for (ulint i = auxiliary_hash_size - 1; i >= 1; i--) {
 
-			if (auxiliary_hash.wordAt(i-1) == empty)
-				auxiliary_hash.setWord(i-1,auxiliary_hash.wordAt(i));
+			if (auxiliary_hash[i-1] == empty)
+				auxiliary_hash[i-1] = auxiliary_hash.get(i);
 
 		}
 
@@ -417,7 +415,7 @@ protected:
 
 	IndexedBWT indexedBWT;
 	packed_view_t text_wv;//the plain text
-	WordVector auxiliary_hash;
+	packed_view_t auxiliary_hash;
 
 	uint sigma;//alphabet size
 	uint log_sigma;//log2(sigma)
