@@ -38,6 +38,7 @@ To compile, run
 or (to specify which compiler to use)
 
 > CXX=clang++ make
+
 > CXX=g++ make
 
 in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
