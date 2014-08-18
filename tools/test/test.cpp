@@ -166,12 +166,15 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 auto pv = new packed_view_t(3,10);
+	 ulint n=1005;
+	 auto pv =  packed_view<vector>(3,n);
+	 cout << pv.size() << endl;
+	 cout << pv.width() << endl;
 
-	 (*pv)[1] = 3;
-	 cout << (*pv)[1];
-
-	 cout << endl;
+	 n=999999;
+	 pv =  packed_view<vector>(3,n);
+	 cout << pv.size() << endl;
+	 cout << pv.width() << endl;
 
  }
 

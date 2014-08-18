@@ -236,6 +236,7 @@ public:
 		check_numBytes();
 		numBytes = fread(&max_value_size, sizeof(ulint), 1, fp);
 		check_numBytes();
+
 		v_64bit_words = new ulint[n64];
 		numBytes = fread(v_64bit_words, sizeof(ulint), n64, fp);
 		check_numBytes();

@@ -113,7 +113,7 @@ Then, to search for the occurrencies of the pattern "static unsigned long", run
 
 the command 
 
-> make example
+> make testcases
 
 will execute automatically all the above examples.
 

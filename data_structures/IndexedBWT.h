@@ -272,8 +272,7 @@ public:
 
 		bwt_wt.saveToFile(fp);
 		marked_positions.saveToFile(fp);
-		//text_pointers.saveToFile(fp);
-		save_packed_view_to_file(text_pointers,fp);
+		save_packed_view_to_file(text_pointers,number_of_SA_pointers,fp);
 
 		fwrite(FIRST.data(), sizeof(ulint), 257, fp);
 		fwrite(remapping.data(), sizeof(uchar), 256, fp);
@@ -304,11 +303,9 @@ public:
 
 		bwt_wt =  WaveletTree();
 		marked_positions =  StaticBitVector();
-		//text_pointers =  WordVector();
 
 		bwt_wt.loadFromFile(fp);
 		marked_positions.loadFromFile(fp);
-		//text_pointers.loadFromFile(fp);
 		text_pointers = load_packed_view_from_file(w, number_of_SA_pointers, fp);
 
 		FIRST = vector<ulint>(257);

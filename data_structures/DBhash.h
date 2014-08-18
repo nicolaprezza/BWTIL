@@ -138,12 +138,12 @@ public:
 
 	ulint size(){//returns size of the structure in bits
 
-		return indexedBWT.size() + text_wv.size() + auxiliary_hash.size();
+		return indexedBWT.size() + text_wv.size()*text_wv.width() + auxiliary_hash.size();
 
 	}
 
 	unsigned char textAt(ulint i){
-		return int_to_char[text_wv.wordAt(i)];
+		return int_to_char[text_wv[i]];
 	}
 
 	unsigned char * computeBWT(unsigned char* text, ulint length){
@@ -220,12 +220,14 @@ public:
 		fwrite(&text_fingerprint_length, sizeof(ulint), 1, fp);
 		fwrite(&sigma, sizeof(uint), 1, fp);
 		fwrite(&log_sigma, sizeof(uint), 1, fp);
+
 		fwrite(char_to_int.data(), sizeof(uint), 256, fp);
 		fwrite(int_to_char.data(), sizeof(unsigned char), sigma, fp);
 
 		h.saveToFile(fp);
 		indexedBWT.saveToFile(fp);
-		text_wv.saveToFile(fp);
+
+		save_packed_view_to_file(text_wv,n,fp);
 		auxiliary_hash.saveToFile(fp);
 
 	}
@@ -260,13 +262,14 @@ public:
 		check_numBytes();
 
 		h = HashFunction();
-		indexedBWT =  IndexedBWT();
-		text_wv =  WordVector();
-		auxiliary_hash =  WordVector();
-
 		h.loadFromFile(fp);
+
+		indexedBWT =  IndexedBWT();
 		indexedBWT.loadFromFile(fp);
-		text_wv.loadFromFile(fp);
+
+		text_wv = load_packed_view_from_file(log_sigma,n,fp);
+
+		auxiliary_hash =  WordVector();
 		auxiliary_hash.loadFromFile(fp);
 
 	}
@@ -356,10 +359,10 @@ protected:
 		log_sigma = ceil(log2(sigma));
 		if(log_sigma==0) log_sigma=1;
 
-		text_wv =  WordVector(n,log_sigma);
+		text_wv =  packed_view_t(log_sigma,n);
 
 		for(ulint i = 0;i<n;i++)
-			text_wv.setWord(i,char_to_int[text[i]]);
+			text_wv[i] = char_to_int[text[i]];
 
 	}
 
@@ -413,7 +416,7 @@ protected:
 	ulint offrate;
 
 	IndexedBWT indexedBWT;
-	WordVector text_wv;//the plain text
+	packed_view_t text_wv;//the plain text
 	WordVector auxiliary_hash;
 
 	uint sigma;//alphabet size

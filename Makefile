@@ -89,11 +89,11 @@ bwt-invert:
 
 	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o bwt-invert $(SOURCES_BWT_INVERT)
 
-test:
+debug:
 
-	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o test $(SOURCES_TEST)
+	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o debug $(SOURCES_TEST)
 
-example:
+testcases:
 
 	./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
 	./bwt-check data/bwt/sources.1MB.bwt data/plain/sources.1MB

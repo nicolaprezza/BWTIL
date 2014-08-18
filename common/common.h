@@ -46,6 +46,7 @@ typedef unsigned char symbol;
 typedef unsigned char uint8;
 
 typedef packed_view<vector> packed_view_t;
+typedef bitview<vector> bitview_t;
 
 constexpr uint W_leafs = 2048;//packed B-trees parameters
 constexpr uint W_nodes = 256;
@@ -99,9 +100,9 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 }
 
 template <typename T>
-void save_packed_view_to_file_T(packed_view_t pv, FILE * fp){
+void save_packed_view_to_file_T(packed_view_t pv, size_t size, FILE * fp){
 
-	for(uint i=0;i<pv.size();i++){
+	for(uint i=0;i<size;i++){
 		T x = pv[i];
 		fwrite(&x, sizeof(T), 1, fp);
 	}
@@ -111,14 +112,15 @@ void save_packed_view_to_file_T(packed_view_t pv, FILE * fp){
 template <typename T>
 packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp){
 
- auto pv = packed_view_t(width,size);
+ packed_view_t pv = packed_view_t(width,size);
 
  ulint numBytes;
- for(uint i=0;i<pv.size();i++){
+ for(uint i=0;i<size;i++){
 
 	 T x;
 	 numBytes=fread(&x, sizeof(T), 1, fp);
 	 check_numBytes();
+
 	 pv[i] = x;
 
  }
@@ -127,16 +129,16 @@ packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp)
 
 }
 
-void save_packed_view_to_file(packed_view_t pv, FILE * fp){
+void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
 
 	if(pv.width()<=8)
-		save_packed_view_to_file_T<uint8_t>(pv,fp);
-	if(pv.width()<=16)
-		save_packed_view_to_file_T<uint16_t>(pv,fp);
-	if(pv.width()<=32)
-		save_packed_view_to_file_T<uint32_t>(pv,fp);
+		save_packed_view_to_file_T<uint8_t>(pv,size,fp);
+	else if(pv.width()<=16)
+		save_packed_view_to_file_T<uint16_t>(pv,size,fp);
+	else if(pv.width()<=32)
+		save_packed_view_to_file_T<uint32_t>(pv,size,fp);
 	else
-		save_packed_view_to_file_T<uint64_t>(pv,fp);
+		save_packed_view_to_file_T<uint64_t>(pv,size,fp);
 
 }
 

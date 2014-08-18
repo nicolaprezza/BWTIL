@@ -129,9 +129,6 @@ public:
 		nodes = vector<StaticBitVector>(number_of_nodes);
 
 		for(ulint i=0;i<number_of_nodes;i++)
-			nodes[i] = StaticBitVector();
-
-		for(ulint i=0;i<number_of_nodes;i++)
 			nodes[i].loadFromFile(fp);
 
 	}
