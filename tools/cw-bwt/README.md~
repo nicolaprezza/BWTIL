@@ -18,10 +18,14 @@ SPACE:	n * Hk + o(n * Hk) bits	(compressed succinct space)
 
 TIME:
 
-|    |      complexity      |  notes |
-|----------|:-------------:|------:|
-| expected/average |  O( n * Hk ) | (*) |
-| worst-case |    O( n * log n * Hk )   |   (**) |
+---------------------------------------------------------------------------------------------
+		complexity	notes	
+
+expected/avg	O( n * Hk )	(*)
+
+worst-case	O( n * log n * Hk )	(**)
+
+---------------------------------------------------------------------------------------------
 
 Notes: 
 
