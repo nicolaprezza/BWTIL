@@ -29,7 +29,7 @@ The BWTIL library offers a set of tools, classes and functions appositely design
  ***   Download  ***
 
 
-Since BWTIL includes extern git repositories, clone it using the --recursive option:
+Since BWTIL includes extern git repositories as submodules, clone it using the --recursive option:
 
 > git clone --recursive https://github.com/nicolaprezza/BWTIL
 
@@ -37,23 +37,20 @@ Since BWTIL includes extern git repositories, clone it using the --recursive opt
  ***   Compile   ***
 
 
-The library has been extensively tested under linux using gcc 4.8.2. The Makefile supports also clang++; however, some bugs seem to appear when compiling with clang++ and still need to be fixed. If any program crashes with clang++, please re-compile with gcc >= 4.8.2.
+The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5.
 
 To compile, run
 
 > make
 
-or (for clang++)
+or (to specify which compiler to use)
 
 > CXX=clang++ make
+> CXX=g++ make
 
 in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
 
 > make tool_name
-
-or (for clang++)
-
-> CXX=clang++ make tool_name
 
 where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
 

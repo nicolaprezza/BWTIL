@@ -166,11 +166,12 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 bitview_t pv = bitview_t(70);
+	 string s("ab");
 
-	 pv.set(0,64,6423423);
 
-	 cout << pv.get(0,64) << endl;
+	 s[2]=0;
+
+	 cout << (uint)s[2]<<endl;
 
  }
 

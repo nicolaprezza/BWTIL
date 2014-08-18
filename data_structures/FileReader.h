@@ -55,6 +55,19 @@ public:
 
 	}
 
+	string toString(){
+
+		string s="";
+
+		while(not eof())
+			s += get();
+
+		rewind();
+
+		return s;
+
+	}
+
 	ulint size(){return n;}
 
 	bool eof(){return pos>=n;}
