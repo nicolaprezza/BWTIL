@@ -1,13 +1,9 @@
-
- ***   BWTIL : the BWT Text-indexing Library   ***
-
-
+BWTIL : the BWT Text-indexing Library
+===============
 Authors: Nicola Prezza, Nicola Gigante, and Alberto Policriti
 mail: nicolapr@gmail.com
 
-
- ***   Brief introduction   ***
-
+### Brief introduction
 
 The BWTIL library offers a set of tools, classes and functions appositely designed to facilitate operations that involve manipulating the Burrows-Wheeler text transform (example: computing/inverting the BWT or checking its correctness) and indexes based on the BWT. The library is specifically designed to deal with large files (which means up to 2^64 characters) and implements efficient algorithms and data structures to offer good time-and-space performances. BWTIL comes with some sample programs and classes, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, the dB-hash data structure (paper under review) and a succinct wavelet-tree based FM index. The available executables (to date) are:
 
@@ -25,17 +21,13 @@ The BWTIL library offers a set of tools, classes and functions appositely design
  
  >> bwt-invert : invert a BWT file to reconstruct the original text (see tools/bwt-invert/README)
 
-
- ***   Download  ***
-
+### Download
 
 Since BWTIL includes extern git repositories as submodules, clone it using the --recursive option:
 
 > git clone --recursive https://github.com/nicolaprezza/BWTIL
 
-
- ***   Compile   ***
-
+### Compile
 
 The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5.
 
@@ -54,15 +46,11 @@ in the main BWTIL/ directory. To compile the executables individually, execute (
 
 where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
 
-
- ***   Test   ***
-
+### Test
 
 The folder BWTIL/data/plain/ contains some sample files to test the library. All files have been obtained taking the first 1M characters from the sample files of the pizza&chili text collection (http://pizzachili.dcc.uchile.cl/).
 
-
- *** Some examples ***
-
+### Some examples
 
 After compiling, in the main BWTIL/ directory run
 
@@ -113,5 +101,4 @@ the command
 > make testcases
 
 will execute automatically all the above examples.
-
 
