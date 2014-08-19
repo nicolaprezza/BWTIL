@@ -25,7 +25,7 @@ TIME:
 
 Notes: 
 
-(*) Despite the worst case time of O(n log n Hk), by analysing the load of the internal data structures on a variety of texts (pizza&chilli repository) we can safely state that cw-bwt runs in average O(n Hk) time on most of the text of interest (i.e. are excluded only texts with extreme high redundancy).
+(*) Despite the worst case time of O(n log n Hk), by analysing the load of the internal data structures on a variety of texts (pizza&chilli repository) we can safely state that cw-bwt runs in average O(n Hk) time on most of the text of interest (i.e. are excluded only texts with extreme high redundancy). To check this, it is sufficient to run cw-bwt (e.g. on pizza&chilli sample texts) and verify indeed that the average packed B-tree height is (almost) always less than or equal to that expected from a uniform text (this info is provided as output). Since the expected complexity for a uniform random text is linear, it follows that also on most texts of interest cw-bwt runs in linear time.
 
 (**) A factor log n * Hk from being optimal. The worst-case is a text with a lot of large (O(n)) length-k contexts; notice, however, that in this case the text is also highly compressible (Hk is small)
 
@@ -36,3 +36,20 @@ In the BWTIL/ directory, execute
 > ./cw-bwt
 
 to display info about the tool usage.
+
+### Use the class
+
+To use the class in your own code, just include algorithms/cw_bwt.h . After that, building the BWT of a string object is straightforward. There are two ways to proceed:
+
+ * **Memory efficient (use disk as buffer)**: 
+	1. save your text (string/array) to disk (e.g. to file "some_path/file.txt")
+	2. free memory (i.e. delete text buffer)
+	3. run cw-bwt loading the text from the file created in step 1 and store directly to file. Do this step in a different scope, so that after saving, the cw\_bwt object will be automatically deleted
+	> { cw\_bwt("some\_path/file.txt",cw_bwt::path).toFile("some\_path/file.txt.bwt"); }
+	4. load in RAM the bwt created in step 3 (i.e. from file "some\_path/file.txt.bwt")
+
+ * **Less memory efficient (maintain text, bwt and cw\_bwt object in RAM)** This is very simple (text=string with your text file, bwt=string with the bwt):
+	> string bwt = cw\_bwt(text,cw_bwt::text).toString();
+
+
+

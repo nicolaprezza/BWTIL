@@ -6,6 +6,7 @@
  */
 
 #include "../../algorithms/cw_bwt.h"
+#include "../../extern/getRSS.h"
 
 using namespace bwtil;
 
@@ -89,6 +90,8 @@ using namespace bwtil;
 	 * WARNING: if you directly print cwbwt.toString(), you won't see the terminator character since it is a 0x0 byte.
 	 *
 	 */
+
+	printRSSstat(cwbwt.length());
 
 	auto t2 = high_resolution_clock::now();
 	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();

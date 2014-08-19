@@ -33,25 +33,27 @@ using namespace bwtil;
 
     auto t1 = high_resolution_clock::now();
 
-	FileReader bwt_fr(argv[1]);
+    IndexedBWT idxBWT;
+    ulint n_inv_bwt=0;
 
-	ulint n_bwt = bwt_fr.size();
-	ulint n_inv_bwt = n_bwt-1;
+    {
 
-	uchar * bwt = new uchar[n_bwt];//with text terminator 0x0
+		FileReader fr(argv[1]);
+		string bwt = fr.toString();
+		fr.close();
 
-	bwt_fr.read(bwt,n_bwt);
-	bwt_fr.close();
+		n_inv_bwt = bwt.length()-1;
 
-	cout << "Indexing the BWT ... " << endl << endl;
+		cout << "BWT length =  " << bwt.length() << endl;
+		cout << "Indexing the BWT ... " << endl << endl;
 
-	IndexedBWT idxBWT = IndexedBWT(bwt,n_bwt,0,true);
+		idxBWT = IndexedBWT(bwt,0,true);
 
-	delete [] bwt;
+    }
 
-	uchar * inverted_bwt = new uchar[n_inv_bwt];//without text terminator 0x0
+	cout << "\nDone. Inverting the BWT ... " << endl;
 
-	cout << "\nDone. Inverting the BWT  ... " << endl;
+	string inverted_bwt = string(n_inv_bwt,'e');//without text terminator 0x0
 
 	//invert the bwt
 
@@ -84,7 +86,7 @@ using namespace bwtil;
 		exit(1);
 	}
 
-	fwrite(inverted_bwt, sizeof(uchar), n_inv_bwt, fp);
+	fwrite(inverted_bwt.data(), sizeof(uchar), n_inv_bwt, fp);
 	fclose(fp);
 
 	cout << "Done. Inverted BWT saved in " << argv[2] << endl;

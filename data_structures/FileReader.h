@@ -16,17 +16,17 @@ class FileReader {
 
 public:
 
+	FileReader();
+
 	FileReader(string path){
 
-		this->path=path;
-
-		fs.open (path.c_str(), ios::binary );
+		fs = new ifstream(path.c_str(), ios::binary);
 
 		streampos begin,end;
-		begin = fs.tellg();
-		fs.seekg (0, ios::end);
-		end = fs.tellg();
-		fs.seekg (0, ios::beg);
+		begin = fs->tellg();
+		fs->seekg (0, ios::end);
+		end = fs->tellg();
+		fs->seekg (0, ios::beg);
 
 		n=end-begin;
 		pos=0;
@@ -35,15 +35,17 @@ public:
 
 	uchar get(){
 
-		fs.read(&x,1);
+		char x;
+		fs->read(&x,1);
 		pos++;
+
 		return (uchar)x;
 
 	}
 
 	void rewind(){
 
-		fs.seekg (0, ios::beg);
+		fs->seekg (0, ios::beg);
 		pos=0;
 
 	}
@@ -57,10 +59,14 @@ public:
 
 	string toString(){
 
-		string s="";
+		rewind();
+		string s;
 
-		while(not eof())
-			s += get();
+		s = string(n,'e');//allocate space for n chars
+		fs->read((char *)s.data(),n);
+
+		/*while(not eof())
+			s += get();*/
 
 		rewind();
 
@@ -72,15 +78,12 @@ public:
 
 	bool eof(){return pos>=n;}
 
-	void close(){fs.close();}
+	void close(){fs->close();delete fs;}
 
 private:
 
-	string path;
-	std::ifstream fs;
+	std::ifstream * fs;
 	ulint n;
-
-	char x;
 
 	ulint pos;
 

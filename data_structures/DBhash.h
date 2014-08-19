@@ -12,7 +12,7 @@
 #include "../common/common.h"
 #include "HashFunction.h"
 #include "IndexedBWT.h"
-#include "../extern/sais.h"
+#include "../algorithms/cw_bwt.h"
 
 namespace bwtil {
 
@@ -22,11 +22,11 @@ public:
 
 	DBhash(){};
 
-	DBhash(unsigned char * text, unsigned char * bwt, ulint n, HashFunction h, ulint offrate = 4, bool verbose = false){
+	DBhash(string text, string bwt, HashFunction h, ulint offrate = 4, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
-		this->n = n;
+		this->n = text.length();
 		this->h = h;
 		this->offrate = offrate;
 
@@ -42,17 +42,13 @@ public:
 
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
-		if(verbose)	cout << " Building bit tables ...";
-
-		if(verbose)	cout << " Done.\n";
-
 		if(verbose)	cout << " Storing text in plain format ...";
 
 		initText(text);
 
 		if(verbose)	cout << " Done.\n";
 
-		indexedBWT =  IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
+		indexedBWT =  IndexedBWT(bwt,offrate,verbose);
 
 		initAuxHash();
 
@@ -60,18 +56,18 @@ public:
 
 	}
 
-	DBhash(unsigned char * text, ulint n, HashFunction h, ulint offrate = 4, bool verbose = false){
+	DBhash(string text, HashFunction h, ulint offrate = 4, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
-		this->n = n;
+		this->n = text.length();
 		this->h = h;
 		this->offrate = offrate;
 
 		m = h.m;
 		w = h.w;
 
-		text_fingerprint_length = n-m+w+1;
+		text_fingerprint_length = n-m+w;
 
 		if(verbose) cout << " Text fingerprint length = " << text_fingerprint_length<<endl;
 
@@ -81,23 +77,27 @@ public:
 
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
-		if(verbose)	cout << " Computing hash value h(T) of the text ...";
-		unsigned char * fingerprint = h.hashValueRemapped(text,n);
+		if(verbose)	cout << " Computing hash value h(T) of the text ..." << flush;
+		string fingerprint = h.hashValueRemapped(text);//hash value where 1 is added to each digit
 		if(verbose)	cout << " Done.\n";
 
 		if(verbose)	cout << " Storing text T in plain format ...";
 		initText(text);
 		if(verbose)	cout << " Done.\n";
 
-		if(verbose)	cout << " Computing BWT(h(T))  ...";
-		unsigned char * bwt = computeBWT(fingerprint,text_fingerprint_length);
-		if(verbose)	cout << " Done.\n";
+		{
 
-		delete [] fingerprint;
+			string bwt;
 
-		indexedBWT =  IndexedBWT(bwt,text_fingerprint_length,offrate,verbose);
+			if(verbose)	cout << " Computing BWT(h(T))  ...";
+			{
+				bwt = cw_bwt(fingerprint,cw_bwt::text).toString();
+			}
+			if(verbose)	cout << " Done.\n";
 
-		delete [] bwt;
+			indexedBWT =  IndexedBWT(bwt,offrate,verbose);
+
+		}
 
 		if(verbose)	cout << "\n  Building auxiliary hash ... " << endl;
 		initAuxHash();
@@ -143,46 +143,6 @@ public:
 
 	unsigned char textAt(ulint i){
 		return int_to_char[text_wv[i]];
-	}
-
-	unsigned char * computeBWT(unsigned char* text, ulint length){
-
-		if( text[length-1]!=0 ){
-
-			cerr << "ERROR in BWT computation: input text does not terminate with 0x0 byte.";
-			exit(0);
-
-		}
-
-		if( length > ((ulint)1<<31) ){
-
-			cerr << "ERROR in BWT computation: currently dB-hash supports only creation of the BWT for texts of length <= 2^31\n";
-			exit(1);
-
-		}
-
-		//suffix array
-		int* SA = new int[length];
-
-		if (sais(text, SA, length) != 0) {
-			cerr << "Error in the creation of the suffix array with sais library.\n";
-			exit(1);
-		}
-
-		//compute BWT(T_h)
-		unsigned char *bwt = new unsigned char[length];
-
-		for (unsigned int i = 0; i < length; i++) {
-			if (SA[i] == 0) 	//first position: previous character is the terminator symbol (#)
-				bwt[i] = 0;
-			else
-				bwt[i] = text[SA[i] - 1];
-		}
-
-		delete [] SA;
-
-		return bwt;
-
 	}
 
 	void saveToFile(string path){
@@ -324,7 +284,7 @@ public:
 
 protected:
 
-	void initText(unsigned char * text){
+	void initText(string text){
 
 		char_to_int = vector<uint>(256);
 

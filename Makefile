@@ -1,4 +1,4 @@
-INCLUDE_FLAGS=-I extern/bitvector/include/ 
+INCLUDE_FLAGS=-I extern/bitvector/include/
 
 CLANG_CXXFLAGS=-Weverything -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic
 GCC_CXXFLAGS=-Wall -pedantic
@@ -31,13 +31,9 @@ endif
 
 SOURCES_CW_BWT=tools/cw-bwt/cw-bwt.cpp
 
-SOURCES_SFM_INDEX=\
-tools/sFM-index/sFM-index.cpp \
-extern/sais.cpp
+SOURCES_SFM_INDEX=tools/sFM-index/sFM-index.cpp
 
-SOURCES_DB_HASH=\
-tools/dB-hash/dB-hash.cpp \
-extern/sais.cpp
+SOURCES_DB_HASH=tools/dB-hash/dB-hash.cpp
 
 SOURCES_BWT_CHECK=tools/bwt-check/bwt-check.cpp
 

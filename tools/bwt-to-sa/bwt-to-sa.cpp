@@ -36,38 +36,39 @@ using namespace bwtil;
 
     auto t1 = high_resolution_clock::now();
 
-	FileReader bwt_fr(argv[1]);
+    IndexedBWT idxBWT;
+    ulint n_bwt;
 
-	ulint n_bwt = bwt_fr.size();
-	uchar * bwt = new uchar[n_bwt];//with text terminator 0x0
+    {
+		FileReader bwt_fr(argv[1]);
+		n_bwt = bwt_fr.size();
+		string bwt = bwt_fr.toString();//with text terminator 0x0
+		bwt_fr.close();
 
-	bwt_fr.read(bwt,n_bwt);
-	bwt_fr.close();
+		cout << "Indexing the BWT ... " << endl << endl;
 
-	cout << "Indexing the BWT ... " << endl << endl;
 
-	IndexedBWT idxBWT;
 
-	if(argc==3){//auto bufsize
+		if(argc==3){//auto bufsize
 
-		uint offset = log2(n_bwt)/8;
-		if(offset==0)
-			offset=1;
+			uint offset = log2(n_bwt)/8;
+			if(offset==0)
+				offset=1;
 
-		idxBWT = IndexedBWT(bwt,n_bwt,offset,true);
+			idxBWT = IndexedBWT(bwt,offset,true);
 
-	}else{// bufsize provided
+		}else{// bufsize provided
 
-		if(atoi(argv[3])<=0){
-			cout << "Error: offset must be > 0.\n";
-			exit(1);
+			if(atoi(argv[3])<=0){
+				cout << "Error: offset must be > 0.\n";
+				exit(1);
+			}
+
+			idxBWT = IndexedBWT(bwt,atoi(argv[3]),true);
+
 		}
 
-		idxBWT = IndexedBWT(bwt,n_bwt,atoi(argv[3]),true);
-
-	}
-
-	delete [] bwt;
+    }
 
 	cout << "\nDone.\n\nStoring suffix array to file ... " << endl <<endl;
 

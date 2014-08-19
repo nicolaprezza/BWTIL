@@ -129,3 +129,20 @@ void printRSSstat(){
 		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<10) << " KB" <<endl;
 
 }
+
+void printRSSstat(ulint size){
+
+	size_t peakSize = getPeakRSS( );
+
+	if(peakSize/((ulint)1<<30) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<30) << " GB" <<endl;
+	else if (peakSize/((ulint)1<<20) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<20) << " MB" <<endl;
+	else if (peakSize/((ulint)1<<10) > 0)
+		cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<10) << " KB" <<endl;
+
+	cout << "Bits per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size)*8 <<endl;
+	cout << "Bytes per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size) <<endl;
+
+}
+

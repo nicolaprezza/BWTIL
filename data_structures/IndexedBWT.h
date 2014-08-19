@@ -29,11 +29,10 @@ public:
 
 	/*
 	 * constructor: takes as input BWT where terminator character is 0 and builds structures.
-	 * n = length of BWT included terminator character
 	 */
-	IndexedBWT(unsigned char * BWT, ulint n, ulint offrate, bool verbose){
+	IndexedBWT(string BWT, ulint offrate, bool verbose){
 
-		this->n=n;
+		this->n=BWT.length();
 		this->offrate=offrate;
 
 		number_of_SA_pointers = (offrate==0?0:n/offrate + 1);
@@ -62,10 +61,10 @@ public:
 				nr_of_terminators++;
 			}else{
 
-				if(not char_inserted.at(BWT[i])){
+				if(not char_inserted.at((uchar)BWT[i])){
 
-					alphabet.push_back(BWT[i]);
-					char_inserted.at(BWT[i])=true;
+					alphabet.push_back((uchar)BWT[i]);
+					char_inserted.at((uchar)BWT[i])=true;
 
 				}
 
@@ -100,9 +99,9 @@ public:
 		//apply remapping
 
 		for(ulint i=0;i<n;i++)
-			BWT[i] = remapping[BWT[i]];//note: remapping of teminator (0x0) is 0
+			BWT[i] = remapping[(uchar)BWT[i]];//note: remapping of teminator (0x0) is 0
 
-		bwt_wt =  WaveletTree(BWT,n,verbose);
+		bwt_wt =  WaveletTree(BWT,verbose);
 
 		if(offrate>0)
 			marked_positions =  StaticBitVector(n);
@@ -145,7 +144,7 @@ public:
 		}
 
 		for(ulint i=0;i<n;i++)
-			BWT[i] = inverse_remapping[BWT[i]];//restore original values
+			BWT[i] = inverse_remapping[(uchar)BWT[i]];//restore original values
 
 	}
 

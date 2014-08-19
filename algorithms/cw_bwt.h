@@ -18,7 +18,6 @@
 #include "../data_structures/BackwardFileIterator.h"
 #include "../data_structures/BackwardStringIterator.h"
 #include "../data_structures/ContextAutomata.h"
-#include "../extern/getRSS.h"
 
 namespace bwtil {
 
@@ -211,25 +210,9 @@ public:
 	double empiricalEntropy(){return Hk;};//empirical entropy of order k, computed with actual observed frequencies.
 	double actualEntropy(){return bits_per_symbol;};//actual entropy of order k obtained with the Huffman compressor. Always >= empiricalEntropy()
 
-	ulint size(){return n+1;};//size of text + terminator character
+	ulint length(){return n+1;};//length of text + terminator character
 
 protected:
-
-	void printRSSstat(){
-
-		size_t peakSize = getPeakRSS( );
-
-		if(peakSize/((ulint)1<<30) > 0)
-			cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<30) << " GB" <<endl;
-		else if (peakSize/((ulint)1<<20) > 0)
-			cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<20) << " MB" <<endl;
-		else if (peakSize/((ulint)1<<10) > 0)
-			cout << "\nPeak RAM usage: " <<  (double)peakSize/((ulint)1<<10) << " KB" <<endl;
-
-		cout << "Bits per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size())*8 <<endl;
-		cout << "Bytes per symbol used (all structures in RAM): " <<  ((double)peakSize/(double)size()) <<endl;
-
-	}
 
 	ulint number_of_contexts;
 
@@ -314,8 +297,6 @@ private:
 		double avg_height = (double)sum_of_heights/(double)sum_of_lenghts;
 
 		if(verbose) cout << "\nAverage packed B-tree height is: " << avg_height << endl;
-
-		if(verbose) printRSSstat();
 
 	}
 

@@ -21,16 +21,16 @@ public:
 
 	WaveletTree(){};
 
-	WaveletTree(unsigned char * text, ulint n, bool verbose=false){
+	WaveletTree(string text, bool verbose=false){
 
 		if (verbose) cout << "  Building Wavelet tree"<<endl;
 
-		this->n = n;
+		this->n = text.length();
 		sigma = 0;
 
 		for(ulint i=0;i<n;i++)
-			if(text[i]>sigma)
-				sigma = text[i];
+			if((uchar)text[i]>sigma)
+				sigma = (uchar)text[i];
 
 		sigma++;
 
@@ -38,7 +38,7 @@ public:
 
 		auto text_wv = new packed_view_t(log_sigma,n);
 		for(ulint i = 0;i<n;i++)
-			(*text_wv)[i] = text[i];
+			(*text_wv)[i] = (uchar)text[i];
 
 		number_of_nodes = ((ulint)1<<log_sigma)-1;
 

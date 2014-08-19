@@ -46,11 +46,8 @@ using namespace bwtil;
 	cout << "\nReading the text ... " << endl;
 
 	FileReader text_fr(argv[2]);
-
 	ulint n = text_fr.size();
-	uchar * text = new uchar[n];//with text terminator 0x0
-
-	text_fr.read(text,n);
+	string text = text_fr.toString();
 	text_fr.close();
 
 	cout << "Done. Reading suffix array and building BWT ... " << endl;

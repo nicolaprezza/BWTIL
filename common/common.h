@@ -210,9 +210,4 @@ packed_view_t load_packed_view_from_file(size_t width, size_t size, FILE * fp){
 
 }
 
-
-
-
-
-
 #endif /* COMMON_H_ */

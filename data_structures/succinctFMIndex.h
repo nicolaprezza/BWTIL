@@ -11,10 +11,9 @@
 #ifndef SUCCINCTFMINDEX_H_
 #define SUCCINCTFMINDEX_H_
 
-#include "../common/common.h"
 #include "IndexedBWT.h"
-#include "../extern/sais.h"
 #include "FileReader.h"
+#include "../algorithms/cw_bwt.h"
 
 namespace bwtil {
 
@@ -24,63 +23,19 @@ public:
 
 	succinctFMIndex(){};
 
-	succinctFMIndex(unsigned char * text, ulint n, bool verbose= false){
+	succinctFMIndex(string text, ulint n, bool verbose= false){
 
-		build(text,n,verbose);
+		build(text,verbose);
 
 	}
 
 	succinctFMIndex(string path, bool verbose= false){
 
-		FileReader fr(path);
-
-		unsigned char * text = new unsigned char[fr.size()];
-
-		fr.read(text,fr.size());
-
+		FileReader fr = FileReader(path);
+		string text = fr.toString();
 		fr.close();
 
-		build(text,fr.size(),verbose);
-
-	}
-
-	unsigned char * computeBWT(unsigned char* text, ulint length){
-
-		if( text[length-1]!=0 ){
-
-			cerr << "ERROR in BWT computation: input text does not terminate with 0x0 byte.";
-			exit(0);
-
-		}
-
-		if( length > ((ulint)1<<31) ){
-
-			cerr << "ERROR in BWT computation: currently SFM-index supports only creation of the BWT for texts of length <= 2^31\n";
-			exit(1);
-
-		}
-
-		//suffix array
-		int* SA = new int[length];
-
-		if (sais(text, SA, length) != 0) {
-			cerr << "Error in the creation of the suffix array with sais library.\n";
-			exit(1);
-		}
-
-		//compute BWT(T_h)
-		unsigned char *bwt = new unsigned char[length];
-
-		for (unsigned int i = 0; i < length; i++) {
-			if (SA[i] == 0) 	//first position: previous character is the terminator symbol (#)
-				bwt[i] = 0;
-			else
-				bwt[i] = text[SA[i] - 1];
-		}
-
-		delete [] SA;
-
-		return bwt;
+		build(text,verbose);
 
 	}
 
@@ -159,16 +114,13 @@ public:
 
 private:
 
-	void build(unsigned char * text, ulint n, bool verbose= false){
+	void build(string text, bool verbose= false){
 
-		this->n=n;
-
-		text = (unsigned char *)realloc(text,(n+1)*sizeof(unsigned char));
-		text[n] = (unsigned char)0;//append 0x0 byte terminator
+		this->n=text.length();
 
 		//compute the BWT
 		if(verbose) cout << " Computing the BWT ... " << flush;
-		unsigned char * bwt = computeBWT(text, n+1);
+		string bwt = cw_bwt(text,cw_bwt::text).toString();
 		if(verbose) cout << "done." << endl;
 
 		//detect alphabet size
@@ -191,7 +143,7 @@ private:
 
 		offrate = ceil( pow(log_n,1+epsilon)/(double)log_sigma );//offrate = log^(1+epsilon) n / log sigma
 
-		idxBWT = IndexedBWT(bwt,n+1,offrate,verbose);
+		idxBWT = IndexedBWT(bwt,offrate,verbose);
 
 	}
 

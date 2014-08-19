@@ -116,7 +116,7 @@ public:
 
 	HashFunction(){}
 
-	HashFunction(ulint m, const char * file_path, bool verbose = false){
+	HashFunction(ulint m, string file_path, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding hash function ... \n";
 
@@ -351,8 +351,12 @@ public:
 
 	}//hashValue
 
-	unsigned char* hashValueRemapped(unsigned char *P, ulint n){
+	/*
+	 * return hash value where 1 is added to each digit. No 0x0 terminator is appended at the end.
+	 */
+	string hashValueRemapped(string P){
 
+		ulint n = P.length();
 		ulint length=n-m+w;
 		int blocks = m/w;
 
@@ -369,17 +373,15 @@ public:
 
 		//there are 'blocks' blocks of length w and a final block of length r (which can be equal to w)
 
-		unsigned char *res = new unsigned char[length+1];//fingerprint of P plus 0x0 byte appended
+		string res = string(length,'e');
 
 		if(m==w){//identity function
 
 			for(ulint i=0;i<length;i++)
-				if(random_char[P[i]])
+				if(random_char[(uint)P[i]])
 					res[i] = rand()%(base)+1;
 				else
-					res[i] = code[P[i]]+1;
-
-			res[length] = 0;
+					res[i] = code[(uint)P[i]]+1;
 
 			return res;
 
@@ -389,10 +391,10 @@ public:
 
 		//fill buffer with the first m+1 digits
 		for(ulint i=0;i<bufsize;i++){
-			if(random_char[P[i]])
+			if(random_char[(uint)P[i]])
 				buffer[i] = rand()%(base);
 			else
-				buffer[i] = code[P[i]];
+				buffer[i] = code[(uint)P[i]];
 		}
 
 		//compute first w digits
@@ -421,10 +423,10 @@ public:
 
 			if(newpos<n){
 
-				if(random_char[P[newpos]])
+				if(random_char[(uint)P[newpos]])
 					buffer[newpos%bufsize] = rand()%(base);
 				else
-					buffer[newpos%bufsize] = code[P[newpos]];
+					buffer[newpos%bufsize] = code[(uint)P[newpos]];
 
 			}
 
@@ -432,8 +434,6 @@ public:
 
 		for(ulint i=0;i<length;i++)//re-map adding 1 to each digit
 			res[i]++;
-
-		res[length] = 0;//append 0x0 byte
 
 		return res;
 
