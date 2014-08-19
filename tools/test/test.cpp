@@ -166,6 +166,12 @@ void test2(){
 
  int main(int argc,char** argv) {
 
+	 auto v = new vector<bool>(5,0);
+
+	 v->at(1)=1;
+
+	 for(uint i=0;i<5;i++)cout << v->at(i);
+	 cout <<endl;
 
  }
 

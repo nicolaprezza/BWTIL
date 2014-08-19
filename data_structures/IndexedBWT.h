@@ -103,73 +103,7 @@ public:
 
 		bwt_wt =  WaveletTree(BWT,verbose);
 
-
-		/*{//TODO debug
-
-			cout << "alph size = " << sigma <<endl;
-			cout << "term pos = " << terminator_position<<endl;
-
-			for(ulint i=0;i<BWT.length();i++){
-
-				if((uchar)BWT[i] != bwt_wt.charAt(i)){
-
-					cout << "ERROR: BWT str and wt do not coincide at position " << i << ": " << (uint)(uchar)BWT[i] << " " <<  (uint)bwt_wt.charAt(i)<<endl;
-					exit(0);
-
-				}
-
-
-			}
-
-			cout << "SUCCESS!"<<endl;
-
-		}*/
-
-		/*{//TODO debug
-
-			cout << "debugging..."<<endl;
-
-
-			vector<ulint> ranks;
-
-			for(uchar j=0;j<sigma;j++){
-
-				ranks = vector<ulint>(sigma,0);
-				ranks[(uchar)BWT[0]]++;
-
-				for(ulint i=1;i<=BWT.length();i++){
-
-					if(ranks[j] != bwt_wt.rank(j,i)){
-
-						cout << "ERROR: rank do not coincide : " << i << " " <<  ranks[j] << " " << bwt_wt.rank(j,i) << endl;
-
-					}
-
-					if(i<BWT.length())
-						ranks[(uchar)BWT[i]]++;
-
-				}
-
-				cout << (ulint)j << "done." << endl;
-
-			}
-
-
-			cout << "SUCCESS! ranks coincide"<<endl;
-			exit(0);
-
-
-		}*/
-
-
-
-
-
-
-		if(offrate>0)
-			marked_positions =  StaticBitVector(n);
-		else
-			marked_positions =  StaticBitVector(0);
+		marked_positions =  StaticBitVector();
 
 		text_pointers =  packed_view_t(w,number_of_SA_pointers);
 
@@ -197,7 +131,11 @@ public:
 
 		if(offrate>0){
 			if(verbose) cout << "\n  Marking positions containing a SA pointer ... ";
-			markPositions(verbose);
+
+			auto marked_pos_vec = markPositions(verbose);
+			marked_positions = StaticBitVector(marked_pos_vec);
+			delete marked_pos_vec;
+
 			if(verbose) cout << "  Done.\n";
 
 			if(verbose) cout << "\n  Sampling SA pointers ... ";
@@ -419,7 +357,9 @@ private:
 
 	}
 
-	void markPositions(bool verbose){//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
+	vector<bool> * markPositions(bool verbose){//mark 1 every offrate positions of the text on the bwt (vector marked_positions)
+
+		auto marked_pos_vec = new vector<bool>(n,false);
 
 		ulint i=n-1;//current position on text
 		ulint j=0;  //current position on the BWT (0=terminator position on the F column)
@@ -441,7 +381,7 @@ private:
 				}
 
 			if(i%offrate==0)
-				marked_positions.setBit(j,1);
+				marked_pos_vec->at(j)=true;
 
 			j = LF(j);
 
@@ -450,9 +390,11 @@ private:
 		}
 
 		//i=0
-		marked_positions.setBit(j,1);
+		marked_pos_vec->at(j)=true;
+		//marked_positions.setBit(j,1);
+		//marked_positions.computeRanks();
 
-		marked_positions.computeRanks();
+		return marked_pos_vec;
 
 	}
 

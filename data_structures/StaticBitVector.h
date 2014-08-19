@@ -23,32 +23,17 @@ namespace bwtil {
 
 class StaticBitVector {
 
-private:
-
-	string printWord(ulint x){
-
-		string s;
-
-		for(uint i=0;i<64;i++)
-			s += (((x>>(63-i))&1)==0?'0':'1');
-
-		return s;
-
-	}
-
 public:
 
 	StaticBitVector(){};
 
-	StaticBitVector(ulint n) {
+	StaticBitVector(vector<bool> * vb){
 
-		this->n = n;
+		this->n = vb->size();
 
 		w = ceil(log2(n));
 
 		if(w<1) w=1;
-
-		D = 64;
 
 		/*
 		 * bits are grouped in words of D bits.
@@ -61,42 +46,16 @@ public:
 		 */
 
 		bitvector = bitview_t(n);
+
+		for(ulint i=0;i<n;i++)
+			bitvector[i]=vb->at(i);
+
 		rank_ptrs_1 = packed_view_t( w, ceil((double)(n+1)/(D*D)) );//log n bits every D^2 positions
 		rank_ptrs_2 = packed_view_t( 2*ceil(log2(D)), ceil((double)(n+1)/D));//2 log D bits every D positions
 
-	}
+		computeRanks();
 
-	void computeRanks(){//compute rank structures basing on the content of the bitvector
-
-		ulint nr_of_ones_global = 0;
-		ulint nr_of_ones_local = 0;
-
-		rank_ptrs_1[0] = 0;
-		rank_ptrs_2[0] = 0;
-
-		if(n==0)
-			return;
-
-		for(ulint i=0;i<n;i++){
-
-			if((i+1)%(D*D)==0)
-				nr_of_ones_local = 0;
-			else
-				nr_of_ones_local += bitAt(i);
-
-			nr_of_ones_global += bitAt(i);
-
-			if((i+1)%D==0){
-				rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
-
-			}
-
-			if((i+1)%(D*D)==0)
-				rank_ptrs_1[(i+1)/(D*D)] = nr_of_ones_global;
-
-		}
-
-	}
+	};
 
 	ulint size(){
 
@@ -106,7 +65,6 @@ public:
 
 	inline ulint rank1(ulint i){//number of 1's before position i (excluded) in the bitvector
 
-		//rank(bitvector.wordAt(i/D),i%D);
 		return rank_ptrs_1[i/(D*D)] + rank_ptrs_2[i/D] + popcnt( bitvector.get((i/D)*D,i) );//  [i/D],i%D);// bitvector.bits().popcount((i/D)*D, i);
 
 	}
@@ -129,7 +87,6 @@ public:
 
 		fwrite(&n, sizeof(ulint), 1, fp);
 		fwrite(&w, sizeof(uint), 1, fp);
-		fwrite(&D, sizeof(uint), 1, fp);
 
 		ulint rank_ptrs_1_size = rank_ptrs_1.size();
 		ulint rank_ptrs_2_width = rank_ptrs_2.width();
@@ -154,8 +111,6 @@ public:
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
 		check_numBytes();
 		numBytes = fread(&w, sizeof(uint), 1, fp);
-		check_numBytes();
-		numBytes = fread(&D, sizeof(uint), 1, fp);
 		check_numBytes();
 
 		ulint rank_ptrs_1_size;
@@ -183,16 +138,49 @@ public:
 	ulint numberOf1(){return rank1(n);}
 	ulint numberOf0(){return n-numberOf1();}
 
-protected:
+private:
+
+	void computeRanks(){//compute rank structures basing on the content of the bitvector
+
+			ulint nr_of_ones_global = 0;
+			ulint nr_of_ones_local = 0;
+
+			rank_ptrs_1[0] = 0;
+			rank_ptrs_2[0] = 0;
+
+			if(n==0)
+				return;
+
+			for(ulint i=0;i<n;i++){
+
+				if((i+1)%(D*D)==0)
+					nr_of_ones_local = 0;
+				else
+					nr_of_ones_local += bitAt(i);
+
+				nr_of_ones_global += bitAt(i);
+
+				if((i+1)%D==0){
+					rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
+
+				}
+
+				if((i+1)%(D*D)==0)
+					rank_ptrs_1[(i+1)/(D*D)] = nr_of_ones_global;
+
+			}
+
+		}
+
 
 	ulint n;//length of the bitvector
 	uint w;//size of the word = log2 n
 
-	bitview_t bitvector;//the bits are stored in a WordVector, so that they can be accessed in blocks of size D
+	bitview_t bitvector;//the bits are stored in a bitvector, so that they can be accessed in blocks of size D
 	packed_view_t rank_ptrs_1;//rank pointers sampled every D^2 positions
 	packed_view_t rank_ptrs_2;//rank pointers sampled every D positions
 
-	uint D;//size of words
+	static const uint D = 64;//size of words
 
 };
 

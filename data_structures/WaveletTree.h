@@ -36,18 +36,72 @@ public:
 
 		log_sigma = ceil(log2(sigma));
 
-		auto text_wv = new packed_view_t(log_sigma,n);
-		for(ulint i = 0;i<n;i++)
-			(*text_wv)[i] = (uchar)text[i];
-
 		number_of_nodes = ((ulint)1<<log_sigma)-1;
 
 		if (verbose) cout << "   Number of nodes = "<< number_of_nodes << endl;
 
+		//firstly create a tree of vector<bool>, then switch to StaticBitVectors
+
+		if (verbose) cout << "   filling nodes ... " << endl;
+
+		auto nodes_vec = vector<vector<bool>* >(number_of_nodes);
+
+		for(uint i=0;i<number_of_nodes;i++)
+			nodes_vec[i] = new vector<bool>();
+
+		uint node = root();
+
+		int perc=0,last_perc=-1;
+
+		for(ulint i=0;i<n;i++){
+
+			if(perc>last_perc and perc%10==0){
+
+				if (verbose) cout << "   " << perc << "% done." <<endl;
+				last_perc=perc;
+
+			}
+
+			for(ulint j=0;j<log_sigma;j++){
+
+				bool bit = bitInChar((uchar)text[i],j);
+
+				nodes_vec[node]->push_back(bit);
+
+				node = (bit?child1(node):child0(node));
+
+			}
+
+			node = root();
+
+			perc = (100*i)/n;
+
+		}
+
+		//now switch to StaticBitVectors
+
+		perc=0;
+		last_perc=-1;
+		if (verbose) cout << "   computing ranks ... " << endl;
+
 		nodes = vector<StaticBitVector>(number_of_nodes);
 
-		if (verbose) cout << "   Recursively building nodes" << endl;
-		buildRecursive(root(),text_wv,verbose);
+		for(uint i=0;i<number_of_nodes;i++){
+
+			if(perc>last_perc+10){
+
+				if (verbose) cout << "   " << perc << "% done." <<endl;
+				last_perc=perc;
+
+			}
+
+			nodes[i] = StaticBitVector(nodes_vec[i]);
+			//free memory
+			delete nodes_vec[i];
+
+			perc = (100*i)/number_of_nodes;
+
+		}
 
 	}
 
@@ -139,59 +193,8 @@ public:
 
 private:
 
-	void buildRecursive(ulint node, packed_view_t * text_wv,bool verbose){
-
-		if (verbose) cout << "    Building node number " << node << endl;
-		if (verbose) cout << "     Node length = " << text_wv->size() << " bits" << endl;
-
-		nodes[node] = StaticBitVector(text_wv->size());
-
-		uint width = text_wv->width();
-
-		for(ulint i=0;i<text_wv->size();i++)
-			nodes[node].setBit(i,((ulint)(*text_wv)[i])>>(width-1));//leftmost bit of the i-th word in text_wv
-
-		if (verbose) cout << "     Computing rank structure ... " << flush;
-		nodes[node].computeRanks();
-		if (verbose) cout << "Done."<<endl;
-
-		if(width>1){//if there are children
-
-			//children
-			auto text_child0 = new packed_view_t(width-1,nodes[node].numberOf0());
-			auto text_child1 = new packed_view_t(width-1,nodes[node].numberOf1());
-
-			ulint j0=0;
-			ulint j1=0;
-
-			ulint MASK = (((ulint)1)<<(width-1))-1;
-
-			for(ulint i=0;i<text_wv->size();i++){//for each symbol in text_wv
-
-				if(nodes[node].bitAt(i)==0){//if first bit is 0
-					(*text_child0)[j0] = ((ulint)(*text_wv)[i] & MASK);//we take the word in position i and we remove the leftmost bit
-					j0++;
-				}else{
-					(*text_child1)[j1] = ((ulint)(*text_wv)[i] & MASK);
-					j1++;
-				}
-
-			}
-
-			//delete text_wv;//TODO to debug! if removed, the output is not correct.
-
-			//call recursively
-
-			buildRecursive(child0(node),text_child0,verbose);
-			buildRecursive(child1(node),text_child1,verbose);
-
-		}//else
-			//delete text_wv;//delete leaf
-
-	}
-
-	inline uint bitInWord(ulint W, uint i){
-		return (W>>(log_sigma-i-1))&1;
+	inline uchar bitInChar(uchar W, uint i){
+		return (W>>(log_sigma-i-1))&(uchar)1;
 	}
 
 	ulint recursiveRank(uchar c, ulint i, ulint node, uint level){//number of characters 'c' before position i excluded
@@ -199,7 +202,7 @@ private:
 		if(nodes[node].length()==0)//empty node
 			return 0;
 
-		uint bit = bitInWord(c,level);
+		uint bit = bitInChar(c,level);
 		uint rank;
 
 		if(bit==0)
