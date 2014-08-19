@@ -511,8 +511,6 @@ private:
 		if(verbose) cout << " Done." << endl;
 	}
 
-	static const uint empty = 256;
-
 	uint k;//context length and order of compression (entropy H_k). default: k = ceil( log_sigma(n/log^3 n) )
 	uint sigma;
 

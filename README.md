@@ -50,7 +50,7 @@ where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-
 ### Input formats
 
  * plain text files: ASCII-coded. However, the byte 0x0 must NOT appear inside the text since the algorithms use 0x0 as text terminator.
- * bwt files: ASCII-coded, with a UNIQUE 0x0 byte (terminator character) appearing somewhere inside the text. Be aware that, if the input bwt file is malformed, the algorithms may crash.
+ * bwt files: ASCII-coded, with a UNIQUE 0x0 byte (terminator character) appearing somewhere inside the text. Be aware that, if the input bwt file is malformed, the programs will fail with a error message.
  * suffix array files: each SA address is stored as a 64-bit (8 byte) integer. Despite the fact that this coding may not be optimal for small texts, you can compress the SA files to reduce its size.
 
 ### Test

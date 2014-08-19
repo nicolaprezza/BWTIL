@@ -166,12 +166,6 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	 string s("ab");
-
-
-	 s[2]=0;
-
-	 cout << (uint)s[2]<<endl;
 
  }
 

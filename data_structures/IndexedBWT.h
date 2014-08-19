@@ -45,18 +45,17 @@ public:
 
 		ulint nr_of_terminators=0;
 
+		//compute re-mapping to keep alphabet size to a minimum
+		//from text chars -> to integers in {0,...,sigma}. the 0x0 byte is also remapped in 0x0, as the first alphabet character.
 		remapping = vector<uchar>(256,0);
 
-		//compute re-mapping to keep alphabet size to a minimum
-
 		//detect alphabet
-
 		vector<uchar> alphabet;
 		vector<bool> char_inserted = vector<bool>(256,false);
 
 		for(ulint i=0;i<n;i++){
 
-			if(BWT[i]==0){//found terminator. Save position
+			if((uchar)BWT[i]==0){//found terminator. Save position
 				terminator_position = i;
 				nr_of_terminators++;
 			}else{
@@ -85,6 +84,7 @@ public:
 		std::sort(alphabet.begin(),alphabet.end());
 
 		//calculate remapping
+		//note: remapping of terminator (0x0) is 0
 
 		for(uint i=0;i<alphabet.size();i++)
 			remapping[alphabet.at(i)] = i;
@@ -99,9 +99,72 @@ public:
 		//apply remapping
 
 		for(ulint i=0;i<n;i++)
-			BWT[i] = remapping[(uchar)BWT[i]];//note: remapping of teminator (0x0) is 0
+			BWT[i] = remapping[(uchar)BWT[i]];
 
 		bwt_wt =  WaveletTree(BWT,verbose);
+
+
+		/*{//TODO debug
+
+			cout << "alph size = " << sigma <<endl;
+			cout << "term pos = " << terminator_position<<endl;
+
+			for(ulint i=0;i<BWT.length();i++){
+
+				if((uchar)BWT[i] != bwt_wt.charAt(i)){
+
+					cout << "ERROR: BWT str and wt do not coincide at position " << i << ": " << (uint)(uchar)BWT[i] << " " <<  (uint)bwt_wt.charAt(i)<<endl;
+					exit(0);
+
+				}
+
+
+			}
+
+			cout << "SUCCESS!"<<endl;
+
+		}*/
+
+		/*{//TODO debug
+
+			cout << "debugging..."<<endl;
+
+
+			vector<ulint> ranks;
+
+			for(uchar j=0;j<sigma;j++){
+
+				ranks = vector<ulint>(sigma,0);
+				ranks[(uchar)BWT[0]]++;
+
+				for(ulint i=1;i<=BWT.length();i++){
+
+					if(ranks[j] != bwt_wt.rank(j,i)){
+
+						cout << "ERROR: rank do not coincide : " << i << " " <<  ranks[j] << " " << bwt_wt.rank(j,i) << endl;
+
+					}
+
+					if(i<BWT.length())
+						ranks[(uchar)BWT[i]]++;
+
+				}
+
+				cout << (ulint)j << "done." << endl;
+
+			}
+
+
+			cout << "SUCCESS! ranks coincide"<<endl;
+			exit(0);
+
+
+		}*/
+
+
+
+
+
 
 		if(offrate>0)
 			marked_positions =  StaticBitVector(n);
@@ -112,25 +175,24 @@ public:
 
 		log_sigma = bwt_wt.bitsPerSymbol();
 
-		TERMINATOR = 256;
-
-		FIRST = vector<ulint>(257,0);
+		FIRST = vector<ulint>(256,0);
 
 		FIRST[TERMINATOR]=0;//first occurrence of terminator char in the first column is at the beginning
 
+		//count number of occurrences of each character
 		for(ulint i=0;i<n;i++)
 			if(i!=terminator_position)
 				FIRST[bwt_wt.charAt(i)]++;
 
-		for(uint i=1;i<256;i++)
+		for(uint i=1;i<255;i++)
 			FIRST[i] += FIRST[i-1];
 
-		for(int i=255;i>0;i--)
+		for(int i=254;i>0;i--)
 			FIRST[i] = FIRST[i-1];
 
 		FIRST[0] = 0;
 
-		for(uint i=0;i<256;i++)
+		for(uint i=0;i<255;i++)
 			FIRST[i]++;
 
 		if(offrate>0){
@@ -143,8 +205,11 @@ public:
 			if(verbose) cout << "  Done.\n";
 		}
 
+		//restore original values in BWT
 		for(ulint i=0;i<n;i++)
-			BWT[i] = inverse_remapping[(uchar)BWT[i]];//restore original values
+			BWT[i] = inverse_remapping[(uchar)BWT[i]];
+
+		BWT[terminator_position] = 0;
 
 	}
 
@@ -179,7 +244,7 @@ public:
 
 	}
 
-	unsigned char at(ulint i){
+	uchar at(ulint i){
 
 		if(i==terminator_position)
 			return 0;
@@ -190,8 +255,7 @@ public:
 
 	ulint LF(ulint i){//LF mapping from last column to first
 
-		unsigned char c = charAt_remapped(i);
-
+		uchar c = charAt_remapped(i);
 		return  FIRST[c] + rank(c,i);
 
 	}
@@ -237,7 +301,7 @@ public:
 
 		for(uint i=0;i<P.length();i++){
 
-			uint c = (unsigned char)P.at( (P.length()-1)-i );
+			uint c = (uchar)P.at( (P.length()-1)-i );
 
 			if(c==0){
 				cout << "ERROR while searching pattern in the index: the pattern contains a 0x0 byte (not allowed since it is used as text terminator).\n";
@@ -259,7 +323,6 @@ public:
 
 	void saveToFile(FILE *fp){
 
-		fwrite(&TERMINATOR, sizeof(uint), 1, fp);
 		fwrite(&sigma, sizeof(uint), 1, fp);
 		fwrite(&log_sigma, sizeof(uint), 1, fp);
 		fwrite(&terminator_position, sizeof(ulint), 1, fp);
@@ -282,8 +345,6 @@ public:
 
 		ulint numBytes;
 
-		numBytes = fread(&TERMINATOR, sizeof(uint), 1, fp);
-		check_numBytes();
 		numBytes = fread(&sigma, sizeof(uint), 1, fp);
 		check_numBytes();
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
@@ -321,11 +382,10 @@ public:
 
 	ulint length(){return n;}
 
-	uint TERMINATOR;//terminator character
-
 private:
 
-	unsigned char charAt_remapped(ulint i){
+	//returns symbol stored in the wavelet tree at position i. The terminator is returned as 255
+	uchar charAt_remapped(ulint i){
 
 		if(i==terminator_position)
 			return TERMINATOR;
@@ -338,7 +398,7 @@ private:
 	 * input: already remapped character (or TERMINATOR) and position
 	 * output: rank of the character in the bwt
 	 */
-	ulint rank(unsigned char c, ulint i){//number of characters 'c' before position i excluded
+	ulint rank(uchar c, ulint i){//number of characters 'c' before position i excluded
 
 		if(c==TERMINATOR)
 			return i>terminator_position;
@@ -428,8 +488,11 @@ private:
 		//i=0
 		text_pointers[marked_positions.rank1(j)] = 0;
 
-
 	}
+
+	//terminator character in the remapped text. 255 is never used since 0x0 is not present in the original text and all characters are remapped
+	//in the lowest values
+	static const uint TERMINATOR = 255;
 
 	uint sigma;//alphabet size (excluded terminator character)
 	uint log_sigma;//number of bits of each character

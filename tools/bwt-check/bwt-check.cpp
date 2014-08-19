@@ -94,11 +94,14 @@ using namespace bwtil;
 
 	i=0;
 
+	uchar x;
+
 	while(i<n_text){
 
-		if((uchar)inverted_bwt[i] != text_fr.get()){
+		if((uchar)inverted_bwt[i] != (x=text_fr.get())){
 
-			cout << "\nError: text file and inverted bwt do not match.\n";
+			cout << "\nError: text file and inverted bwt do not match at position " << i << ".\n";
+			cout << (uchar)inverted_bwt[i] << " " << x << " " << (uint)inverted_bwt[i] << " " << (uint)x <<endl;
 			cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
 			exit(0);
 

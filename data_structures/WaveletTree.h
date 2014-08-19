@@ -46,22 +46,20 @@ public:
 
 		nodes = vector<StaticBitVector>(number_of_nodes);
 
-		//ROOT
-
 		if (verbose) cout << "   Recursively building nodes" << endl;
 		buildRecursive(root(),text_wv,verbose);
 
 	}
 
-	inline ulint rank(unsigned char c, ulint i){//number of characters 'c' before position i excluded
+	inline ulint rank(uchar c, ulint i){//number of characters 'c' before position i excluded
 
 		return recursiveRank(c, i, root(), 0);
 
 	}
 
-	inline unsigned char charAt(ulint i){
+	inline uchar charAt(ulint i){
 
-		unsigned char c=0;
+		uchar c=0;
 		ulint node = root();
 		uint level = 0;
 		uint bit=0;
@@ -180,15 +178,15 @@ private:
 
 			}
 
-			delete text_wv;
+			//delete text_wv;//TODO to debug! if removed, the output is not correct.
 
 			//call recursively
 
 			buildRecursive(child0(node),text_child0,verbose);
 			buildRecursive(child1(node),text_child1,verbose);
 
-		}else
-			delete text_wv;//delete leaf
+		}//else
+			//delete text_wv;//delete leaf
 
 	}
 
@@ -196,7 +194,7 @@ private:
 		return (W>>(log_sigma-i-1))&1;
 	}
 
-	ulint recursiveRank(unsigned char c, ulint i, ulint node, uint level){//number of characters 'c' before position i excluded
+	ulint recursiveRank(uchar c, ulint i, ulint node, uint level){//number of characters 'c' before position i excluded
 
 		if(nodes[node].length()==0)//empty node
 			return 0;
