@@ -45,10 +45,9 @@ To use the class in your own code, just include algorithms/cw_bwt.h . After that
 
 1. save your text (string/array) to disk (e.g. to file "some_path/file.txt")
 2. free memory (i.e. delete text buffer)
-3. run cw-bwt loading the text from the file created in step 1 and store directly to file. Do this step in a different scope, so that after saving, the cw\_bwt object will be automatically deleted
+3. run cw-bwt loading the text from the file created in step 1 and store the bwt directly to file. 
 
-> { cw\_bwt("some\_path/file.txt",cw_bwt::path).toFile("some\_path/file.txt.bwt"); }
-
+> cw\_bwt("some\_path/file.txt",cw_bwt::path).toFile("some\_path/file.txt.bwt");
 
 After that, you can load in RAM the bwt created in step 3 (i.e. from file "some\_path/file.txt.bwt")
 
