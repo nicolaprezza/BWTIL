@@ -45,7 +45,6 @@ public:
 		if (verbose) cout << "   filling nodes ... " << endl;
 
 		auto nodes_vec = vector<vector<bool>* >(number_of_nodes);
-
 		for(uint i=0;i<number_of_nodes;i++)
 			nodes_vec[i] = new vector<bool>();
 
@@ -96,8 +95,7 @@ public:
 			}
 
 			nodes[i] = StaticBitVector(nodes_vec[i]);
-			//free memory
-			delete nodes_vec[i];
+			delete nodes_vec[i];//free node memory
 
 			perc = (100*i)/number_of_nodes;
 

@@ -31,7 +31,7 @@ public:
 
 		this->n = vb->size();
 
-		w = ceil(log2(n));
+		w = ceil(log2(n)) + 1;
 
 		if(w<1) w=1;
 
@@ -45,13 +45,13 @@ public:
 		 *
 		 */
 
-		bitvector = bitview_t(n);
+		bitvector = bitview_t(n+100);//TODO debug needed:some container overflows
 
 		for(ulint i=0;i<n;i++)
 			bitvector[i]=vb->at(i);
 
-		rank_ptrs_1 = packed_view_t( w, ceil((double)(n+1)/(D*D)) );//log n bits every D^2 positions
-		rank_ptrs_2 = packed_view_t( 2*ceil(log2(D)), ceil((double)(n+1)/D));//2 log D bits every D positions
+		rank_ptrs_1 = packed_view_t( w, n/(D*D) + 100 );//log n bits every D^2 positions
+		rank_ptrs_2 = packed_view_t( 2*ceil(log2(D)) + 1, n/D + 100);//2 log D bits every D positions
 
 		computeRanks();
 
@@ -142,35 +142,35 @@ private:
 
 	void computeRanks(){//compute rank structures basing on the content of the bitvector
 
-			ulint nr_of_ones_global = 0;
-			ulint nr_of_ones_local = 0;
+		ulint nr_of_ones_global = 0;
+		ulint nr_of_ones_local = 0;
 
-			rank_ptrs_1[0] = 0;
-			rank_ptrs_2[0] = 0;
+		rank_ptrs_1[0] = 0;
+		rank_ptrs_2[0] = 0;
 
-			if(n==0)
-				return;
+		if(n==0)
+			return;
 
-			for(ulint i=0;i<n;i++){
+		for(ulint i=0;i<n;i++){
 
-				if((i+1)%(D*D)==0)
-					nr_of_ones_local = 0;
-				else
-					nr_of_ones_local += bitAt(i);
+			if((i+1)%(D*D)==0)
+				nr_of_ones_local = 0;
+			else
+				nr_of_ones_local += bitAt(i);
 
-				nr_of_ones_global += bitAt(i);
+			nr_of_ones_global += bitAt(i);
 
-				if((i+1)%D==0){
-					rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
-
-				}
-
-				if((i+1)%(D*D)==0)
-					rank_ptrs_1[(i+1)/(D*D)] = nr_of_ones_global;
+			if((i+1)%D==0){
+				rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
 
 			}
 
+			if((i+1)%(D*D)==0)
+				rank_ptrs_1[(i+1)/(D*D)] = nr_of_ones_global;
+
 		}
+
+	}
 
 
 	ulint n;//length of the bitvector

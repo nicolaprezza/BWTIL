@@ -8,6 +8,8 @@
 #include "../../data_structures/IndexedBWT.h"
 #include "../../data_structures/FileReader.h"
 #include "../../extern/getRSS.h"
+#include "../../data_structures/BackwardFileIterator.h"
+
 
 using namespace bwtil;
 
@@ -49,11 +51,38 @@ using namespace bwtil;
 
 		idxBWT = IndexedBWT(bwt,0,true);
 
+		/*{
+
+			cout << "******** DEBUG after building idxbwt... " << endl;
+			for(ulint i=0;i<bwt.length();i++){
+
+				if((uchar)bwt[i] != idxBWT.at(i)){
+
+					cout << "ERROR : indexed BWT is inconsistent at position " << i << endl;
+
+				}
+
+			}
+
+			cout << "DONE DEBUG." << endl;
+			exit(0);
+
+		}*/
+
     }
 
-	cout << "\nDone. Inverting the BWT ... " << endl;
+	auto bfr = BackwardFileIterator(argv[2]);
 
-	string inverted_bwt = string(n_inv_bwt,'e');//without text terminator 0x0
+	if(bfr.length() != n_inv_bwt){
+
+		cout << "\nError: the bwt file and the text input file do not have same length (excluding bwt terminator)\n";
+		cout << "text length = " << bfr.length() << ", bwt length (without terminator) = " << n_inv_bwt << endl;
+		cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
+		exit(0);
+
+	}
+
+	cout << "\nDone. Inverting the BWT and checking correctness ... " << endl;
 
 	//invert the bwt
 
@@ -62,9 +91,19 @@ using namespace bwtil;
 
 	int perc, last_perc=-1;
 
+	uchar x,y;
+
 	while(i<n_inv_bwt){
 
-		inverted_bwt[n_inv_bwt-i-1] = idxBWT.at(bwt_pos);
+		if((x=idxBWT.at(bwt_pos)) != (y=bfr.read())){
+
+			cout << "\nError: text file and inverted bwt do not match at position " << n_inv_bwt-i-1 << ".\n";
+			cout << x << " " << y << " " << (uint)x << " " << (uint)y <<endl;
+			cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
+			exit(0);
+
+		}
+
 		bwt_pos = idxBWT.LF(bwt_pos);
 		i++;
 
@@ -78,38 +117,7 @@ using namespace bwtil;
 
 	}
 
-	cout << "Done.\n";
-
-	FileReader text_fr(argv[2]);
-	ulint n_text = text_fr.size();
-
-	if(n_text!=n_inv_bwt){
-
-		cout << "\nError: the bwt file and the text input file do not have same length (excluding bwt terminator)\n";
-		cout << "text length = " << n_text << ", bwt length (without terminator) = " << n_inv_bwt << endl;
-		cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
-		exit(0);
-
-	}
-
-	i=0;
-
-	uchar x;
-
-	while(i<n_text){
-
-		if((uchar)inverted_bwt[i] != (x=text_fr.get())){
-
-			cout << "\nError: text file and inverted bwt do not match at position " << i << ".\n";
-			cout << (uchar)inverted_bwt[i] << " " << x << " " << (uint)inverted_bwt[i] << " " << (uint)x <<endl;
-			cout << argv[1] << " " << "is not a valid BWT of " << argv[2] << endl;
-			exit(0);
-
-		}
-
-		i++;
-
-	}
+	bfr.close();
 
 	cout << "\nSUCCESS!\n";
 	cout << argv[1] << " " << "is the BWT of " << argv[2] << endl;

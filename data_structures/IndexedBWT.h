@@ -218,7 +218,7 @@ public:
 
 		for(uint i=0;i<length;i++){
 
-			uint c = remapping[digitAt(W,i)+1];//sum 1 since the BWT is built on the remapped text, where 1 is added to each digit
+			auto c = remapping[digitAt(W,i)+1];//sum 1 since the BWT is built on the remapped text, where 1 is added to each digit
 
 			interval.first = FIRST[c] + rank(c,interval.first);
 			interval.second = FIRST[c] + rank(c,interval.second);
@@ -239,7 +239,7 @@ public:
 
 		for(uint i=0;i<P.length();i++){
 
-			uint c = (uchar)P.at( (P.length()-1)-i );
+			auto c = (uchar)P.at( (P.length()-1)-i );
 
 			if(c==0){
 				cout << "ERROR while searching pattern in the index: the pattern contains a 0x0 byte (not allowed since it is used as text terminator).\n";
