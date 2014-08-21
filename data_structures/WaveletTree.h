@@ -3,7 +3,7 @@
 // Author      : Nicola Prezza and Alberto Policriti
 // Version     : 1.0
 // Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
-// Description : 	This class implements a binary balanced wavelet tree on the input text.
+// Description : 	This class implements a binary balanced wavelet tree on the input text->
 //					Alphabet size is automatically detected, and equals the largest character. Note that this is not optimal if some characters are
 //					not present in the text (in this case it is suggested to do a re-mapping of the text before to build the wavelet tree)
 //============================================================================
@@ -21,16 +21,16 @@ public:
 
 	WaveletTree(){};
 
-	WaveletTree(string text, bool verbose=false){
+	WaveletTree(string * text, bool verbose=false){
 
 		if (verbose) cout << "  Building Wavelet tree"<<endl;
 
-		this->n = text.length();
+		this->n = text->length();
 		sigma = 0;
 
 		for(ulint i=0;i<n;i++)
-			if((uchar)text[i]>sigma)
-				sigma = (uchar)text[i];
+			if((uchar)text->at(i)>sigma)
+				sigma = (uchar)text->at(i);
 
 		sigma++;
 
@@ -63,7 +63,7 @@ public:
 
 			for(ulint j=0;j<log_sigma;j++){
 
-				bool bit = bitInChar((uchar)text[i],j);
+				bool bit = bitInChar((uchar)text->at(i),j);
 
 				nodes_vec[node]->push_back(bit);
 

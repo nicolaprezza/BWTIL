@@ -91,7 +91,7 @@ public:
 	cw_bwt(){};
 
 	//creates cw_bwt with default number of contexts ( O(n/(log^3 n)) )
-	cw_bwt(string input_string, cw_bwt_input_type input_type, bool verbose=true){
+	cw_bwt(string * input_string, cw_bwt_input_type input_type, bool verbose=true){
 
 		if(input_type==path)
 			bwIt = new BackwardFileIterator(input_string);
@@ -103,14 +103,14 @@ public:
 		ca = ContextAutomata(bwIt, 10, true);//Default automata overhead
 		k = ca.contextLength();
 
-		init(input_string, verbose);
+		init(verbose);
 
 		delete bwIt;
 
 	}
 
 	//creates cw_bwt with desired context length k
-	cw_bwt(string input_string, cw_bwt_input_type input_type, uint k, bool verbose){
+	cw_bwt(string * input_string, cw_bwt_input_type input_type, uint k, bool verbose){
 
 		this->k = k;
 
@@ -142,7 +142,7 @@ public:
 
 		ca = ContextAutomata(k, bwIt, true);
 
-		init(input_string, verbose);
+		init(verbose);
 
 		delete bwIt;
 
@@ -273,14 +273,14 @@ private:
 
 	}
 
-	void init(string path, bool verbose){
+	void init(bool verbose){
 
 		number_of_contexts = ca.numberOfStates();
 
 		sigma = ca.alphabetSize();//this takes into account also the terminator character
 		TERMINATOR = 0;
 
-		initStructures(path, verbose);
+		initStructures(verbose);
 
 		build(verbose);
 
@@ -300,7 +300,7 @@ private:
 
 	}
 
-	void initStructures(string path, bool verbose){
+	void initStructures(bool verbose){
 
 		frequencies = vector<vector<ulint> >(number_of_contexts);
 		for(ulint i=0;i<number_of_contexts;i++)

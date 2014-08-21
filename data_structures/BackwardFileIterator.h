@@ -23,11 +23,11 @@ class BackwardFileIterator  : public BackwardIterator{
 
 public:
 
-	BackwardFileIterator(string path){
+	BackwardFileIterator(string * path){
 
 		this->path=path;
 
-		fp = fopen(path.c_str(), "rb");
+		fp = fopen(path->c_str(), "rb");
 
 		if (fp == NULL){
 		  cout << "Error while opening file " << path <<endl;
@@ -38,7 +38,7 @@ public:
 		n = ftell(fp);
 
 		if (n == 0){
-		  cout << "Error: file " << path << " has length 0." << endl;
+		  cout << "Error: file " << *path << " has length 0." << endl;
 		  exit(0);
 		}
 
@@ -67,7 +67,7 @@ public:
 		fseek ( fp , offset , SEEK_SET );
 
 		if(fread(buffer, sizeof(symbol), size, fp)==0){
-			cout << "Error while reading file " << path <<endl;
+			cout << "Error while reading file " << *path <<endl;
 			exit(0);
 		}
 
@@ -93,7 +93,7 @@ public:
 			fseek ( fp , offset , SEEK_SET );
 
 			if(fread(buffer, sizeof(symbol), bufferSize, fp)==0){
-				cout << "Error while reading file " << path <<endl;
+				cout << "Error while reading file " << *path <<endl;
 				exit(0);
 			}
 
@@ -120,7 +120,7 @@ private:
 
 	bool begin_of_file;//begin of file reached
 
-	string path;
+	string * path;
 
 	symbol * buffer;
 

@@ -47,7 +47,7 @@ using namespace bwtil;
 		cout << "BWT length =  " << bwt.length() << endl;
 		cout << "Indexing the BWT ... " << endl << endl;
 
-		idxBWT = IndexedBWT(bwt,0,true);
+		idxBWT = IndexedBWT(&bwt,0,true);
 
     }
 
@@ -94,9 +94,28 @@ using namespace bwtil;
 	printRSSstat();
 
 	auto t2 = high_resolution_clock::now();
-	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
-	cout << "Total time: " << total << "s.\n";
+	ulint total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
 
+	if(total>=3600){
+
+		uint h = total/3600;
+		uint m = (total%3600)/60;
+		uint s = (total%3600)%60;
+
+		cout << "Total time: " << h << "h " << m << "m " << s << "s" << endl;
+
+	}else if (total>=60){
+
+		uint m = total/60;
+		uint s = total%60;
+
+		cout << "Total time: " << m << "m " << s << "s" << endl;
+
+	}else{
+
+		cout << "Total time: " << total << "s" << endl;
+
+	}
  }
 
 

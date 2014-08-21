@@ -56,12 +56,14 @@ using namespace bwtil;
 
 	//build bwt from a text file:
 
-	if(argc==3)//k autodetected
-		cwbwt = cw_bwt(argv[1],cw_bwt::path);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
-
-	if(argc==4)//the user has specified k
-		cwbwt = cw_bwt(argv[1],cw_bwt::path,atoi(argv[3]),true);
-
+	if(argc==3){//k autodetected
+		string path(argv[1]);
+		cwbwt = cw_bwt(&path,cw_bwt::path);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
+	}
+	if(argc==4){//the user has specified k
+		string path(argv[1]);
+		cwbwt = cw_bwt(&path,cw_bwt::path,atoi(argv[3]),true);
+	}
 	/*
 	 * If, instead, you want to compute the bwt of a string, create a cw_bwt object as follows:
 	 *
@@ -94,9 +96,28 @@ using namespace bwtil;
 	printRSSstat(cwbwt.length());
 
 	auto t2 = high_resolution_clock::now();
-	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
-	cout << "\nTotal time: " << total << "s.\n";
+	ulint total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
 
+	if(total>=3600){
+
+		uint h = total/3600;
+		uint m = (total%3600)/60;
+		uint s = (total%3600)%60;
+
+		cout << "Total time: " << h << "h " << m << "m " << s << "s" << endl;
+
+	}else if (total>=60){
+
+		uint m = total/60;
+		uint s = total%60;
+
+		cout << "Total time: " << m << "m " << s << "s" << endl;
+
+	}else{
+
+		cout << "Total time: " << total << "s" << endl;
+
+	}
  }
 
 

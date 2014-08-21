@@ -29,6 +29,7 @@
 #include <fstream>
 #include "../extern/bitvector/include/bitvector.h"
 #include "../extern/bitvector/include/packed_view.h"
+#include <assert.h>
 
 using namespace std;
 using namespace bv;

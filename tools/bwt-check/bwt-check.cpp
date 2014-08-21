@@ -49,29 +49,13 @@ using namespace bwtil;
 		cout << "BWT length =  " << bwt.length() << endl;
 		cout << "Indexing the BWT ... " << endl << endl;
 
-		idxBWT = IndexedBWT(bwt,0,true);
-
-		/*{
-
-			cout << "******** DEBUG after building idxbwt... " << endl;
-			for(ulint i=0;i<bwt.length();i++){
-
-				if((uchar)bwt[i] != idxBWT.at(i)){
-
-					cout << "ERROR : indexed BWT is inconsistent at position " << i << endl;
-
-				}
-
-			}
-
-			cout << "DONE DEBUG." << endl;
-			exit(0);
-
-		}*/
+		idxBWT = IndexedBWT(&bwt,0,true);
 
     }
 
-	auto bfr = BackwardFileIterator(argv[2]);
+    string * path = new string(argv[2]);
+	auto bfr = BackwardFileIterator(path);
+	delete path;
 
 	if(bfr.length() != n_inv_bwt){
 
@@ -125,8 +109,29 @@ using namespace bwtil;
 	printRSSstat();
 
 	auto t2 = high_resolution_clock::now();
-	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
-	cout << "Total time: " << total << "s.\n";
+	ulint total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+
+	if(total>=3600){
+
+		uint h = total/3600;
+		uint m = (total%3600)/60;
+		uint s = (total%3600)%60;
+
+		cout << "Total time: " << h << "h " << m << "m " << s << "s" << endl;
+
+	}else if (total>=60){
+
+		uint m = total/60;
+		uint s = total%60;
+
+		cout << "Total time: " << m << "m " << s << "s" << endl;
+
+	}else{
+
+		cout << "Total time: " << total << "s" << endl;
+
+	}
+
 
  }
 

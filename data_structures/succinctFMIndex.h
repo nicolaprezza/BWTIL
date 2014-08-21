@@ -120,7 +120,7 @@ private:
 
 		//compute the BWT
 		if(verbose) cout << " Computing the BWT ... " << flush;
-		string bwt = cw_bwt(text,cw_bwt::text).toString();
+		string bwt = cw_bwt(&text,cw_bwt::text).toString();
 		if(verbose) cout << "done." << endl;
 
 		//detect alphabet size
@@ -143,7 +143,7 @@ private:
 
 		offrate = ceil( pow(log_n,1+epsilon)/(double)log_sigma );//offrate = log^(1+epsilon) n / log sigma
 
-		idxBWT = IndexedBWT(bwt,offrate,verbose);
+		idxBWT = IndexedBWT(&bwt,offrate,verbose);
 
 	}
 

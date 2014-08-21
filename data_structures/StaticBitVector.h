@@ -31,10 +31,6 @@ public:
 
 		this->n = vb->size();
 
-		w = ceil(log2(n)) + 1;
-
-		if(w<1) w=1;
-
 		/*
 		 * bits are grouped in words of D bits.
 		 * rank structures:
@@ -45,13 +41,16 @@ public:
 		 *
 		 */
 
-		bitvector = bitview_t(n+100);//TODO debug needed:some container overflows
+		bitvector = bitview_t(n+100);
 
 		for(ulint i=0;i<n;i++)
-			bitvector[i]=vb->at(i);
+			bitvector.set(i,vb->at(i));
 
-		rank_ptrs_1 = packed_view_t( w, n/(D*D) + 100 );//log n bits every D^2 positions
-		rank_ptrs_2 = packed_view_t( 2*ceil(log2(D)) + 1, n/D + 100);//2 log D bits every D positions
+		rank_ptrs_1_size = n/(D*D) + 1;
+		rank_ptrs_2_size = n/D + 1;
+
+		rank_ptrs_1 = vector<uint64_t>( rank_ptrs_1_size,0 );//log n bits every D^2 positions
+		rank_ptrs_2 = vector<uint16_t>( rank_ptrs_2_size,0 );//2 log D bits every D positions
 
 		computeRanks();
 
@@ -59,47 +58,53 @@ public:
 
 	ulint size(){
 
-		return bitvector.size() + rank_ptrs_1.size()*rank_ptrs_1.width() + rank_ptrs_2.size()*rank_ptrs_2.width();
+		return bitvector.size() + rank_ptrs_1.size() * 64 + rank_ptrs_2.size()*16;
 
 	}
 
 	inline ulint rank1(ulint i){//number of 1's before position i (excluded) in the bitvector
 
-		return rank_ptrs_1[i/(D*D)] + rank_ptrs_2[i/D] + popcnt( bitvector.get((i/D)*D,i) );//  [i/D],i%D);// bitvector.bits().popcount((i/D)*D, i);
+		assert(i<=n);
+		assert(i/(D*D)<rank_ptrs_1_size);
+		assert(i/D<rank_ptrs_2_size);
+		assert((i/D)*D<=n);
+
+		ulint remainder = ( ((i/D)*D)>=i?0:popcnt(bitvector.get((i/D)*D,i)) );
+
+		return rank_ptrs_1[i/(D*D)] + rank_ptrs_2[i/D] + remainder;
 
 	}
 
-	inline ulint rank0(ulint i){return i-rank1(i);}//number of 0's before position i (excluded) in the bitvector
+	inline ulint rank0(ulint i){
+
+		assert(i<=n);
+
+		return i-rank1(i);
+
+	}//number of 0's before position i (excluded) in the bitvector
 
 	inline uint bitAt(ulint i){//get value of the i-th bit
 
-		return bitvector[i];
+		assert(i<n);
 
-	}
-
-	inline void setBit(ulint i, bool b){//set bit in position i
-
-		bitvector[i] = b;
+		return bitvector.get(i);
 
 	}
 
 	void saveToFile(FILE *fp){
 
 		fwrite(&n, sizeof(ulint), 1, fp);
-		fwrite(&w, sizeof(uint), 1, fp);
 
-		ulint rank_ptrs_1_size = rank_ptrs_1.size();
-		ulint rank_ptrs_2_width = rank_ptrs_2.width();
-		ulint rank_ptrs_2_size = rank_ptrs_2.size();
 		ulint bitvector_size = bitvector.size();
 
 		fwrite(&rank_ptrs_1_size, sizeof(ulint), 1, fp);
-		fwrite(&rank_ptrs_2_width, sizeof(ulint), 1, fp);
 		fwrite(&rank_ptrs_2_size, sizeof(ulint), 1, fp);
+
 		fwrite(&bitvector_size, sizeof(ulint), 1, fp);
 
-		save_packed_view_to_file(rank_ptrs_1,rank_ptrs_1_size,fp);
-		save_packed_view_to_file(rank_ptrs_2,rank_ptrs_2_size,fp);
+		fwrite(rank_ptrs_1.data(), sizeof(uint64_t), rank_ptrs_1_size, fp);
+		fwrite(rank_ptrs_2.data(), sizeof(uint16_t), rank_ptrs_2_size, fp);
+
 		save_bitview_to_file(bitvector,bitvector_size,fp);
 
 	}
@@ -110,25 +115,27 @@ public:
 
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
 		check_numBytes();
-		numBytes = fread(&w, sizeof(uint), 1, fp);
-		check_numBytes();
 
-		ulint rank_ptrs_1_size;
-		ulint rank_ptrs_2_width;
-		ulint rank_ptrs_2_size;
 		ulint bitvector_size;
 
 		numBytes = fread(&rank_ptrs_1_size, sizeof(ulint), 1, fp);
 		check_numBytes();
-		numBytes = fread(&rank_ptrs_2_width, sizeof(ulint), 1, fp);
-		check_numBytes();
+
 		numBytes = fread(&rank_ptrs_2_size, sizeof(ulint), 1, fp);
 		check_numBytes();
+
 		numBytes = fread(&bitvector_size, sizeof(ulint), 1, fp);
 		check_numBytes();
 
-		rank_ptrs_1 = load_packed_view_from_file(w, rank_ptrs_1_size,fp);
-		rank_ptrs_2 = load_packed_view_from_file(rank_ptrs_2_width, rank_ptrs_2_size,fp);
+		rank_ptrs_1 = vector<uint64_t>(rank_ptrs_1_size,0);
+		rank_ptrs_2 = vector<uint16_t>(rank_ptrs_2_size,0);
+
+		numBytes = fread(rank_ptrs_1.data(), sizeof(uint64_t), rank_ptrs_1_size, fp);
+		check_numBytes();
+
+		numBytes = fread(rank_ptrs_2.data(), sizeof(uint16_t), rank_ptrs_2_size, fp);
+		check_numBytes();
+
 		bitvector = load_bitview_from_file(bitvector_size,fp);
 
 	}
@@ -145,8 +152,8 @@ private:
 		ulint nr_of_ones_global = 0;
 		ulint nr_of_ones_local = 0;
 
-		rank_ptrs_1[0] = 0;
-		rank_ptrs_2[0] = 0;
+		rank_ptrs_1[0]=0;
+		rank_ptrs_2[0]=0;
 
 		if(n==0)
 			return;
@@ -160,13 +167,11 @@ private:
 
 			nr_of_ones_global += bitAt(i);
 
-			if((i+1)%D==0){
-				rank_ptrs_2[(i+1)/D] = nr_of_ones_local;
-
-			}
+			if((i+1)%D==0)
+				rank_ptrs_2[(i+1)/D]=nr_of_ones_local;
 
 			if((i+1)%(D*D)==0)
-				rank_ptrs_1[(i+1)/(D*D)] = nr_of_ones_global;
+				rank_ptrs_1[(i+1)/(D*D)]=nr_of_ones_global;
 
 		}
 
@@ -174,11 +179,13 @@ private:
 
 
 	ulint n;//length of the bitvector
-	uint w;//size of the word = log2 n
 
 	bitview_t bitvector;//the bits are stored in a bitvector, so that they can be accessed in blocks of size D
-	packed_view_t rank_ptrs_1;//rank pointers sampled every D^2 positions
-	packed_view_t rank_ptrs_2;//rank pointers sampled every D positions
+	vector<uint64_t> rank_ptrs_1;//rank pointers sampled every D^2 positions
+	vector<uint16_t> rank_ptrs_2;//rank pointers sampled every D positions
+
+	ulint rank_ptrs_1_size;
+	ulint rank_ptrs_2_size;
 
 	static const uint D = 64;//size of words
 

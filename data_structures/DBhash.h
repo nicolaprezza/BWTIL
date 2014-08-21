@@ -48,7 +48,7 @@ public:
 
 		if(verbose)	cout << " Done.\n";
 
-		indexedBWT =  IndexedBWT(bwt,offrate,verbose);
+		indexedBWT =  IndexedBWT(&bwt,offrate,verbose);
 
 		initAuxHash();
 
@@ -91,11 +91,11 @@ public:
 
 			if(verbose)	cout << " Computing BWT(h(T))  ...";
 			{
-				bwt = cw_bwt(fingerprint,cw_bwt::text).toString();
+				bwt = cw_bwt(&fingerprint,cw_bwt::text).toString();
 			}
 			if(verbose)	cout << " Done.\n";
 
-			indexedBWT =  IndexedBWT(bwt,offrate,verbose);
+			indexedBWT =  IndexedBWT(&bwt,offrate,verbose);
 
 		}
 

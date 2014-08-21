@@ -1,12 +1,12 @@
 //============================================================================
-// Name        : IndexedBWT.h
+// Name        : IndexedBWT->h
 // Author      : Nicola Prezza and Alberto Policriti
 // Version     : 1.0
 // Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
 // Description : BWT with succinct rank structures and sampled SA pointers
 
 /*   This class stores the BWT as a wavelet tree + structures to retrieve original text addresses from BWT addresses.
- *   implements rank functions on the BWT.
+ *   implements rank functions on the BWT->
  *
  *   ASSUMPTION: the array 'BWT' must be a BWT (of length n) of some text, with 0x0 byte as terminator character AND no other 0x0 bytes
  *   The class will perform a re-mapping of the bwt, subtracting 1 to each character (except the terminator character) to keep the alphabet size at a minimum.
@@ -30,9 +30,9 @@ public:
 	/*
 	 * constructor: takes as input BWT where terminator character is 0 and builds structures.
 	 */
-	IndexedBWT(string BWT, ulint offrate, bool verbose){
+	IndexedBWT(string * BWT, ulint offrate, bool verbose){
 
-		this->n=BWT.length();
+		this->n=BWT->length();
 		this->offrate=offrate;
 
 		number_of_SA_pointers = (offrate==0?0:n/offrate + 1);
@@ -55,15 +55,15 @@ public:
 
 		for(ulint i=0;i<n;i++){
 
-			if((uchar)BWT[i]==0){//found terminator. Save position
+			if((uchar)BWT->at(i)==0){//found terminator. Save position
 				terminator_position = i;
 				nr_of_terminators++;
 			}else{
 
-				if(not char_inserted.at((uchar)BWT[i])){
+				if(not char_inserted.at((uchar)BWT->at(i))){
 
-					alphabet.push_back((uchar)BWT[i]);
-					char_inserted.at((uchar)BWT[i])=true;
+					alphabet.push_back((uchar)BWT->at(i));
+					char_inserted.at((uchar)BWT->at(i))=true;
 
 				}
 
@@ -72,7 +72,7 @@ public:
 
 		if(nr_of_terminators!=1){
 
-			cout << "Error (IndexedBWT.cpp): the bwt contains no o more than one 0x0 bytes\n";
+			cout << "Error (IndexedBWT->cpp): the bwt contains no o more than one 0x0 bytes\n";
 			exit(1);
 
 		}
@@ -99,7 +99,7 @@ public:
 		//apply remapping
 
 		for(ulint i=0;i<n;i++)
-			BWT[i] = remapping[(uchar)BWT[i]];
+			BWT->at(i) = remapping[(uchar)BWT->at(i)];
 
 		bwt_wt =  WaveletTree(BWT,verbose);
 
@@ -129,6 +129,12 @@ public:
 		for(uint i=0;i<255;i++)
 			FIRST[i]++;
 
+		//restore original values in BWT
+		for(ulint i=0;i<n;i++)
+			BWT->at(i) = inverse_remapping[(uchar)BWT->at(i)];
+
+		BWT->at(terminator_position) = 0;
+
 		if(offrate>0){
 			if(verbose) cout << "\n  Marking positions containing a SA pointer ... ";
 
@@ -142,12 +148,6 @@ public:
 			sampleSA(verbose);
 			if(verbose) cout << "  Done.\n";
 		}
-
-		//restore original values in BWT
-		for(ulint i=0;i<n;i++)
-			BWT[i] = inverse_remapping[(uchar)BWT[i]];
-
-		BWT[terminator_position] = 0;
 
 	}
 

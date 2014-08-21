@@ -164,14 +164,22 @@ void test2(){
 }
 
 
+void test(string * a){
+
+	a->at(0) = 'c';
+
+}
+
  int main(int argc,char** argv) {
 
-	 auto v = new vector<bool>(5,0);
+	 string a = "mandi";
 
-	 v->at(1)=1;
+	 test(&a);
 
-	 for(uint i=0;i<5;i++)cout << v->at(i);
-	 cout <<endl;
+	 cout << a << endl;
+
+
+
 
  }
 

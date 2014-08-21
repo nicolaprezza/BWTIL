@@ -55,7 +55,7 @@ using namespace bwtil;
 			if(offset==0)
 				offset=1;
 
-			idxBWT = IndexedBWT(bwt,offset,true);
+			idxBWT = IndexedBWT(&bwt,offset,true);
 
 		}else{// bufsize provided
 
@@ -64,7 +64,7 @@ using namespace bwtil;
 				exit(1);
 			}
 
-			idxBWT = IndexedBWT(bwt,atoi(argv[3]),true);
+			idxBWT = IndexedBWT(&bwt,atoi(argv[3]),true);
 
 		}
 
@@ -112,9 +112,28 @@ using namespace bwtil;
 	printRSSstat();
 
 	auto t2 = high_resolution_clock::now();
-	double total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
-	cout << "Total time: " << total << "s.\n";
+	ulint total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
 
+	if(total>=3600){
+
+		uint h = total/3600;
+		uint m = (total%3600)/60;
+		uint s = (total%3600)%60;
+
+		cout << "Total time: " << h << "h " << m << "m " << s << "s" << endl;
+
+	}else if (total>=60){
+
+		uint m = total/60;
+		uint s = total%60;
+
+		cout << "Total time: " << m << "m " << s << "s" << endl;
+
+	}else{
+
+		cout << "Total time: " << total << "s" << endl;
+
+	}
 
  }
 
