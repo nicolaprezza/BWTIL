@@ -51,7 +51,7 @@ To use the class in your own code, just include algorithms/cw_bwt.h . After that
 
 After that, you can load in RAM the bwt created in step 3 (i.e. from file "some\_path/file.txt.bwt")
 
-**Less memory efficient (maintain text, bwt and cw\_bwt object in RAM)** This is very simple (text=string with your text file, bwt=string with the bwt):
+**Less memory efficient (maintain text, bwt and cw\_bwt object in RAM)** This is very simple (input=your text file as a string object, bwt=string with the bwt):
 
-> string bwt = cw\_bwt(&text,cw_bwt::text).toString();
+> string bwt = cw\_bwt(&input,cw_bwt::text).toString();
 

@@ -41,7 +41,7 @@ public:
 		 *
 		 */
 
-		bitvector = bitview_t(n+100);
+		bitvector = bitview_t(n);
 
 		for(ulint i=0;i<n;i++)
 			bitvector.set(i,vb->at(i));
