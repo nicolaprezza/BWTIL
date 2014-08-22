@@ -32,7 +32,6 @@ public:
 
 	//overhead : k will be chosen such that the automata will require approximately space n*overhead/100 bits, where n is the text length
 	ContextAutomata(BackwardIterator * bfr, uint overhead, bool verbose){
-
 		init(bfr, verbose);
 
 		//detect optimal k and build automata
@@ -391,7 +390,8 @@ private:
 
 		H.at(context%q).insert(context);
 
-		int perc,last_perc=-1,symbols_read=0;
+		int perc,last_perc=-1;
+		ulint symbols_read=0;
 
 		while(not bfr->begin()){
 
