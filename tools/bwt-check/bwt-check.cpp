@@ -49,6 +49,7 @@ using namespace bwtil;
 		cout << "BWT length =  " << bwt.length() << endl;
 		cout << "Indexing the BWT ... " << endl << endl;
 
+		//second arg is offrate of SA pointers. If 0, no SA pointers are stored.
 		idxBWT = IndexedBWT(&bwt,0,true);
 
     }

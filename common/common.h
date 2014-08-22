@@ -75,7 +75,7 @@ enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 
 #define popcnt(x) __builtin_popcountll(x)
 
-#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading dB-hash file (StaticBitVector error)" << endl << flush; exit(1); }
+#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading file." << endl << flush; exit(1); }
 
 #include <memory>
 #include <type_traits>

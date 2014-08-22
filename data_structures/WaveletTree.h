@@ -40,13 +40,9 @@ public:
 
 		if (verbose) cout << "   Number of nodes = "<< number_of_nodes << endl;
 
-		//firstly create a tree of vector<bool>, then switch to StaticBitVectors
-
 		if (verbose) cout << "   filling nodes ... " << endl;
 
-		auto nodes_vec = vector<vector<bool>* >(number_of_nodes);
-		for(uint i=0;i<number_of_nodes;i++)
-			nodes_vec[i] = new vector<bool>();
+		nodes = vector<StaticBitVector>(number_of_nodes);
 
 		uint node = root();
 
@@ -65,7 +61,7 @@ public:
 
 				bool bit = bitInChar((uchar)text->at(i),j);
 
-				nodes_vec[node]->push_back(bit);
+				nodes[node].push_back(bit);
 
 				node = (bit?child1(node):child0(node));
 
@@ -77,29 +73,7 @@ public:
 
 		}
 
-		//now switch to StaticBitVectors
-
-		perc=0;
-		last_perc=-1;
-		if (verbose) cout << "   computing ranks ... " << endl;
-
-		nodes = vector<StaticBitVector>(number_of_nodes);
-
-		for(uint i=0;i<number_of_nodes;i++){
-
-			if(perc>last_perc+10){
-
-				if (verbose) cout << "   " << perc << "% done." <<endl;
-				last_perc=perc;
-
-			}
-
-			nodes[i] = StaticBitVector(nodes_vec[i]);
-			delete nodes_vec[i];//free node memory
-
-			perc = (100*i)/number_of_nodes;
-
-		}
+		if (verbose) cout << "   Done." << endl;
 
 	}
 
@@ -118,15 +92,25 @@ public:
 
 		while(level<height()){
 
-			bit = nodes[node].bitAt(i);
+			bit = nodes[node].at(i);
 			c = c*2 + bit;
 
 			if(bit==0){
+
 				i = nodes[node].rank0(i);
+
+				assert(i<nodes[node].size());
+
 				node = child0(node);
+
 			}else{
+
 				i = nodes[node].rank1(i);
+
+				assert(i<nodes[node].size());
+
 				node = child1(node);
+
 			}
 
 			level++;
@@ -166,18 +150,20 @@ public:
 		ulint numBytes;
 
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		nodes = vector<StaticBitVector>(number_of_nodes);
 
 		for(ulint i=0;i<number_of_nodes;i++)
 			nodes[i].loadFromFile(fp);
+
+		numBytes++;//avoids "variable not used" warning
 
 	}
 

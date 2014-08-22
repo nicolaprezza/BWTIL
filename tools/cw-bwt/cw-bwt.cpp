@@ -58,7 +58,7 @@ using namespace bwtil;
 
 	if(argc==3){//k autodetected
 		string path(argv[1]);
-		cwbwt = cw_bwt(&path,cw_bwt::path);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
+		cwbwt = cw_bwt(&path,cw_bwt::path,true);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
 	}
 	if(argc==4){//the user has specified k
 		string path(argv[1]);

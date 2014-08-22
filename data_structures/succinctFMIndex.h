@@ -90,15 +90,17 @@ public:
 		ulint numBytes;
 
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&offrate, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		idxBWT.loadFromFile(fp);
+
+		numBytes++;//avoids "variable not used" warning
 
 	}
 

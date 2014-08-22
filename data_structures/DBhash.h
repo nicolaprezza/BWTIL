@@ -196,29 +196,29 @@ public:
 		ulint numBytes;
 
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&m, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&w, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&w_aux, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&auxiliary_hash_size, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&text_fingerprint_length, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		char_to_int = vector<uint>(256);
 		int_to_char = vector<uchar>(sigma);
 
 		numBytes = fread(char_to_int.data(), sizeof(uint), 256, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(int_to_char.data(), sizeof(unsigned char), sigma, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		h = HashFunction();
 		h.loadFromFile(fp);
@@ -229,6 +229,8 @@ public:
 		text_wv = load_packed_view_from_file(log_sigma,n,fp);
 
 		auxiliary_hash = load_packed_view_from_file(ceil(log2(n+1)),auxiliary_hash_size,fp);
+
+		numBytes++;//avoids "variable not used" warning
 
 	}
 
@@ -247,12 +249,12 @@ public:
 			exit(1);
 		}
 
-		return filterOutBadOccurrencies(P, getOccurrencies_slow(h.hashValue(P)), max_errors);
+		return filterOutBadOccurrences(P, getOccurrencies_slow(h.hashValue(P)), max_errors);
 
 	}
 
 	//given a pattern, a list of (candidate) occurrencies and a maximum number of errors (Hamming distance), filter out occurrencies at distance > max_errors
-	vector<ulint> filterOutBadOccurrencies(string P, vector<ulint> occ, uint max_errors){
+	vector<ulint> filterOutBadOccurrences(string P, vector<ulint> occ, uint max_errors){
 
 		vector<ulint> good;
 

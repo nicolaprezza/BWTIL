@@ -155,7 +155,7 @@ public:
 
 		ulint l = 0;//number of LF steps
 
-		while(marked_positions.bitAt(i) == 0){
+		while(marked_positions.at(i) == 0){
 			i = LF(i);
 			l++;
 
@@ -284,24 +284,24 @@ public:
 		ulint numBytes;
 
 		numBytes = fread(&sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&log_sigma, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&terminator_position, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&offrate, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&number_of_SA_pointers, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&w, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&n, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		bwt_wt =  WaveletTree();
-		marked_positions =  StaticBitVector();
-
 		bwt_wt.loadFromFile(fp);
+
+		marked_positions =  StaticBitVector();
 		marked_positions.loadFromFile(fp);
 		text_pointers = load_packed_view_from_file(w, number_of_SA_pointers, fp);
 
@@ -310,11 +310,13 @@ public:
 		inverse_remapping = vector<uchar>(sigma);
 
 		numBytes = fread(FIRST.data(), sizeof(ulint), 257, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(remapping.data(), sizeof(uchar), 256, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(inverse_remapping.data(), sizeof(uchar), sigma, fp);
-		check_numBytes();
+		assert(numBytes>0);
+
+		numBytes++;//avoids "variable not used" warning
 
 	}
 
@@ -419,7 +421,7 @@ private:
 
 				}
 
-			if(marked_positions.bitAt(j)==1)
+			if(marked_positions.at(j)==1)
 				text_pointers[marked_positions.rank1(j)] = i;
 
 			j = LF(j);

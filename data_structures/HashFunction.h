@@ -477,27 +477,29 @@ public:
 		ulint numBytes;
 
 		numBytes = fread(&base, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&m, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&w, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&r, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&log_base, sizeof(uint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(&type, sizeof(hash_type), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		code = new uint[256];
 		random_char = new bool[256];
 
 		numBytes = fread(code, sizeof(uint), 256, fp);
-		check_numBytes();
+		assert(numBytes>0);
 		numBytes = fread(random_char, sizeof(bool), 256, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		buildZSet();
+
+		numBytes++;//avoids "variable not used" warning
 
 	}
 

@@ -172,13 +172,9 @@ void test(string * a){
 
  int main(int argc,char** argv) {
 
-	 string a = "mandi";
+	 ulint x = 1;
 
-	 test(&a);
-
-	 cout << a << endl;
-
-
+	 x++;
 
 
  }
