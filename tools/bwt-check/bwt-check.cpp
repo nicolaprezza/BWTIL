@@ -50,13 +50,12 @@ using namespace bwtil;
 		cout << "Indexing the BWT ... " << endl << endl;
 
 		//second arg is offrate of SA pointers. If 0, no SA pointers are stored.
-		idxBWT = IndexedBWT(&bwt,0,true);
+		idxBWT = IndexedBWT(bwt,0,true);
 
     }
 
-    string * path = new string(argv[2]);
+    string path = string(argv[2]);
 	auto bfr = BackwardFileIterator(path);
-	delete path;
 
 	if(bfr.length() != n_inv_bwt){
 

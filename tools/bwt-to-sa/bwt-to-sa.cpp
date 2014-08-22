@@ -55,7 +55,7 @@ using namespace bwtil;
 			if(offset==0)
 				offset=1;
 
-			idxBWT = IndexedBWT(&bwt,offset,true);
+			idxBWT = IndexedBWT(bwt,offset,true);
 
 		}else{// bufsize provided
 
@@ -64,7 +64,7 @@ using namespace bwtil;
 				exit(1);
 			}
 
-			idxBWT = IndexedBWT(&bwt,atoi(argv[3]),true);
+			idxBWT = IndexedBWT(bwt,atoi(argv[3]),true);
 
 		}
 

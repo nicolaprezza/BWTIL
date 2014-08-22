@@ -45,13 +45,15 @@ To use the class in your own code, just include algorithms/cw_bwt.h . After that
 
 1. save your text (string/array) to disk (e.g. to file "some_path/file.txt")
 2. free memory (i.e. delete text buffer)
-3. run cw-bwt loading the text from the file created in step 1 and store the bwt directly to file. Let string in_path("some\_path/file.txt") be your input:
+3. run cw-bwt loading the text from the file created in step 1 and store the bwt directly to file. Let "some\_path/file.txt" be your input:
 
-> cw\_bwt(&in\_path,cw_bwt::path).toFile("some\_path/file.txt.bwt");
+> string in_path("some\_path/file.txt")
+> cw\_bwt(in\_path,cw_bwt::path).toFile("some\_path/file.txt.bwt");
 
 After that, you can load in RAM the bwt created in step 3 (i.e. from file "some\_path/file.txt.bwt")
 
-**Less memory efficient (maintain text, bwt and cw\_bwt object in RAM)** This is very simple (input=your text as a string object, bwt=string with the bwt):
+**Less memory efficient (maintain text, bwt and cw\_bwt object in RAM)** This is very simple:
 
-> string bwt = cw\_bwt(&input,cw_bwt::text).toString();
+> string input("mississippi");
+> string bwt = cw\_bwt(input,cw_bwt::text).toString();
 

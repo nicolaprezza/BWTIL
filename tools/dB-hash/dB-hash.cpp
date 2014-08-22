@@ -32,12 +32,17 @@ DBhash buildFromFile(string text_path, uint m){
 
 	// 2) create the hash function
 
-	//HashFunction * h = new HashFunction(n,m,DNA_SEARCH);//hash function for DNA search. Use only if the file is on the alphabet {A,C,G,T,N}
-	HashFunction h = HashFunction(m,text_path,true);//general purpose hash function: detect automatically alphabet size
+	//hash function for DNA search. Use only if the file is on the alphabet {A,C,G,T,N}
+	//n is the file length
+	//HashFunction h = HashFunction(n,m,HashFunction::DNA_SEARCH);
+
+	//general purpose hash function: detect automatically alphabet size
+	HashFunction h = HashFunction(m,text_path,true);
 
 	//build dBhash data structure
 
-	DBhash dBhash = DBhash(text,h,4,true);//offrate=4, verbose=true
+	//offrate=4, verbose=true
+	DBhash dBhash = DBhash(text,h,4,true);
 
 	return dBhash;
 

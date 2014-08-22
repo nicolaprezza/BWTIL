@@ -22,41 +22,7 @@ public:
 
 	DBhash(){};
 
-	DBhash(string text, string bwt, HashFunction h, ulint offrate = 4, bool verbose = false){
-
-		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
-
-		this->n = text.length();
-		this->h = h;
-		this->offrate = offrate;
-
-		m = h.m;
-		w = h.w;
-
-		text_fingerprint_length = n-m+w+1;
-
-		if(verbose)	cout << " Text fingerprint length = " << text_fingerprint_length<<endl;
-
-		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h.base) );//log_b n - log_b log_2 n
-		auxiliary_hash_size = 1 << (w_aux * h.log_base);
-
-		if(verbose)	cout << " w_aux = " << w_aux <<endl;
-
-		if(verbose)	cout << " Storing text in plain format ...";
-
-		initText(text);
-
-		if(verbose)	cout << " Done.\n";
-
-		indexedBWT =  IndexedBWT(&bwt,offrate,verbose);
-
-		initAuxHash();
-
-		if(verbose)	cout << "Done. Size of the structure = " << (double)size()/(n*8) << "n Bytes" <<endl;
-
-	}
-
-	DBhash(string text, HashFunction h, ulint offrate = 4, bool verbose = false){
+	DBhash(string &text, HashFunction h, ulint offrate = 4, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
@@ -89,13 +55,13 @@ public:
 
 			string bwt;
 
-			if(verbose)	cout << " Computing BWT(h(T))  ...";
+			if(verbose)	cout << " Computing BWT(h(T))  ..." <<flush;
 			{
-				bwt = cw_bwt(&fingerprint,cw_bwt::text).toString();
+				bwt = cw_bwt(fingerprint,cw_bwt::text,verbose).toString();
 			}
 			if(verbose)	cout << " Done.\n";
 
-			indexedBWT =  IndexedBWT(&bwt,offrate,verbose);
+			indexedBWT =  IndexedBWT(bwt,offrate,verbose);
 
 		}
 
@@ -135,13 +101,39 @@ public:
 
 	}
 
+	//returns first cl occurrences in the text of substrings having 'fingerprint' as hash value. uses the auxiliary hash.
+	vector<ulint> getOccurrenciesUpTo(ulint fingerprint,uint cl){
+
+		ulint mask = auxiliary_hash_size-1;
+
+		ulint suffix = fingerprint & mask;//suffix of length w_aux. Searched in the auxiliary hash
+		ulint prefix = fingerprint >> (w_aux*h.log_base);//prefix of the fingerprint of length log m/log base to be searched with backward search
+
+		pair<ulint, ulint> interval;
+
+		interval.first = auxiliary_hash[suffix];
+
+		if (suffix + 1 == auxiliary_hash_size)
+			interval.second = text_fingerprint_length + 1;
+		else
+			interval.second = auxiliary_hash[suffix+1];
+
+		interval = indexedBWT.BS(prefix,w-w_aux,interval);
+
+		if(cl>0 and interval.second-interval.first>cl)//truncate interval
+			interval.second = interval.first+cl;
+
+		return indexedBWT.convertToTextCoordinates( interval );
+
+	}
+
 	ulint size(){//returns size of the structure in bits
 
 		return indexedBWT.size() + text_wv.size()*text_wv.width() + auxiliary_hash.size()*auxiliary_hash.width();
 
 	}
 
-	unsigned char textAt(ulint i){
+	uchar textAt(ulint i){
 		return int_to_char[text_wv[i]];
 	}
 
@@ -180,8 +172,11 @@ public:
 		fwrite(&sigma, sizeof(uint), 1, fp);
 		fwrite(&log_sigma, sizeof(uint), 1, fp);
 
+		assert(char_to_int.size()==256);
 		fwrite(char_to_int.data(), sizeof(uint), 256, fp);
-		fwrite(int_to_char.data(), sizeof(unsigned char), sigma, fp);
+
+		assert(int_to_char.size()==sigma);
+		fwrite(int_to_char.data(), sizeof(uchar), sigma, fp);
 
 		h.saveToFile(fp);
 		indexedBWT.saveToFile(fp);
@@ -217,7 +212,7 @@ public:
 
 		numBytes = fread(char_to_int.data(), sizeof(uint), 256, fp);
 		assert(numBytes>0);
-		numBytes = fread(int_to_char.data(), sizeof(unsigned char), sigma, fp);
+		numBytes = fread(int_to_char.data(), sizeof(uchar), sigma, fp);
 		assert(numBytes>0);
 
 		h = HashFunction();
@@ -242,7 +237,7 @@ public:
 
 	}
 
-	vector<ulint> getOccurrencies(string P, uint max_errors=0){
+	vector<ulint> getOccurrencies(string &P, uint max_errors=0){
 
 		if(P.length()!=m){
 			cerr << "Error: Searching pattern of length " << P.length() << " in a dB-hash with pattern length " << m<<endl;
@@ -254,7 +249,7 @@ public:
 	}
 
 	//given a pattern, a list of (candidate) occurrencies and a maximum number of errors (Hamming distance), filter out occurrencies at distance > max_errors
-	vector<ulint> filterOutBadOccurrences(string P, vector<ulint> occ, uint max_errors){
+	vector<ulint> filterOutBadOccurrences(string &P, vector<ulint> occ, uint max_errors){
 
 		vector<ulint> good;
 
@@ -267,7 +262,7 @@ public:
 			s = occ.at(i);
 
 			for(ulint j=0;j<P.length() and dist<=max_errors;j++)
-				if(P.at(j) != textAt(s+j))
+				if((uchar)P.at(j) != textAt(s+j))
 					dist++;
 
 			if(dist<=max_errors)
@@ -286,7 +281,7 @@ public:
 
 protected:
 
-	void initText(string text){
+	void initText(string &text){
 
 		char_to_int = vector<uint>(256);
 
@@ -300,8 +295,8 @@ protected:
 		//compute alphabet size and init codes to convert char to int
 		for(ulint i = 0;i<n;i++){
 
-			if(char_to_int[text[i]]==empty){
-				char_to_int[text[i]] = sigma;
+			if(char_to_int[(uchar)text.at(i)]==empty){
+				char_to_int[(uchar)text.at(i)] = sigma;
 				sigma++;
 			}
 
@@ -322,7 +317,7 @@ protected:
 		text_wv =  packed_view_t(log_sigma,n);
 
 		for(ulint i = 0;i<n;i++)
-			text_wv[i] = char_to_int[text[i]];
+			text_wv[i] = char_to_int[(uchar)text.at(i)];
 
 	}
 

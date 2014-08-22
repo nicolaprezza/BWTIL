@@ -52,11 +52,10 @@ typedef bitview<vector> bitview_t;
 constexpr uint W_leafs = 2048;//packed B-trees parameters
 constexpr uint W_nodes = 256;
 
-enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
-
 // Functions :
 
-/*int popcnt(unsigned long int x){//no need for HW implementation
+//Uncomment this if popcount is not available in hardware
+/*inline int popcnt(ulint x){
 
 	x = x - ((x&0xAAAAAAAAAAAAAAAA)>>1);//groups of 2 bits
 	x = (x&0x3333333333333333)+((x&0xCCCCCCCCCCCCCCCC)>>2);//groups of 4 bits
@@ -70,9 +69,7 @@ enum hash_type {DNA_SEARCH,BS_SEARCH,DEFAULT};
 
 }*/
 
-//const-time popcnt (if available in hardware)
-//#define popcnt(x) __builtin_popcount(x>>32)+__builtin_popcount(x&0x00000000FFFFFFFF);
-
+//Comment this if popcount is not available in hardware
 #define popcnt(x) __builtin_popcountll(x)
 
 #define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading file." << endl << flush; exit(1); }

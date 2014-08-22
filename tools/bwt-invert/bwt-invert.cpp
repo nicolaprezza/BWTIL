@@ -47,7 +47,7 @@ using namespace bwtil;
 		cout << "BWT length =  " << bwt.length() << endl;
 		cout << "Indexing the BWT ... " << endl << endl;
 
-		idxBWT = IndexedBWT(&bwt,0,true);
+		idxBWT = IndexedBWT(bwt,0,true);
 
     }
 

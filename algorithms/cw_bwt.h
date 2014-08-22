@@ -91,7 +91,7 @@ public:
 	cw_bwt(){};
 
 	//creates cw_bwt with default number of contexts ( O(n/(log^3 n)) )
-	cw_bwt(string * input_string, cw_bwt_input_type input_type, bool verbose=false){
+	cw_bwt(string &input_string, cw_bwt_input_type input_type, bool verbose=false){
 
 		if(input_type==path)
 			bwIt = new BackwardFileIterator(input_string);
@@ -110,7 +110,7 @@ public:
 	}
 
 	//creates cw_bwt with desired context length k
-	cw_bwt(string * input_string, cw_bwt_input_type input_type, uint k, bool verbose=false){
+	cw_bwt(string &input_string, cw_bwt_input_type input_type, uint k, bool verbose=false){
 
 		this->k = k;
 

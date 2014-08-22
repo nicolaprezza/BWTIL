@@ -58,11 +58,12 @@ using namespace bwtil;
 
 	if(argc==3){//k autodetected
 		string path(argv[1]);
-		cwbwt = cw_bwt(&path,cw_bwt::path,true);//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
+		//cw_bwt::path means that the first argument has to be interpreted as a file path rather than a text string
+		cwbwt = cw_bwt(path,cw_bwt::path,true);
 	}
 	if(argc==4){//the user has specified k
 		string path(argv[1]);
-		cwbwt = cw_bwt(&path,cw_bwt::path,atoi(argv[3]),true);
+		cwbwt = cw_bwt(path,cw_bwt::path,atoi(argv[3]),true);
 	}
 	/*
 	 * If, instead, you want to compute the bwt of a string, create a cw_bwt object as follows:

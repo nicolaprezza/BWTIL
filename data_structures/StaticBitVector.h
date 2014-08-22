@@ -35,14 +35,14 @@ public:
 	};
 
 	//build bitvector copying the content of the input vector of bool
-	StaticBitVector(vector<bool> * vb){
+	StaticBitVector(vector<bool> &vb){
 
 		n=0;
 		global_rank1=0;
 		local_rank1=0;
 
-		for(ulint i=0;i<vb->size();i++)
-			push_back(vb->at(i));
+		for(ulint i=0;i<vb.size();i++)
+			push_back(vb.at(i));
 
 	};
 

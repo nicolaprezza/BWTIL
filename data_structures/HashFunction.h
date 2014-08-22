@@ -18,13 +18,15 @@ namespace bwtil {
 class HashFunction {
 public:
 
+	enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAULT};
+
 	class SetZIterator{
 
 	public:
 
 		SetZIterator(HashFunction * f){
-			Z = f->Z;
-			Z_size = f->Z_size;
+			Z = f->Z.data();
+			Z_size = f->Z_size.data();
 			current_errors=0;
 			index=0;
 		}
@@ -61,14 +63,15 @@ public:
 
 		uint current_errors;
 		ulint index;
-		ulint **Z;//set Z
+		vector<ulint> *Z;//set Z
 		uint *Z_size;//size of Z(i)
 
 	};
 
 	//n = text length, m= pattern length. w is automatically calculated as w = log_b(mn), where b = base (which depends on type)
 	//WARNING: use DNA_SEARCH or BS_SEARCH as hash type only if the text is on the alphabet {A,C,G,T,N}
-	HashFunction(ulint n, ulint m, hash_type type=DEFAULT, bool verbose = false){
+	//quality_threshold is meaningful only for QUALITY hash types
+	HashFunction(ulint n, ulint m, hash_type type=DEFAULT, uint quality_threshold=15, bool verbose = false){
 
 		if(verbose)
 			cout << "\nBuilding hash function ... \n";
@@ -76,12 +79,8 @@ public:
 		this->type = type;
 		this->m=m;
 
-		code = new uint[256];
-
-		for(uint i=0;i<256;i++)
-			code[i]=0;
-
-		random_char = new bool[256];
+		code = vector<uint>(256,0);
+		random_char = vector<uchar>(256,false);
 
 		if(type == DEFAULT)
 			init_DEFAULT();
@@ -91,6 +90,12 @@ public:
 
 		if(type == BS_SEARCH)
 			init_BS_SEARCH();
+
+		if(type == QUALITY_DNA_SEARCH)
+			init_QUALITY_DNA_SEARCH(quality_threshold);
+
+		if(type == QUALITY_BS_SEARCH)
+			init_QUALITY_BS_SEARCH(quality_threshold);
 
 		w = ceil(log2(m*n)/log2(base));//optimal word size
 		log_base = ceil(log2(base));
@@ -123,11 +128,8 @@ public:
 		this->type = DEFAULT;
 		this->m=m;
 
-		code = new uint[256];
-
-		random_char = new bool[256];
-		for(uint i=0;i<256;i++)
-			random_char[i]=false;
+		code = vector<uint>(256,0);
+		random_char = vector<uchar>(256,false);
 
 		ulint n=0;
 
@@ -173,9 +175,6 @@ public:
 
 		//calculate code
 
-		for(uint i=0;i<256;i++)
-			code[i]=0;
-
 		for(uint i=0;i<alphabet.size();i++)
 			code[alphabet.at(i)] = i;
 
@@ -205,8 +204,9 @@ public:
 
 	}
 
+	ulint hashValue(string &P){//compute fingerprint of pattern P of length m.
 
-	ulint hashValue(string P){//compute fingerprint of pattern P of length m.
+		assert(P.size()==m);
 
 		ulint W = 0;
 		ulint result = 0;
@@ -218,7 +218,7 @@ public:
 				W = 0;
 			}
 
-			W = (W<<log_base) + code[(unsigned int)P.at(i)];
+			W = (W<<log_base) + code[(uchar)P.at(i)];
 
 		}
 
@@ -228,7 +228,7 @@ public:
 		if(r>0){
 
 			for(uint i=m-w;i<m;i++)
-				W = (W<<log_base) + code[(unsigned int)P.at(i)];
+				W = (W<<log_base) + code[(uchar)P.at(i)];
 
 			result = result^W;
 
@@ -238,7 +238,9 @@ public:
 
 	}
 
-	ulint hashValue(unsigned char *P){//compute fingerprint of pattern P of length m.
+	ulint qualityHashValue(string &P){//compute quality fingerprint of pattern P of length m.
+
+		assert(P.size()==m);
 
 		ulint W = 0;
 		ulint result = 0;
@@ -246,115 +248,37 @@ public:
 		for(uint i=0;i<m-r;i++){
 
 			if(i%w==0){
-				result = result^W;
+				result = result|W;
 				W = 0;
 			}
 
-			W = (W<<log_base) + code[P[i]];
+			W = (W<<log_base) + code[(uchar)P.at(i)];
 
 		}
 
-		result = result^W;
+		result = result|W;
 		W = 0;
 
 		if(r>0){
 
 			for(uint i=m-w;i<m;i++)
-				W = (W<<log_base) + code[P[i]];
+				W = (W<<log_base) + code[(uchar)P.at(i)];
 
-			result = result^W;
+			result = result|W;
 
 		}
 
 		return result;
 
-	}//hash value
-
-	unsigned char* hashValue(unsigned char *P, ulint n){
-
-		ulint length=n-m+w;
-		int blocks = m/w;
-
-		ulint bufsize=m+1;
-
-		int r = m%w;
-
-		if(r==0){
-			blocks--;
-			r=w;
-		}
-
-		//there are 'blocks' blocks of length w and a final block of length r (which can be equal to w)
-
-		srand(time(NULL));
-
-		unsigned char *res = new unsigned char[length];//fingerprint of P
-
-		if(m==w){//identity function
-
-			for(ulint i=0;i<length;i++)
-				if(random_char[P[i]])
-					res[i] = rand()%(base);
-				else
-					res[i] = code[P[i]];
-
-			return res;
-
-		}
-
-		vector<unsigned char> buffer(bufsize);
-
-		//fill buffer with the first m+1 digits
-		for(ulint i=0;i<bufsize;i++){
-			if(random_char[P[i]])
-				buffer[i] = rand()%(base);
-			else
-				buffer[i] = code[P[i]];
-		}
-
-		//compute first w digits
-		for(ulint i=0;i<w;i++){
-
-			res[i]=0;
-			for(int j=0;j<blocks;j++)
-				res[i] ^= buffer[(i+j*w)%bufsize];
-
-			res[i] ^= buffer[(i+(blocks-1)*w+r)%bufsize];
-
-		}
-
-		//compute the other digits
-		ulint newpos=0;
-
-		for(ulint i=w;i<length;i++){
-
-			res[i] = 	res[i-w] ^
-						buffer[(i-w)%bufsize] ^
-						buffer[((int)i+(blocks-2)*(int)w+r)%bufsize] ^
-						buffer[(i+(blocks-1)*w)%bufsize] ^
-						buffer[(i+(blocks-1)*w + r)%bufsize];
-
-			newpos=i+m-w+1;
-
-			if(newpos<n){
-
-				if(random_char[P[newpos]])
-					buffer[newpos%bufsize] = rand()%(base);
-				else
-					buffer[newpos%bufsize] = code[P[newpos]];
-
-			}
-
-		}
-
-		return res;
-
-	}//hashValue
+	}
 
 	/*
+	 * compute hash value of string P having length >= m
 	 * return hash value where 1 is added to each digit. No 0x0 terminator is appended at the end.
 	 */
-	string hashValueRemapped(string P){
+	string hashValueRemapped(string &P){
+
+		assert(P.length()>=m);
 
 		ulint n = P.length();
 		ulint length=n-m+w;
@@ -378,10 +302,10 @@ public:
 		if(m==w){//identity function
 
 			for(ulint i=0;i<length;i++)
-				if(random_char[(uint)P[i]])
+				if(random_char[(uchar)P.at(i)])
 					res[i] = rand()%(base)+1;
 				else
-					res[i] = code[(uint)P[i]]+1;
+					res[i] = code[(uchar)P.at(i)]+1;
 
 			return res;
 
@@ -391,10 +315,10 @@ public:
 
 		//fill buffer with the first m+1 digits
 		for(ulint i=0;i<bufsize;i++){
-			if(random_char[(uint)P[i]])
+			if(random_char[(uchar)P.at(i)])
 				buffer[i] = rand()%(base);
 			else
-				buffer[i] = code[(uint)P[i]];
+				buffer[i] = code[(uchar)P.at(i)];
 		}
 
 		//compute first w digits
@@ -423,10 +347,10 @@ public:
 
 			if(newpos<n){
 
-				if(random_char[(uint)P[newpos]])
+				if(random_char[(uchar)P.at(newpos)])
 					buffer[newpos%bufsize] = rand()%(base);
 				else
-					buffer[newpos%bufsize] = code[(uint)P[newpos]];
+					buffer[newpos%bufsize] = code[(uchar)P.at(newpos)];
 
 			}
 
@@ -467,8 +391,8 @@ public:
 		fwrite(&log_base, sizeof(uint), 1, fp);
 		fwrite(&type, sizeof(hash_type), 1, fp);
 
-		fwrite(code, sizeof(uint), 256, fp);
-		fwrite(random_char, sizeof(bool), 256, fp);
+		fwrite(code.data(), sizeof(uint), 256, fp);
+		fwrite(random_char.data(), sizeof(uchar), 256, fp);
 
 	}
 
@@ -489,12 +413,12 @@ public:
 		numBytes = fread(&type, sizeof(hash_type), 1, fp);
 		assert(numBytes>0);
 
-		code = new uint[256];
-		random_char = new bool[256];
+		code = vector<uint>(256);
+		random_char = vector<uchar>(256);
 
-		numBytes = fread(code, sizeof(uint), 256, fp);
+		numBytes = fread(code.data(), sizeof(uint), 256, fp);
 		assert(numBytes>0);
-		numBytes = fread(random_char, sizeof(bool), 256, fp);
+		numBytes = fread(random_char.data(), sizeof(uchar), 256, fp);
 		assert(numBytes>0);
 
 		buildZSet();
@@ -505,7 +429,7 @@ public:
 
 	hash_type hashType(){return type;}
 
-	SetZIterator * getSetZIterator(){return new SetZIterator(this);}
+	SetZIterator getSetZIterator(){return SetZIterator(this);}
 
  	uint base,m,w,r,log_base;
 
@@ -536,12 +460,12 @@ protected:
 		 *
 		 */
 
-		Z_size = new uint[radius+1];
-		Z = new ulint*[radius+1];
+		Z_size = vector<uint>(radius+1);
+		Z = vector<vector<ulint> >(radius+1);
 
 		Z_size[0] = 1;
 
-		Z[0] = new ulint[1];
+		Z[0] = vector<ulint>(1);
 		Z[0][0] = 0;
 
 		uint idx = 0;
@@ -552,7 +476,7 @@ protected:
 
 			Z_size[1] = w*(base-1);
 
-			Z[1] = new ulint[ Z_size[1] ];
+			Z[1] = vector<ulint>( Z_size[1] );
 
 			idx=0;
 
@@ -568,7 +492,7 @@ protected:
 			if (m>=2*w or 2*r>=w){
 
 				Z_size[1] = w*(base-1) + (w-r)*(base-1);
-				Z[1] = new ulint[ Z_size[1] ];
+				Z[1] = vector<ulint>( Z_size[1] );
 
 				idx = 0;
 
@@ -595,7 +519,7 @@ protected:
 			} else {
 
 				Z_size[1] = (2*m - 2*w)*(base-1) + (w-r)*(base-1);
-				Z[1] = new ulint[ Z_size[1] ];
+				Z[1] = vector<ulint>( Z_size[1] );
 
 				idx = 0;
 
@@ -627,7 +551,7 @@ protected:
 			}
 		}
 
-		quickSort(Z[1],Z_size[1]);
+		quickSort(Z[1].data(),Z_size[1]);
 
 		ulint size;
 		ulint *AllCombinations;
@@ -658,7 +582,7 @@ protected:
 				if( (not searchInZ(AllCombinations[i],err) ) and (i<1 || AllCombinations[i]!=AllCombinations[i-1])  )
 					Z_size[err]++;
 
-			Z[err] = new ulint[ Z_size[err] ];
+			Z[err] = vector<ulint>( Z_size[err] );
 
 			idx=0;
 			for(uint i=0;i<size;i++)
@@ -755,20 +679,12 @@ protected:
 		bool found = false;
 
 		for(uint i=0;i<err;i++)
-			found = found or binarySearch(Z[i],Z_size[i],x);
+			found = found or binarySearch(Z[i].data(),Z_size[i],x);
 
 		return found;
 
 	}
 
-
-	const static uint radius = 2;//by default, Z set is built with at maximum radius 3 (in practice, at most 2 errors are introduced in the seeds)
-
-	uint *code;//digit associated with each char in the text. Needed to compute the numeric hash value
-	bool *random_char;//assign a random digit to this char?
-
-	ulint **Z;//set Z
-	uint *Z_size;//size of Z(i)
 
 	// ---------- init the type of hash function
 
@@ -790,19 +706,19 @@ protected:
 		for(uint i=0;i<256;i++)
 			random_char[i] = true;
 
-		random_char[(uint) 'a'] = random_char[(uint) 'A'] = false;
-		random_char[(uint) 'c'] = random_char[(uint) 'C'] = false;
-		random_char[(uint) 'g'] = random_char[(uint) 'G'] = false;
-		random_char[(uint) 't'] = random_char[(uint) 'T'] = false;
+		random_char[(uchar) 'a'] = random_char[(uchar) 'A'] = false;
+		random_char[(uchar) 'c'] = random_char[(uchar) 'C'] = false;
+		random_char[(uchar) 'g'] = random_char[(uchar) 'G'] = false;
+		random_char[(uchar) 't'] = random_char[(uchar) 'T'] = false;
 
 		base = 4;
 
-		code[(uint) 'a'] = code[(uint) 'A'] = 0;
-		code[(uint) 'c'] = code[(uint) 'C'] = 1;
-		code[(uint) 'g'] = code[(uint) 'G'] = 2;
-		code[(uint) 't'] = code[(uint) 'T'] = 3;
-		code[(uint) 'n'] = code[(uint) 'N'] = 0;
-		code[(uint) '$'] = 1;
+		code[(uchar) 'a'] = code[(uchar) 'A'] = 0;
+		code[(uchar) 'c'] = code[(uchar) 'C'] = 1;
+		code[(uchar) 'g'] = code[(uchar) 'G'] = 2;
+		code[(uchar) 't'] = code[(uchar) 'T'] = 3;
+		code[(uchar) 'n'] = code[(uchar) 'N'] = 0;
+		code[(uchar) '$'] = 1;
 
 	}
 
@@ -811,21 +727,61 @@ protected:
 		for(uint i=0;i<256;i++)
 			random_char[i] = true;
 
-		random_char[(uint) 'a'] = random_char[(uint) 'A'] = false;
-		random_char[(uint) 'c'] = random_char[(uint) 'C'] = false;
-		random_char[(uint) 'g'] = random_char[(uint) 'G'] = false;
-		random_char[(uint) 't'] = random_char[(uint) 'T'] = false;
+		random_char[(uchar) 'a'] = random_char[(uchar) 'A'] = false;
+		random_char[(uchar) 'c'] = random_char[(uchar) 'C'] = false;
+		random_char[(uchar) 'g'] = random_char[(uchar) 'G'] = false;
+		random_char[(uchar) 't'] = random_char[(uchar) 'T'] = false;
 
 		base=2;
 
-		code[(uint) 'a'] = code[(uint) 'A'] = 0;
-		code[(uint) 'c'] = code[(uint) 'C'] = 1;
-		code[(uint) 'g'] = code[(uint) 'G'] = 0;
-		code[(uint) 't'] = code[(uint) 'T'] = 1;
-		code[(uint) 'n'] = code[(uint) 'N'] = 0;
-		code[(uint) '$'] = 1;
+		code[(uchar) 'a'] = code[(uchar) 'A'] = 0;
+		code[(uchar) 'c'] = code[(uchar) 'C'] = 1;
+		code[(uchar) 'g'] = code[(uchar) 'G'] = 0;
+		code[(uchar) 't'] = code[(uchar) 'T'] = 1;
+		code[(uchar) 'n'] = code[(uchar) 'N'] = 0;
+		code[(uchar) '$'] = 1;
 
 	}
+
+	void init_QUALITY_DNA_SEARCH(uint q){
+
+		for(uint i=0;i<256;i++)
+			random_char[i] = false;
+
+		for(uint i=0;i<256;i++)
+			code[i]=0;
+
+		base=4;
+
+		for(uint i=33;i<255;i++)
+			if(i-33<q)
+				code[i]=3;
+
+	}
+
+	void init_QUALITY_BS_SEARCH(uint q){
+
+		for(uint i=0;i<256;i++)
+			random_char[i] = false;
+
+		for(uint i=0;i<256;i++)
+			code[i]=0;
+
+		base = 2;
+
+		for(uint i=33;i<255;i++)
+			if(i-33<q)
+				code[i]=1;
+
+	}
+
+	const static uint radius = 2;//by default, Z set is built with at maximum radius 3 (in practice, at most 2 errors are introduced in the seeds)
+
+	vector<uint> code;//digit associated with each char in the text. Needed to compute the numeric hash value
+	vector<uchar> random_char;//assign a random digit to this char?
+
+	vector<vector<ulint> > Z;//set Z
+	vector<uint> Z_size;//size of Z(i)
 
 };
 }

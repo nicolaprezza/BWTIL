@@ -17,7 +17,7 @@ ifndef OPTFLAGS
 		endif
 		OPTFLAGS=-Ofast -fstrict-aliasing $(ASSERTSFLAGS) $(ARCHFLAGS)
 	else
-		OPTFLAGS=-O0 -ggdb
+		OPTFLAGS=-O0 -ggdb -g
 	endif
 endif
 
