@@ -18,8 +18,6 @@ namespace bwtil {
 class HashFunction {
 public:
 
-	enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAULT};
-
 	class SetZIterator{
 
 	public:

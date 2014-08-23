@@ -52,6 +52,8 @@ typedef bitview<vector> bitview_t;
 constexpr uint W_leafs = 2048;//packed B-trees parameters
 constexpr uint W_nodes = 256;
 
+enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAULT};
+
 #include "../extern/getRSS.h"
 
 // Functions :
