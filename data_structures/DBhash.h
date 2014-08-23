@@ -148,8 +148,11 @@ public:
 
 		saveToFile(fp);
 
+		fclose(fp);
+
 	}
 	void load(string path){
+
 		FILE *fp;
 
 		if ((fp = fopen(path.c_str(), "rb")) == NULL) {
@@ -158,6 +161,8 @@ public:
 		}
 
 		loadFromFile(fp);
+
+		fclose(fp);
 
 	}
 
