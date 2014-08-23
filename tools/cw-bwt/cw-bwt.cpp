@@ -6,7 +6,6 @@
  */
 
 #include "../../algorithms/cw_bwt.h"
-#include "../../extern/getRSS.h"
 
 using namespace bwtil;
 
@@ -80,9 +79,8 @@ using namespace bwtil;
 	 *
 	 */
 
-	cout << "\nSaving BWT in " << argv[2] << endl;
-	cwbwt.toFile(argv[2]);//this saves to file the bwt without occupying additional RAM
-	cout << "Done. " << endl;
+	//save to file the bwt without occupying additional RAM
+	cwbwt.toFile(argv[2]);
 
 	/*
 	 * If, instead, you want a string object containing the bwt, call

@@ -58,3 +58,9 @@ After that, you can load in RAM the bwt created in step 3 (i.e. from file "some\
 > string input("mississippi");
 
 > string bwt = cw\_bwt(input,cw_bwt::text).toString();
+
+or
+
+> string bwt = cw\_bwt(input,cw_bwt::text,true).toString();
+
+for verbose output.

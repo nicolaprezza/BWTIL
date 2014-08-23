@@ -52,6 +52,8 @@ typedef bitview<vector> bitview_t;
 constexpr uint W_leafs = 2048;//packed B-trees parameters
 constexpr uint W_nodes = 256;
 
+#include "../extern/getRSS.h"
+
 // Functions :
 
 //Uncomment this if popcount is not available in hardware

@@ -5,6 +5,9 @@
  *      Author: nicola
  */
 
+#include "../../common/common.h"
+#include "../../algorithms/cw_bwt.h"
+#include "../../data_structures/FileReader.h"
 #include "../../data_structures/DummyDynamicBitvector.h"
 #include "../../extern/bitvector/include/bitvector.h"
 
@@ -163,19 +166,15 @@ void test2(){
 
 }
 
-
-void test(string * a){
-
-	a->at(0) = 'c';
-
-}
-
  int main(int argc,char** argv) {
 
-	 ulint x = 1;
+	string txt = FileReader("/home/nicola/workspace/datasets/pizzachilli/plain/english.10MB").toString();
 
-	 x++;
+	auto cwbwt = cw_bwt(txt,cw_bwt::text,true);
 
+	string bwt = cwbwt.toString();
+
+	printRSSstat();
 
  }
 

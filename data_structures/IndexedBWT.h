@@ -272,7 +272,7 @@ public:
 		marked_positions.saveToFile(fp);
 		save_packed_view_to_file(text_pointers,number_of_SA_pointers,fp);
 
-		fwrite(FIRST.data(), sizeof(ulint), 257, fp);
+		fwrite(FIRST.data(), sizeof(ulint), 256, fp);
 		fwrite(remapping.data(), sizeof(uchar), 256, fp);
 		fwrite(inverse_remapping.data(), sizeof(uchar), sigma, fp);
 
@@ -304,11 +304,11 @@ public:
 		marked_positions.loadFromFile(fp);
 		text_pointers = load_packed_view_from_file(w, number_of_SA_pointers, fp);
 
-		FIRST = vector<ulint>(257);
+		FIRST = vector<ulint>(256);
 		remapping = vector<uchar>(256);
 		inverse_remapping = vector<uchar>(sigma);
 
-		numBytes = fread(FIRST.data(), sizeof(ulint), 257, fp);
+		numBytes = fread(FIRST.data(), sizeof(ulint), 256, fp);
 		assert(numBytes>0);
 		numBytes = fread(remapping.data(), sizeof(uchar), 256, fp);
 		assert(numBytes>0);

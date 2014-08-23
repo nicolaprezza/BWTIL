@@ -142,7 +142,7 @@ public:
 		FILE *fp;
 
 		if ((fp = fopen(path.c_str(), "wb")) == NULL) {
-			VERBOSE_CHANNEL<< "Cannot open file " << path<<endl;
+			cout << "Cannot open file " << path << endl;
 			exit(1);
 		}
 

@@ -7,7 +7,6 @@
 
 #include "../../data_structures/IndexedBWT.h"
 #include "../../data_structures/FileReader.h"
-#include "../../extern/getRSS.h"
 #include "../../data_structures/BackwardFileIterator.h"
 
 

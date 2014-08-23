@@ -93,6 +93,8 @@ public:
 	//creates cw_bwt with default number of contexts ( O(n/(log^3 n)) )
 	cw_bwt(string &input_string, cw_bwt_input_type input_type, bool verbose=false){
 
+		this->verbose=verbose;
+
 		if(input_type==path)
 			bwIt = new BackwardFileIterator(input_string);
 		else
@@ -103,7 +105,7 @@ public:
 		ca = ContextAutomata(bwIt, 10, verbose);//Default automata overhead
 		k = ca.contextLength();
 
-		init(verbose);
+		init();
 
 		delete bwIt;
 
@@ -112,6 +114,7 @@ public:
 	//creates cw_bwt with desired context length k
 	cw_bwt(string &input_string, cw_bwt_input_type input_type, uint k, bool verbose=false){
 
+		this->verbose=verbose;
 		this->k = k;
 
 		if(k==0){
@@ -142,7 +145,7 @@ public:
 
 		ca = ContextAutomata(k, bwIt, verbose);
 
-		init(verbose);
+		init();
 
 		delete bwIt;
 
@@ -155,18 +158,34 @@ public:
 		string s = "";
 
 		symbol c;
+		int perc=0,last_perc=-1;
+		ulint i=0;
+
+		if(verbose) cout << "\nDecompressing BWT in string object ... " << endl;
 
 		while(it.hasNext()){
-			c = it.next();
 
+			if(verbose and perc>last_perc and perc%10==0){
+				cout << " " << perc << "% Done." << endl;
+				last_perc=perc;
+			}
+
+			c = it.next();
 			s += c;
+
+			perc = (100*i)/n;
+
+			i++;
+
 		}
+
+		cout << "Done. " << endl;
 
 		return s;
 
 	}
 
-	void toFile(string path,bool verbose=true){//save cw_bwt to file
+	void toFile(string path){//save cw_bwt to file
 
 		FILE *fp;
 
@@ -181,6 +200,8 @@ public:
 		symbol c;
 
 		int perc,last_perc=-1;
+
+		if(verbose) cout << "\nDecompressing BWT and storing it to \"" << path << "\"" << endl;
 
 		while(it.hasNext()){
 
@@ -198,6 +219,8 @@ public:
 		}
 
 		fclose(fp);
+
+		cout << "Done. " << endl;
 
 	}
 
@@ -273,16 +296,16 @@ private:
 
 	}
 
-	void init(bool verbose){
+	void init(){
 
 		number_of_contexts = ca.numberOfStates();
 
 		sigma = ca.alphabetSize();//this takes into account also the terminator character
 		TERMINATOR = 0;
 
-		initStructures(verbose);
+		initStructures();
 
-		build(verbose);
+		build();
 
 		ulint sum_of_heights=0;
 		ulint sum_of_lenghts=0;
@@ -300,7 +323,7 @@ private:
 
 	}
 
-	void initStructures(bool verbose){
+	void initStructures(){
 
 		frequencies = vector<vector<ulint> >(number_of_contexts);
 		for(ulint i=0;i<number_of_contexts;i++)
@@ -444,7 +467,7 @@ private:
 
 	}
 
-	void build(bool verbose){
+	void build(){
 
 		ulint pos = n-1;//current position on text (char to be inserted in the bwt)
 		ulint terminator_context,terminator_pos, new_terminator_context,new_terminator_pos;//coordinates of the terminator character
@@ -510,6 +533,8 @@ private:
 
 		if(verbose) cout << " Done." << endl;
 	}
+
+	bool verbose;
 
 	uint k;//context length and order of compression (entropy H_k). default: k = ceil( log_sigma(n/log^3 n) )
 	uint sigma;
