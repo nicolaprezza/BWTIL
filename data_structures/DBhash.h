@@ -43,27 +43,35 @@ public:
 
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
-		if(verbose)	cout << " Computing hash value h(T) of the text ..." << flush;
-		string fingerprint = h.hashValueRemapped(text);//hash value where 1 is added to each digit
-		if(verbose)	cout << " Done.\n";
+		cw_bwt * cwbwt;
+
+		{
+
+			if(verbose)	cout << " Computing hash value h(T) of the text ..." << flush;
+			string fingerprint = h.hashValueRemapped(text);//hash value where 1 is added to each digit
+			if(verbose)	cout << " Done.\n";
+
+			if(verbose)	cout << " Computing BWT(h(T))  ..." <<flush;
+
+			cwbwt = new cw_bwt(fingerprint,cw_bwt::text,verbose);
+
+			if(verbose)	cout << " Done.\n";
+
+		}//fingerprint is deleted
+
+		{
+
+			string bwt = cwbwt->toString();
+
+			delete cwbwt;
+
+			indexedBWT =  IndexedBWT(bwt,offrate,verbose);
+
+		}//bwt is deleted
 
 		if(verbose)	cout << " Storing text T in plain format ...";
 		initText(text);
 		if(verbose)	cout << " Done.\n";
-
-		{
-
-			string bwt;
-
-			if(verbose)	cout << " Computing BWT(h(T))  ..." <<flush;
-			{
-				bwt = cw_bwt(fingerprint,cw_bwt::text,verbose).toString();
-			}
-			if(verbose)	cout << " Done.\n";
-
-			indexedBWT =  IndexedBWT(bwt,offrate,verbose);
-
-		}
 
 		if(verbose)	cout << "\n  Building auxiliary hash ... " << endl;
 		initAuxHash();

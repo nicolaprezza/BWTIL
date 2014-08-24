@@ -165,6 +165,10 @@ public:
 		}
 
 		log_base = ceil(log2(alphabet.size()));
+
+		if(log_base>=8)
+			log_base=7;//max 7 bits per digit allowed, since value 255 is forbidden
+
 		base = ((ulint)1)<<log_base;
 
 		//sort alphabet
@@ -174,7 +178,7 @@ public:
 		//calculate code
 
 		for(uint i=0;i<alphabet.size();i++)
-			code[alphabet.at(i)] = i;
+			code[alphabet.at(i)] = i%base;
 
 		fin.close();
 

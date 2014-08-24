@@ -126,9 +126,17 @@ private:
 		this->n=text.length();
 
 		//compute the BWT
-		if(verbose) cout << " Computing the BWT ... " << flush;
-		string bwt = cw_bwt(text,cw_bwt::text,true).toString();
-		if(verbose) cout << "done." << endl;
+
+		string bwt;
+
+		{
+
+			if(verbose) cout << " Computing the BWT ... " << flush;
+			auto cwbwt = cw_bwt(text,cw_bwt::text,true);
+			bwt = cwbwt.toString();
+			if(verbose) cout << "done." << endl;
+
+		}
 
 		//detect alphabet size
 		sigma=0;
