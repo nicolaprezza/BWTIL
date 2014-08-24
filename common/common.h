@@ -76,33 +76,12 @@ enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAUL
 //Comment this if popcount is not available in hardware
 #define popcnt(x) __builtin_popcountll(x)
 
-#define check_numBytes() if (numBytes == 0) { VERBOSE_CHANNEL << "Read 0 bytes when reading file." << endl << flush; exit(1); }
-
 #include <memory>
 #include <type_traits>
 #include <utility>
 
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique_helper(std::false_type, Args&&... args) {
-  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique_helper(std::true_type, Args&&... args) {
-   static_assert(std::extent<T>::value == 0,
-       "make_unique<T[N]>() is forbidden, please use make_unique<T[]>().");
-
-   typedef typename std::remove_extent<T>::type U;
-   return std::unique_ptr<T>(new U[sizeof...(Args)]{std::forward<Args>(args)...});
-}
-
-template <typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-   return make_unique_helper<T>(std::is_array<T>(), std::forward<Args>(args)...);
-}
-
 template <typename T>
-void save_packed_view_to_file_T(packed_view_t pv, size_t size, FILE * fp){
+inline void save_packed_view_to_file_T(packed_view_t pv, size_t size, FILE * fp){
 
 	for(uint i=0;i<size;i++){
 		T x = pv[i];
@@ -112,7 +91,7 @@ void save_packed_view_to_file_T(packed_view_t pv, size_t size, FILE * fp){
 }
 
 template <typename T>
-packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp){
+inline packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp){
 
  packed_view_t pv = packed_view_t(width,size);
 
@@ -121,17 +100,18 @@ packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FILE * fp)
 
 	 T x;
 	 numBytes=fread(&x, sizeof(T), 1, fp);
-	 check_numBytes();
+	 assert(numBytes>0);
 
 	 pv[i] = x;
 
  }
 
+ numBytes++;
  return pv;
 
 }
 
-void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
+inline void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 
 	ulint i = 0;
 	ulint x;
@@ -154,7 +134,7 @@ void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 
 }
 
-bitview_t load_bitview_from_file(size_t size, FILE * fp){
+inline bitview_t load_bitview_from_file(size_t size, FILE * fp){
 
 	ulint i = 0;
 	ulint x;
@@ -165,7 +145,7 @@ bitview_t load_bitview_from_file(size_t size, FILE * fp){
 	while(i+64<=size){
 
 		numBytes=fread(&x, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		bv.set(i,i+64,x);
 
@@ -176,17 +156,18 @@ bitview_t load_bitview_from_file(size_t size, FILE * fp){
 	if(i<size){
 
 		numBytes=fread(&x, sizeof(ulint), 1, fp);
-		check_numBytes();
+		assert(numBytes>0);
 
 		bv.set(i,size,x);
 
 	}
 
+	 numBytes++;
 	return bv;
 
 }
 
-void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
+inline void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
 
 	if(pv.width()<=8)
 		save_packed_view_to_file_T<uint8_t>(pv,size,fp);
@@ -199,7 +180,7 @@ void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
 
 }
 
-packed_view_t load_packed_view_from_file(size_t width, size_t size, FILE * fp){
+inline packed_view_t load_packed_view_from_file(size_t width, size_t size, FILE * fp){
 
 	if(width<=8)
 		return load_packed_view_from_file_T<uint8_t>(width, size, fp);

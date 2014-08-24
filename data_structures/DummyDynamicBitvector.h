@@ -25,6 +25,8 @@ public:
 		waste = vector<bool>((n*2)/10);
 		current_size = 0;
 
+		node_size++;
+
 	}
 
 	bool access(ulint i){

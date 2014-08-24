@@ -35,7 +35,7 @@
  * memory use) measured in bytes, or zero if the value cannot be
  * determined on this OS.
  */
-size_t getPeakRSS( )
+inline size_t getPeakRSS( )
 {
 #if defined(_WIN32)
 	/* Windows -------------------------------------------------- */
@@ -77,7 +77,7 @@ size_t getPeakRSS( )
  * Returns the current resident set size (physical memory use) measured
  * in bytes, or zero if the value cannot be determined on this OS.
  */
-size_t getCurrentRSS( )
+inline size_t getCurrentRSS( )
 {
 #if defined(_WIN32)
 	/* Windows -------------------------------------------------- */
@@ -114,7 +114,7 @@ size_t getCurrentRSS( )
 #endif
 }
 
-void printRSSstat(){
+inline void printRSSstat(){
 
 	size_t peakSize = getPeakRSS( );
 
@@ -127,7 +127,7 @@ void printRSSstat(){
 
 }
 
-void printRSSstat(ulint size){
+inline void printRSSstat(ulint size){
 
 	size_t peakSize = getPeakRSS( );
 
