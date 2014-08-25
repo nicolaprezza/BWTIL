@@ -430,7 +430,7 @@ private:
 		}
 
 
-		if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings) ***" << endl << endl;
+		if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings and partial sums) ***" << endl << endl;
 
 		perc=0;
 		last_perc=-1;
