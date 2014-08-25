@@ -284,11 +284,11 @@ public:
 
 		ulint n = P.length();
 		ulint length=n-m+w;
-		int blocks = m/w;
+		lint blocks = m/w;
 
 		ulint bufsize=m+1;
 
-		int r = m%w;
+		lint r = m%w;
 
 		if(r==0){
 			blocks--;
@@ -327,7 +327,7 @@ public:
 		for(ulint i=0;i<w;i++){
 
 			res[i]=0;
-			for(int j=0;j<blocks;j++)
+			for(lint j=0;j<blocks;j++)
 				res[i] ^= buffer[(i+j*w)%bufsize];
 
 			res[i] ^= buffer[(i+(blocks-1)*w+r)%bufsize];
@@ -341,7 +341,7 @@ public:
 
 			res[i] = 	res[i-w] ^
 						buffer[(i-w)%bufsize] ^
-						buffer[((int)i+(blocks-2)*(int)w+r)%bufsize] ^
+						buffer[((lint)i+(blocks-2)*(lint)w+r)%bufsize] ^
 						buffer[(i+(blocks-1)*w)%bufsize] ^
 						buffer[(i+(blocks-1)*w + r)%bufsize];
 

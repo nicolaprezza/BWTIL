@@ -168,13 +168,9 @@ void test2(){
 
  int main(int argc,char** argv) {
 
-	string txt = FileReader("/home/nicola/workspace/datasets/pizzachilli/plain/english.10MB").toString();
+	lint a = ((ulint)1<<32);
 
-	auto cwbwt = cw_bwt(txt,cw_bwt::text,true);
-
-	string bwt = cwbwt.toString();
-
-	printRSSstat();
+	cout << a << endl;
 
  }
 

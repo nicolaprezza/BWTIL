@@ -38,6 +38,7 @@ using namespace bv;
 #define ERROR_CHANNEL std::cerr
 
 typedef uint64_t ulint;
+typedef long int lint;
 typedef unsigned int uint;
 typedef unsigned short int t_char; ///< Type for char conversion
 typedef unsigned short int t_errors; ///< Type for ERRORS

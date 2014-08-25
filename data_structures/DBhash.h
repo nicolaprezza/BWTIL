@@ -82,14 +82,14 @@ public:
 	}
 
 	//doesn't use auxiliary hash.
-	vector<ulint> getOccurrencies_slow(ulint fingerprint){
+	vector<ulint> getOccurrences_slow(ulint fingerprint){
 
 		return indexedBWT.convertToTextCoordinates( indexedBWT.BS(fingerprint,w) );
 
 	}
 
 	//returns occurrences in the text of substrings having 'fingerprint' as hash value. uses the auxiliary hash.
-	vector<ulint> getOccurrencies(ulint fingerprint){
+	vector<ulint> getOccurrences(ulint fingerprint){
 
 		ulint mask = auxiliary_hash_size-1;
 
@@ -110,7 +110,7 @@ public:
 	}
 
 	//returns first cl occurrences in the text of substrings having 'fingerprint' as hash value. uses the auxiliary hash.
-	vector<ulint> getOccurrenciesUpTo(ulint fingerprint,uint cl){
+	vector<ulint> getOccurrencesUpTo(ulint fingerprint,uint cl){
 
 		ulint mask = auxiliary_hash_size-1;
 
@@ -257,7 +257,7 @@ public:
 			exit(1);
 		}
 
-		return filterOutBadOccurrences(P, getOccurrencies_slow(h.hashValue(P)), max_errors);
+		return filterOutBadOccurrences(P, getOccurrences_slow(h.hashValue(P)), max_errors);
 
 	}
 
