@@ -77,10 +77,7 @@ enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAUL
 //Comment this if popcount is not available in hardware
 #define popcnt(x) __builtin_popcountll(x)
 
-#include <memory>
-#include <type_traits>
-#include <utility>
-
+/*
 template <typename T>
 inline void save_packed_view_to_file_T(packed_view_t pv, size_t size, FILE * fp){
 
@@ -111,6 +108,7 @@ inline packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FIL
  return pv;
 
 }
+*/
 
 inline void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 
@@ -132,6 +130,38 @@ inline void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 		fwrite(&x, sizeof(ulint), 1, fp);
 
 	}
+
+}
+
+inline bitview_t load_bitview_from_file(bitview_t & bv, size_t size, FILE * fp){
+
+	ulint i = 0;
+	ulint x;
+
+	ulint numBytes;
+
+	while(i+64<=size){
+
+		numBytes=fread(&x, sizeof(ulint), 1, fp);
+		assert(numBytes>0);
+
+		bv.set(i,i+64,x);
+
+		i+=64;
+
+	}
+
+	if(i<size){
+
+		numBytes=fread(&x, sizeof(ulint), 1, fp);
+		assert(numBytes>0);
+
+		bv.set(i,size,x);
+
+	}
+
+	 numBytes++;
+	return bv;
 
 }
 
@@ -170,27 +200,34 @@ inline bitview_t load_bitview_from_file(size_t size, FILE * fp){
 
 inline void save_packed_view_to_file(packed_view_t pv, size_t size,FILE * fp){
 
-	if(pv.width()<=8)
+	save_bitview_to_file(pv.bits(), size*pv.width(), fp);
+
+	/*if(pv.width()<=8)
 		save_packed_view_to_file_T<uint8_t>(pv,size,fp);
 	else if(pv.width()<=16)
 		save_packed_view_to_file_T<uint16_t>(pv,size,fp);
 	else if(pv.width()<=32)
 		save_packed_view_to_file_T<uint32_t>(pv,size,fp);
 	else
-		save_packed_view_to_file_T<uint64_t>(pv,size,fp);
+		save_packed_view_to_file_T<uint64_t>(pv,size,fp);*/
 
 }
 
 inline packed_view_t load_packed_view_from_file(size_t width, size_t size, FILE * fp){
 
-	if(width<=8)
+	 packed_view_t pv = packed_view_t(width,size);
+	 load_bitview_from_file(pv.bits(),size*width ,fp);
+
+	 return pv;
+
+	/*if(width<=8)
 		return load_packed_view_from_file_T<uint8_t>(width, size, fp);
 	if(width<=16)
 		return load_packed_view_from_file_T<uint16_t>(width, size, fp);
 	if(width<=32)
 		return load_packed_view_from_file_T<uint32_t>(width, size, fp);
 
-	return load_packed_view_from_file_T<uint64_t>(width, size, fp);
+	return load_packed_view_from_file_T<uint64_t>(width, size, fp);*/
 
 }
 

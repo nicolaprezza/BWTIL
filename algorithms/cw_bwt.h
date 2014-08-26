@@ -161,7 +161,7 @@ public:
 		int perc=0,last_perc=-1;
 		ulint i=0;
 
-		if(verbose) cout << "\nDecompressing BWT in string object ... " << endl;
+		if(verbose) cout << "\nDecompressing BWT ... " << endl;
 
 		while(it.hasNext()){
 
