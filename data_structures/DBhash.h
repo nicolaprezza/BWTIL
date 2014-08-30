@@ -109,6 +109,29 @@ public:
 
 	}
 
+	//returns number of occurrences of the fingerprint. uses the auxiliary hash.
+	ulint numberOfOccurrences(ulint fingerprint){
+
+		ulint mask = auxiliary_hash_size-1;
+
+		ulint suffix = fingerprint & mask;//suffix of length w_aux. Searched in the auxiliary hash
+		ulint prefix = fingerprint >> (w_aux*h.log_base);//prefix of the fingerprint of length log m/log base to be searched with backward search
+
+		pair<ulint, ulint> interval;
+
+		interval.first = auxiliary_hash[suffix];
+
+		if (suffix + 1 == auxiliary_hash_size)
+			interval.second = text_fingerprint_length + 1;
+		else
+			interval.second = auxiliary_hash[suffix+1];
+
+		interval = indexedBWT.BS(prefix,w-w_aux,interval);
+
+		return interval.second - interval.first;
+
+	}
+
 	//returns first cl occurrences in the text of substrings having 'fingerprint' as hash value. uses the auxiliary hash.
 	vector<ulint> getOccurrencesUpTo(ulint fingerprint,uint cl){
 
@@ -132,6 +155,44 @@ public:
 			interval.second = interval.first+cl;
 
 		return indexedBWT.convertToTextCoordinates( interval );
+
+	}
+
+	//result[i] = number of hash lists with >= than i entries.
+	//max number of entries detected=10000
+	//result[10000] = number of hash lists with > than 10000 entries.
+	//can be used for statistics.
+	vector<ulint> hashLoad(){
+
+		ulint hash_size = ((ulint)1)<<(w*log_sigma);//number of hash entries
+		ulint max_length = 10000;//max length detected
+
+		vector<ulint> stats(max_length+1,0);
+
+		for(ulint i=0;i<hash_size;i++){
+
+			ulint occ = numberOfOccurrences(i);
+			if(occ<max_length)
+				stats[occ]++;
+			else
+				stats[max_length]++;
+
+		}
+
+		return stats;
+
+	}
+
+	void printHashLoad(){
+
+		cout << "Hash Load:" << endl;
+
+		vector<ulint> stats = hashLoad();
+
+		for(ulint i=0;i<stats.size();i++)
+			cout << i << "\t" << stats[i] << endl;
+
+		cout << endl;
 
 	}
 

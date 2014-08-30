@@ -73,7 +73,7 @@ using namespace bwtil;
 	 *
 	 * or
 	 *
-	 * cwbwt = cw_bwt(str,cw_bwt::text, your_k_value,true); // you choose k (faster since k has not to be autodetected)
+	 * cwbwt = cw_bwt(str,cw_bwt::text, your_k_value,true); // you choose k
 	 *
 	 * However, this requires more space in RAM since the input text string is kept in memory together with the structures of cwbwt
 	 *
