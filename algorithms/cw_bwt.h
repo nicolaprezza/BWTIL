@@ -399,7 +399,7 @@ private:
 
 		ulint exp_context_length = n/number_of_contexts;
 
-		if(verbose) cout << " Largest context has " << max << " characters" << endl;
+		//if(verbose) cout << " Largest context has " << max << " characters" << endl;
 		if(verbose) cout << " Expected context size (if uniform text) is " << exp_context_length << " characters" << endl;
 
 		//compute expected packed B-tree height
@@ -414,11 +414,11 @@ private:
 			double exp_height = (log2(nr_of_leaves)/log2(b));
 			if(exp_height<=0) exp_height = 1;
 
-			if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl << endl;
+			if(verbose) cout << " Expected worst-case packed B-tree height (if uniform text) is " << exp_height << endl ;
 
 		}
 
-		if(verbose) cout << " Context length statistics: " << endl;
+		/*if(verbose) cout << " Context length statistics: " << endl;
 
 		if(verbose){
 
@@ -427,7 +427,7 @@ private:
 
 			cout << " [ " << max_len <<", inf [ -> " << stats.at(tot_intervals-1)<<endl;
 
-		}
+		}*/
 
 
 		if(verbose) cout << "\n*** Creating data structures (dynamic compressed strings and partial sums) ***" << endl << endl;
@@ -493,6 +493,15 @@ private:
 
 		int perc,last_percentage=-1;
 
+		/*ulint char_inserted = 0;
+		vector<double> times;
+
+	    using std::chrono::high_resolution_clock;
+	    using std::chrono::duration_cast;
+	    using std::chrono::duration;
+
+	    auto t1 = high_resolution_clock::now();*/
+
 		while(not bwIt->begin()){
 
 			perc = (100*(n-pos-1))/n;
@@ -523,6 +532,18 @@ private:
 			terminator_context = new_terminator_context;
 			terminator_pos = new_terminator_pos;
 
+			/*{//print also time benchmarks
+
+				//number of chars processed until now
+				char_inserted = n-pos;
+
+				//sample time every 500k chars
+				if(char_inserted%500000==0)
+					times.push_back( duration_cast<duration<double, std::ratio<1>>>(high_resolution_clock::now() - t1).count() );
+
+			}*/
+
+
 			pos--;
 
 		}
@@ -532,6 +553,18 @@ private:
 		bwIt->close();//close input file
 
 		if(verbose) cout << " Done." << endl;
+
+		/*{//print time benchmarks
+
+			cout << "\nRunning times (seconds) every 500k characters:" << endl;
+
+			for(ulint i=0;i<times.size();i++)
+				cout << times.at(i) << "\n";
+
+			cout << endl;
+
+		}*/
+
 	}
 
 	bool verbose;

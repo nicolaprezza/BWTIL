@@ -166,11 +166,10 @@ void test2(){
 
 }
 
+
+
  int main(int argc,char** argv) {
 
-	lint a = ((ulint)1<<32);
-
-	cout << a << endl;
 
  }
 
