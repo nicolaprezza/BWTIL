@@ -103,18 +103,18 @@ using namespace bwtil;
 		uint m = (total%3600)/60;
 		uint s = (total%3600)%60;
 
-		cout << "Total time: " << h << "h " << m << "m " << s << "s" << endl;
+		cout << "Total time: " << total << " seconds. ("<< h << "h " << m << "m " << s << "s" << ")"<<endl;
 
 	}else if (total>=60){
 
 		uint m = total/60;
 		uint s = total%60;
 
-		cout << "Total time: " << m << "m " << s << "s" << endl;
+		cout << "Total time: " << total << " seconds. ("<< m << "m " << s << "s" << ")"<<endl;
 
 	}else{
 
-		cout << "Total time: " << total << "s" << endl;
+		cout << "Total time: " << total << " seconds." << endl;
 
 	}
  }
