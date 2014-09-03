@@ -96,6 +96,10 @@ public:
 			init_QUALITY_BS_SEARCH(quality_threshold);
 
 		w = ceil(log2(m*n)/log2(base));//optimal word size
+
+		//w must not exceed m!
+		if(w>m) w=m;
+
 		log_base = ceil(log2(base));
 		r = m%w;
 
@@ -188,6 +192,7 @@ public:
 
 		w = ceil(log2(m*n)/log_base);//optimal word size
 
+		//w must not exceed m!
 		if(w>m) w=m;
 
 		r = m%w;
@@ -207,6 +212,9 @@ public:
 	}
 
 	ulint hashValue(string &P){//compute fingerprint of pattern P of length m.
+
+		if(type==QUALITY_DNA_SEARCH or type==QUALITY_BS_SEARCH)
+			return qualityHashValue(P);
 
 		assert(P.size()==m);
 
@@ -240,45 +248,17 @@ public:
 
 	}
 
-	ulint qualityHashValue(string &P){//compute quality fingerprint of pattern P of length m.
-
-		assert(P.size()==m);
-
-		ulint W = 0;
-		ulint result = 0;
-
-		for(uint i=0;i<m-r;i++){
-
-			if(i%w==0){
-				result = result|W;
-				W = 0;
-			}
-
-			W = (W<<log_base) + code[(uchar)P.at(i)];
-
-		}
-
-		result = result|W;
-		W = 0;
-
-		if(r>0){
-
-			for(uint i=m-w;i<m;i++)
-				W = (W<<log_base) + code[(uchar)P.at(i)];
-
-			result = result|W;
-
-		}
-
-		return result;
-
-	}
-
 	/*
 	 * compute hash value of string P having length >= m
 	 * return hash value where 1 is added to each digit. No 0x0 terminator is appended at the end.
+	 * NB: this function is not yet implemented for QUALITY hash values.
 	 */
 	string hashValueRemapped(string &P){
+
+		if(type==QUALITY_DNA_SEARCH or type==QUALITY_BS_SEARCH){
+			cout << "Error: hash value remapped not yet implemented for quality hash functions." << endl;
+			exit(0);
+		}
 
 		assert(P.length()>=m);
 
@@ -439,6 +419,40 @@ public:
 
 
 protected:
+
+	ulint qualityHashValue(string &P){//compute quality fingerprint of pattern P of length m.
+
+		assert(P.size()==m);
+
+		ulint W = 0;
+		ulint result = 0;
+
+		for(uint i=0;i<m-r;i++){
+
+			if(i%w==0){
+				result = result|W;
+				W = 0;
+			}
+
+			W = (W<<log_base) + code[(uchar)P.at(i)];
+
+		}
+
+		result = result|W;
+		W = 0;
+
+		if(r>0){
+
+			for(uint i=m-w;i<m;i++)
+				W = (W<<log_base) + code[(uchar)P.at(i)];
+
+			result = result|W;
+
+		}
+
+		return result;
+
+	}
 
 	void buildZSet(){
 

@@ -22,7 +22,7 @@ public:
 
 	DBhash(){};
 
-	DBhash(string &text, HashFunction h, ulint offrate = 4, bool verbose = false){
+	DBhash(string &text, HashFunction h, ulint offrate = 16, bool verbose = false){
 
 		if(verbose)	cout << "\nBuilding dB-hash data structure" <<endl;
 
@@ -39,8 +39,11 @@ public:
 
 		w_aux = ceil( ( log2(n) - log2(log2(n)) )/log2(h.base) );//log_b n - log_b log_2 n
 
+		if(w_aux>w) w_aux=w;
+
 		auxiliary_hash_size = 1 << (w_aux * h.log_base);
 
+		if(verbose)	cout << " w = " << w <<endl;
 		if(verbose)	cout << " w_aux = " << w_aux <<endl;
 
 		cw_bwt * cwbwt;
@@ -318,7 +321,7 @@ public:
 			exit(1);
 		}
 
-		return filterOutBadOccurrences(P, getOccurrences_slow(h.hashValue(P)), max_errors);
+		return filterOutBadOccurrences(P, getOccurrences(h.hashValue(P)), max_errors);
 
 	}
 
