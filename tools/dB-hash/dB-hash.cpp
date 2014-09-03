@@ -26,7 +26,7 @@ DBhash buildFromFile(string text_path, uint m){
 	// 1) read text from file
 
 	FileReader fr = FileReader(text_path);
-	ulint n = fr.size();
+	//ulint n = fr.size();
 	string text = fr.toString();
 	fr.close();
 
@@ -36,8 +36,15 @@ DBhash buildFromFile(string text_path, uint m){
 	//n is the file length
 
 	//general purpose hash function: detect automatically alphabet size
-	//HashFunction h = HashFunction(m,text_path,true);
-	HashFunction h = HashFunction(n,m,BS_SEARCH);
+	HashFunction h = HashFunction(m,text_path,true);
+
+	//other hash functions (uncomment also n variable above)
+
+	//bisulfite search (ACTGN alphabet, identifies C=T and G=A)
+	//HashFunction h = HashFunction(n,m,BS_SEARCH);
+
+	//DNA search (ACTGN alphabet)
+	//HashFunction h = HashFunction(n,m,DNA_SEARCH);
 
 	//build dBhash data structure
 
