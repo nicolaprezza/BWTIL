@@ -1,8 +1,23 @@
+/*
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
 //============================================================================
 // Name        : WaveletTree.h
-// Author      : Nicola Prezza and Alberto Policriti
+// Author      : Nicola Prezza
 // Version     : 1.0
-// Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
 // Description : 	This class implements a binary balanced wavelet tree on the input text.
 //					Alphabet size is automatically detected, and equals the largest character. Note that this is not optimal if some characters are
 //					not present in the text (in this case it is suggested to do a re-mapping of the text before to build the wavelet tree)

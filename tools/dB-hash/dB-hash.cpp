@@ -1,6 +1,22 @@
+/*
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
 //============================================================================
 // Name        : dB-hash.cpp
-// Author      : Nicola Prezza and Alberto Policriti
+// Author      : Nicola Prezza
 // Version     : 1.0
 // Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
 // Description : test class for the dB-hash data structure. Allows to build a dB-hash over a text file and query it with a pattern.
@@ -56,8 +72,6 @@ DBhash buildFromFile(string text_path, uint m){
 }
 
  int main(int argc,char** argv) {
-
-	//debug();
 
 	if(argc != 4){
 		cout << "*** dB-hash data structure ***\n";

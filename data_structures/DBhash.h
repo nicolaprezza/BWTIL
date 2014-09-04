@@ -1,8 +1,23 @@
+/*
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
 //============================================================================
 // Name        : DBhash.h
 // Author      : Nicola Prezza and Alberto Policriti
 // Version     : 1.0
-// Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
 // Description : A dB-hash (de Bruijn hash) data structures on general alphabets and texts of length n<2^64.
 //============================================================================
 

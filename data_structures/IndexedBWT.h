@@ -1,8 +1,23 @@
+/*
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
 //============================================================================
 // Name        : IndexedBWT.h
-// Author      : Nicola Prezza and Alberto Policriti
+// Author      : Nicola Prezza
 // Version     : 1.0
-// Copyright   : GNU General Public License (http://www.gnu.org/copyleft/gpl.html)
 // Description : BWT with succinct rank structures and sampled SA pointers
 
 /*   This class stores the BWT as a wavelet tree + structures to retrieve original text addresses from BWT addresses.

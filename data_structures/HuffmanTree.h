@@ -1,4 +1,20 @@
 /*
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
+/*
  * HuffmanTree.h
  *
  *  Created on: Jun 15, 2014
@@ -122,42 +138,6 @@ public:
 		//free memory
 		nodes.clear();
 		nodes_vec.clear();
-
-	}
-
-	void debug(){
-
-		cout << "Coding: \n";
-
-		for(uint i=0;i<sigma_0;i++){
-
-			cout << i << " -> ";
-
-			for(uint j=0;j<codes[i].size();j++)
-				cout << codes[i].at(j);
-
-			cout << endl;
-
-		}
-
-		cout << "\nDecoding: \n";
-
-		for(uint i=0;i<sigma_0;i++){
-
-			for(uint j=0;j<codes[i].size();j++)
-				cout << codes[i].at(j);
-
-			/*cout << " -> ";
-
-			if(codes[i].size()>0)
-				cout << (uint)decode(codes[i]);*/
-
-			cout << endl;
-
-		}
-
-		cout << "\nentropy is " << entropy() << " bits per symbol" << endl;
-
 
 	}
 

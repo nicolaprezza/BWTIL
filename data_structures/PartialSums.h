@@ -1,16 +1,32 @@
 /*
- * CumulativeCounters.h
+ *  This file is part of BWTIL.
+ *  Copyright (c) by
+ *  Nicola Prezza <nicolapr@gmail.com>
+ *
+ *   BWTIL is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+
+ *   BWTIL is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details (<http://www.gnu.org/licenses/>).
+ */
+
+/*
+ * PartialSums.h
  *
  *  Created on: Jun 22, 2014
- *      Author: nicola
+ *  Author: nicola
  *
- *      Description: maintains sigma cumulative counters; when incrementing counter i, all counters j>=i are incremented.
- *      Complexity: the structure is a packed B-tree. increment/access time = O( log_d(sigma), where d=w/log w and w is the word size (w=64) )
+ *  Description: maintains sigma partial sums; when incrementing counter i, all counters j>=i are incremented.
+ *  Complexity: the structure is a packed B-tree. increment/access time = O( log_d(sigma), where d=w/log w and w is the word size (w=64) )
  *
  */
 
-#ifndef CUMULATIVECOUNTERS_H_
-#define CUMULATIVECOUNTERS_H_
+#ifndef PARTIALSUMS_H_
+#define PARTIALSUMS_H_
 
 #include "../common/common.h"
 
@@ -304,5 +320,5 @@ private:
 };
 
 
-} /* namespace compressed_bwt_construction */
-#endif /* CUMULATIVECOUNTERS_H_ */
+} /* namespace bwtil */
+#endif /* PARTIALSUMS_H_ */
