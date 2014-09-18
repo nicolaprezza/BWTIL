@@ -141,7 +141,7 @@ private:
 	symbol * buffer;
 
 	ulint ptr_in_buffer;//pointer to the current position in buffer
-	uint offset;//offset (in the file) of the byte after the next chunk to be read
+	ulint offset;//offset (in the file) of the byte after the next chunk to be read
 
 	FILE * fp;//pointer to file.
 
