@@ -351,7 +351,7 @@ private:
 
 		sigma = 1;//code 0x0 is for the terminator
 
-		if(verbose) cout << "\n Alphabet = { ";
+		/*if(verbose) cout << "\n Alphabet = { ";
 
 		for (uint i=0;i<alphabet.size();i++){
 
@@ -366,9 +366,9 @@ private:
 
 		}
 
-		if(verbose) cout << "}\n\n";
+		if(verbose) cout << "}\n\n";*/
 
-		if(verbose) cout << " Alphabet (ASCII codes) = { ";
+		if(verbose) cout << "\n Alphabet (ASCII codes) = { ";
 
 		for (uint i=0;i<alphabet.size();i++)
 			if(verbose) cout << (ulint)alphabet.at(i) << ' ';
