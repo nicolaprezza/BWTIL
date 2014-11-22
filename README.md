@@ -11,7 +11,7 @@ The BWTIL library offers a set of tools, classes and functions designed to facil
  
  * **sFM-index** : an implementation of a succinct (uncompressed) FM-index (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/sFM-index)
 
- * **cw-bwt** (paper coming soon) : a novel context-wise bwt construction algorithm (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/cw-bwt)
+ * **cw-bwt** (paper accepted in LATA2015!) : a novel context-wise bwt construction algorithm (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/cw-bwt)
  
  * **bwt-check** : check consistency of a BWT file (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/bwt-check)
  
