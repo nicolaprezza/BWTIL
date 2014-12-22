@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.6)
 
 project (BWTIL)
 
@@ -9,8 +9,8 @@ message("Building in ${CMAKE_BUILD_TYPE} mode")
 set(CMAKE_CXX_FLAGS "--std=c++11")
 
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -fstrict-aliasing -DNDEBUG -march=native")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast -fstrict-aliasing -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -ggdb -Ofast -fstrict-aliasing -march=native")
 
 add_executable(cw-bwt tools/cw-bwt/cw-bwt.cpp)
 add_executable(sFM-index tools/sFM-index/sFM-index.cpp)
