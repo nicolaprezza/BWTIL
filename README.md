@@ -23,6 +23,8 @@ The BWTIL library offers a set of tools, classes and functions designed to facil
 
  * **count-runs** : count number of equal-letter runs in a text file (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/count-runs)
 
+ * **lz77** : count number of phrases in the LZ77 parse of the input text file (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/lz77)
+
 ### Download
 
 Since BWTIL includes extern git repositories as submodules, clone it using the --recursive option:
