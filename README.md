@@ -21,6 +21,8 @@ The BWTIL library offers a set of tools, classes and functions designed to facil
  
  * **bwt-invert** : invert a BWT file to reconstruct the original text (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/bwt-invert)
 
+ * **count-runs** : count number of equal-letter runs in a text file (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/count-runs)
+
 ### Download
 
 Since BWTIL includes extern git repositories as submodules, clone it using the --recursive option:
@@ -29,23 +31,22 @@ Since BWTIL includes extern git repositories as submodules, clone it using the -
 
 ### Compile
 
-The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5.
+The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5. We use cmake to generate the Makefile:
 
-To compile, run
+To compile, firstly create a build directory and access it:
+
+> mkdir build
+> cd build
+
+Then, launch cmake as:
+
+> cmake -DCMAKE_BUILD_TYPE=Release ..
+
+Finally, build the executables:
 
 > make
 
-or (to specify which compiler to use)
-
-> CXX=clang++ make
-
-> CXX=g++ make
-
-in the main BWTIL/ directory. To compile the executables individually, execute (in the BWTIL/ directory)
-
-> make tool_name
-
-where tool_name is one of dB-hash, cw-bwt, bwt-check, bwt-to-sa, sa-to-bwt, bwt-invert, sFM-index.
+The above command creates the executables in the main BWTIL directory.
 
 ### Input formats
 
