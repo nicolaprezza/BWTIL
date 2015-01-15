@@ -52,6 +52,8 @@ public:
 		symbol_to_int = vector<uint>(256);
 		sigma=0;
 
+		if(verbose) cout << "Scanning input file to compute character frequencies ... " << endl<<endl;
+
 		FileReader fr(path);
 		set<symbol> alphabet;
 
