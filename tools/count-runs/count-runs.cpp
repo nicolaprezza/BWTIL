@@ -54,7 +54,7 @@ using namespace bwtil;
 
 	text.close();
 
-	cout << R << endl;
+	cout << "Number of equal-letter runs = " << R << endl;
 
  }
 

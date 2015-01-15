@@ -47,7 +47,7 @@ public:
 	/*
 	 * given the path of a ASCII-coded file, builds the LZ77 parse. Warning: the text file must contain < 256 distinct characters (one is reserved for the BWT terminator)
 	 */
-	LZ77(string path){
+	LZ77(string path, bool verbose=false){
 
 		symbol_to_int = vector<uint>(256);
 		sigma=0;
@@ -83,6 +83,12 @@ public:
 
 		pair<ulint, ulint> interval(0,dbwt.size());
 
+		if(verbose) cout << "Parsing input file ... " << endl<<endl;
+
+		ulint i=0;//characters read
+		ulint n=fr.size();//file length
+		int last_perc=-1;
+
 		while(not fr.eof()){
 
 			//read next symbol from file
@@ -111,6 +117,18 @@ public:
 
 			}
 
+			i++;
+
+			if(verbose){
+
+				int perc = (i*100)/n;
+
+				if(perc>last_perc){
+					cout << perc << "% done." << endl;
+					last_perc=perc;
+				}
+
+			}
 
 		}
 

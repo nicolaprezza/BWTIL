@@ -30,9 +30,9 @@ using namespace bwtil;
 		exit(0);
 	}
 
-	lz77_t lz77(argv[1]);
+	lz77_t lz77(argv[1],true);//verbose
 
-	cout << lz77.getNumberOfPhrases() << endl;
+	cout << endl << "Number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
 
  }
 
