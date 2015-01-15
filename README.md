@@ -35,8 +35,7 @@ The library has been extensively tested under linux using gcc 4.8.2 and clang++ 
 
 To compile, firstly create a build directory and access it:
 
-> mkdir build
-> cd build
+> mkdir build; cd build
 
 Then, launch cmake as:
 
