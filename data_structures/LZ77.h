@@ -124,6 +124,8 @@ public:
 
 				//no matches: extend with s, increment phrases, begin new phrase
 
+				number_of_phrases++;
+
 				if(l==1 or lz_variant==v1){
 
 					//if phrase is 1 character long, variants 1 and 2 are the same
@@ -137,14 +139,31 @@ public:
 
 					//l>1 AND variant=v2
 
-					//extend BWT with the new character, reset interval, search the character (which is part of the new phrase) and create new phrase (of length 1).
-					dbwt.extend( symbol_to_int[s] );
+					//we search mismatching character
 					interval = dbwt.BS( pair<ulint, ulint>(0,dbwt.size()), symbol_to_int[s] );
-					l=1;
+
+					if(interval.second<=interval.first){
+
+						//if character does not occur, then create new phrase with it and extend bwt
+
+						dbwt.extend( symbol_to_int[s] );
+						interval = pair<ulint, ulint>(0,dbwt.size());//new interval
+						l=0;//length of new phrase is 0
+						number_of_phrases++;//we just created a phrase with only 1 character
+
+					}else{
+
+						//if character does occur, then extend bwt and remember that current phrase has length 1 (the character)
+
+						dbwt.extend( symbol_to_int[s] );
+						interval.second++;//increment upper bound because we inserted a new prefix that falls in this interval
+						l=1;
+
+					}
 
 				}
 
-				number_of_phrases++;
+
 
 			}else{
 
