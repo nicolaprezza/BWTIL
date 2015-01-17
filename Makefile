@@ -45,10 +45,6 @@ SOURCES_BWT_INVERT=tools/bwt-invert/bwt-invert.cpp
 
 SOURCES_TEST=tools/test/test.cpp
 
-SOURCES_COUNT_RUNS=tools/count-runs/count-runs.cpp
-
-SOURCES_LZ77=tools/lz77/lz77.cpp
-
 all: 
 
 	@echo "Compiling with $(CXX)..."
@@ -60,8 +56,6 @@ all:
 	make bwt-to-sa
 	make sa-to-bwt
 	make bwt-invert
-	make count-runs
-	make lz77
 
 sFM-index:
 
@@ -91,14 +85,6 @@ bwt-invert:
 
 	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o bwt-invert $(SOURCES_BWT_INVERT)
 
-count-runs:
-
-	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o count-runs $(SOURCES_COUNT_RUNS)
-
-lz77:
-
-	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o lz77 $(SOURCES_LZ77)
-
 debug:
 
 	@$(CXX) -std=$(STD) $(MY_CXXFLAGS) $(INCLUDE_FLAGS) $(OPTFLAGS) -o debug $(SOURCES_TEST)
@@ -117,4 +103,4 @@ testcases:
 
 clean:
 
-	rm -f dB-hash cw-bwt bwt-check bwt-to-sa sa-to-bwt bwt-invert sFM-index test count-runs lz77
+	rm -f dB-hash cw-bwt bwt-check bwt-to-sa sa-to-bwt bwt-invert sFM-index test

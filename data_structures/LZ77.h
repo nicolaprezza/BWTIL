@@ -47,7 +47,25 @@ public:
 	/*
 	 * given the path of a ASCII-coded file, builds the LZ77 parse. Warning: the text file must contain < 256 distinct characters (one is reserved for the BWT terminator)
 	 */
-	LZ77(string path, bool verbose=false){
+
+	enum variant {v1,v2};
+
+	//v1 : LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary
+	//v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase
+
+	struct options{
+
+		string path;
+		bool verbose;
+		variant lz_variant;
+
+	};
+
+	LZ77(options opt){
+
+		string path = opt.path;
+		bool verbose = opt.verbose;
+		variant lz_variant = opt.lz_variant;
 
 		symbol_to_int = vector<uint>(256);
 		sigma=0;
@@ -90,6 +108,7 @@ public:
 		ulint i=0;//characters read
 		ulint n=fr.size();//file length
 		int last_perc=-1;
+		uint l =0;//current phrase length
 
 		while(not fr.eof()){
 
@@ -98,16 +117,34 @@ public:
 
 			//obtain interval of the symbol
 			interval = dbwt.BS( interval, symbol_to_int[s] );
+			//increment phrase length
+			l++;
 
 			if(interval.second<=interval.first){
 
 				//no matches: extend with s, increment phrases, begin new phrase
 
-				dbwt.extend( symbol_to_int[s] );
+				if(l==1 or lz_variant==v1){
+
+					//if phrase is 1 character long, variants 1 and 2 are the same
+
+					//extend BWT with the new character, reset interval and create new phrase
+					dbwt.extend( symbol_to_int[s] );
+					interval = pair<ulint, ulint>(0,dbwt.size());
+					l=0;
+
+				}else{
+
+					//l>1 AND variant=v2
+
+					//extend BWT with the new character, reset interval, search the character (which is part of the new phrase) and create new phrase (of length 1).
+					dbwt.extend( symbol_to_int[s] );
+					interval = dbwt.BS( pair<ulint, ulint>(0,dbwt.size()), symbol_to_int[s] );
+					l=1;
+
+				}
 
 				number_of_phrases++;
-
-				interval = pair<ulint, ulint>(0,dbwt.size());
 
 			}else{
 
