@@ -181,7 +181,7 @@ public:
 			if(opt.block>0){
 
 				if(i%opt.block==0)
-					cout << endl << i << "\t" << number_of_phrases;
+					cout << i << "\t" << number_of_phrases << endl;
 
 			}
 

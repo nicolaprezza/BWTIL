@@ -25,7 +25,8 @@ void help(){
 	cout << "Options:" <<  endl;
 	cout << "--v1 : [default] LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary."<<endl;
 	cout << "--v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. If W=empty, a new phrase 'c' is inserted in the dictionary, and the next phrase is initialized empty."<<endl;
-	cout << "--p arg : output the number of phrases every <arg> characters. With this option, output percentages are suppressed."<<endl;
+	cout << "--p arg : output the number of phrases every <arg> characters."<<endl;
+	cout << "--verbose : [default:false] show percentage of work done."<<endl;
 	exit(0);
 }
 
@@ -36,21 +37,13 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	if(s.compare("--v1")==0){
 
-		if(opt.block<=0)
-			opt.verbose=true;
-
 		opt.lz_variant = lz77_t::v1;
 
 	}else if(s.compare("--v2")==0){
 
-		if(opt.block<=0)
-			opt.verbose=true;
-
 		opt.lz_variant = lz77_t::v2;
 
 	}else if(s.compare("--p")==0){
-
-		opt.verbose = false;
 
 		if(ptr>=argc){
 			cout<<"Missing block size in option --p" << endl;
@@ -68,6 +61,10 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		opt.block=block_size;
 
 		ptr++;
+
+	}else if(s.compare("--verbose")==0){
+
+		opt.verbose = true;
 
 	}else{
 		cout << "Unrecognized option " << s<< endl << endl;
@@ -87,7 +84,6 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		help();
 
 	lz77_t::options opt;
-	opt.verbose=true;
 
 	int ptr = 1;
 
@@ -107,7 +103,7 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 	opt.path = string(argv[ptr]);
 
 	lz77_t lz77(opt);
-	cout << endl << endl << "Total number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
+	cout << endl << "Total number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
 
  }
 
