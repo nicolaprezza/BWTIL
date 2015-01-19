@@ -56,8 +56,9 @@ public:
 	struct options{
 
 		string path;
-		bool verbose;
-		variant lz_variant;
+		bool verbose=false;//output percentages
+		variant lz_variant=v1;
+		ulint block=0;//output number of phrases every block characters
 
 	};
 
@@ -176,6 +177,13 @@ public:
 			}
 
 			i++;
+
+			if(opt.block>0){
+
+				if(i%opt.block==0)
+					cout << endl << i << "\t" << number_of_phrases;
+
+			}
 
 			if(verbose){
 
