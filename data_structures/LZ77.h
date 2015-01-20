@@ -59,6 +59,7 @@ public:
 		bool verbose=false;//output percentages
 		variant lz_variant=v1;
 		ulint block=0;//output number of phrases every block characters
+		symbol sep=0;//separator
 
 	};
 
@@ -115,6 +116,13 @@ public:
 
 			//read next symbol from file
 			symbol s = fr.get();
+
+			if(opt.sep>0 and s==opt.sep){
+
+				while((s=fr.get())==opt.sep){}//skip all separators
+				cout << i << "\t" << number_of_phrases << endl;//print number of phrases
+
+			}
 
 			//obtain interval of the symbol
 			interval = dbwt.BS( interval, symbol_to_int[s] );

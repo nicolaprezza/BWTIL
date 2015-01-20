@@ -26,6 +26,7 @@ void help(){
 	cout << "--v1 : [default] LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary."<<endl;
 	cout << "--v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. If W=empty, a new phrase 'c' is inserted in the dictionary, and the next phrase is initialized empty."<<endl;
 	cout << "--p arg : output the number of phrases every <arg> characters."<<endl;
+	cout << "--s arg : output the number of phrases each time a character equal to <arg> is encountered. Warning: <arg> characters are skipped and not taken into account in the LZ parse."<<endl;
 	cout << "--verbose : [default:false] show percentage of work done."<<endl;
 	exit(0);
 }
@@ -65,6 +66,23 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 	}else if(s.compare("--verbose")==0){
 
 		opt.verbose = true;
+
+	}else if(s.compare("--s")==0){
+
+		if(ptr>=argc){
+			cout<<"Missing separator character in option --s" << endl;
+			help();
+		}
+
+		string sep(argv[ptr]);
+
+		if(sep.length()!=1){
+			cout << "Error: separator must be a single character." << endl;
+			help();
+		}
+
+		opt.sep = sep.at(0);
+		ptr++;
 
 	}else{
 		cout << "Unrecognized option " << s<< endl << endl;
