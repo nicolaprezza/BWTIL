@@ -1,0 +1,1 @@
+/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/bwtest.dir/tools/test/test.cpp.o  -o bwtest -rdynamic 

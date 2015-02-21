@@ -105,9 +105,3 @@ Then, to search for the occurrencies of the pattern "static unsigned long", run
 
 > bin/sFM-index search data/plain/sources.1MB.sfm "static unsigned long"
 
-the command 
-
-> make testcases
-
-will execute automatically all the above examples.
-

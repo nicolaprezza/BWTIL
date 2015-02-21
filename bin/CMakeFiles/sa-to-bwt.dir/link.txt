@@ -1,0 +1,1 @@
+/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/sa-to-bwt.dir/tools/sa-to-bwt/sa-to-bwt.cpp.o  -o sa-to-bwt -rdynamic 

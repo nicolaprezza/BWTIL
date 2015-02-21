@@ -1,0 +1,1 @@
+/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/dB-hash.dir/tools/dB-hash/dB-hash.cpp.o  -o dB-hash -rdynamic 

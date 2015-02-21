@@ -1,0 +1,8 @@
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/bwt-check.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/bwt-invert.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/bwt-to-sa.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/bwtest.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/cw-bwt.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/dB-hash.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/sFM-index.dir
+/home/nicola/workspace/BWTIL/bin/CMakeFiles/sa-to-bwt.dir
