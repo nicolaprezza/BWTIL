@@ -35,9 +35,9 @@ Since BWTIL includes extern git repositories as submodules, clone it using the -
 
 The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5. We use cmake to generate the Makefile:
 
-To compile, firstly enter the bin/ directory
+To compile, firstly create and enter the bin/ directory
 
-> cd bin
+> mkdir bin; cd bin
 
 Then, launch cmake as (default build type is release):
 
