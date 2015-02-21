@@ -1,1 +1,0 @@
-/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/bwt-invert.dir/tools/bwt-invert/bwt-invert.cpp.o  -o bwt-invert -rdynamic 

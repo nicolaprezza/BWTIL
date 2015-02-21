@@ -1,1 +1,0 @@
-/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/cw-bwt.dir/tools/cw-bwt/cw-bwt.cpp.o  -o cw-bwt -rdynamic 

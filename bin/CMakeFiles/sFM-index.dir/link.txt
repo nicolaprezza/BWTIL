@@ -1,1 +1,0 @@
-/usr/bin/c++   --std=c++11 -g -ggdb -Ofast -fstrict-aliasing -DNDEBUG -march=native    CMakeFiles/sFM-index.dir/tools/sFM-index/sFM-index.cpp.o  -o sFM-index -rdynamic 
