@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 2.6)
 
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+endif()
+
+#set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/.. )
+
 project (BWTIL)
 
 include_directories(${PROJECT_SOURCE_DIR}/extern/bitvector/include)

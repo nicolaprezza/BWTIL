@@ -35,19 +35,19 @@ Since BWTIL includes extern git repositories as submodules, clone it using the -
 
 The library has been extensively tested under linux using gcc 4.8.2 and clang++ 3.5. We use cmake to generate the Makefile:
 
-To compile, firstly create a build directory and access it:
+To compile, firstly enter the bin/ directory
 
-> mkdir build; cd build
+> cd bin
 
-Then, launch cmake as:
+Then, launch cmake as (default build type is release):
 
-> cmake -DCMAKE_BUILD_TYPE=Release ..
+> cmake ..
 
 Finally, build the executables:
 
 > make
 
-The above command creates the executables in the main BWTIL directory.
+The above command creates the executables in the bin directory.
 
 ### Input formats
 
@@ -63,47 +63,47 @@ The folder BWTIL/data/plain/ contains some sample files to test the library. All
 
 After compiling, in the main BWTIL/ directory run
 
-> ./cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
+> bin/cw-bwt data/plain/sources.1MB data/bwt/sources.1MB.bwt
 
 To build the BWT of the text data/plain/sources.1MB. The BWT will be saved in data/bwt/sources.1MB.bwt
 
 now run
 
-> ./bwt-check data/bwt/sources.1MB.bwt data/plain/sources.1MB
+> bin/bwt-check data/bwt/sources.1MB.bwt data/plain/sources.1MB
 
 to test the correctness of the BWT file just created. Alternatively, run
 
-> ./bwt-invert data/bwt/sources.1MB.bwt data/plain/sources.1MB_copy
+> bin/bwt-invert data/bwt/sources.1MB.bwt data/plain/sources.1MB_copy
 
 to invert the BWT and check that the two files data/plain/sources.1MB and data/plain/sources.1MB_copy are indeed identical (for example, using diff).
 
 Now that we have the BWT of data/plain/sources.1MB, we can build its suffix array. Run
 
-> ./bwt-to-sa data/bwt/sources.1MB.bwt data/SA/sources.1MB.sa
+> bin/bwt-to-sa data/bwt/sources.1MB.bwt data/SA/sources.1MB.sa
 
 The suffix array of data/plain/sources.1MB will be stored in data/SA/sources.1MB.sa
 
 If we want to check the consistency of the SA, we can simply convert it back to a BWT with (for this we need also the original text file)
 
-> ./sa-to-bwt data/SA/sources.1MB.sa data/plain/sources.1MB data/bwt/sources.1MB_copy.bwt
+> bin/sa-to-bwt data/SA/sources.1MB.sa data/plain/sources.1MB data/bwt/sources.1MB_copy.bwt
 
 And check with bwt-check the consistency of data/bwt/sources.1MB_copy.bwt against the plain text file data/plain/sources.1MB.
 
 To search the occurrences of a pattern in a text file with the dB-hash data structure, first create the index (the file data/plain/sources.1MB.dbh will be created):
 
-> ./dB-hash build data/plain/sources.1MB 20
+> bin/dB-hash build data/plain/sources.1MB 20
 
 Where 20 is the pattern length. Then, to search for the occurrencies of the pattern of length 20 "static unsigned long", run
 
-> ./dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
+> bin/dB-hash search data/plain/sources.1MB.dbh "static unsigned long"
 
 To search the occurrences of a pattern in a text file with the sFM-index data structure, first create the index (the file data/plain/sources.1MB.sfm will be created):
 
-> ./sFM-index build data/plain/sources.1MB
+> bin/sFM-index build data/plain/sources.1MB
 
 Then, to search for the occurrencies of the pattern "static unsigned long", run
 
-> ./sFM-index search data/plain/sources.1MB.sfm "static unsigned long"
+> bin/sFM-index search data/plain/sources.1MB.sfm "static unsigned long"
 
 the command 
 
