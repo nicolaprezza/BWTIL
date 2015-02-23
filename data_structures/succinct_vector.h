@@ -32,6 +32,52 @@
 #include "../common/common.h"
 #include "../extern/bitvector/include/packed_view.h"
 
+namespace bwtil {
+
+template <class Container> class succinct_vector_reference{
+
+	using value_type = typename Container::value_type;
+
+public:
+
+	succinct_vector_reference(Container &sv, ulint idx): _sv(sv), _idx(idx) {}
+
+    operator value_type() {
+        return _sv.get(_idx);
+    }
+
+    succinct_vector_reference const&operator=(value_type v) const {
+
+		_sv.set(_idx, v);
+
+        return *this;
+    }
+
+    succinct_vector_reference const&operator++() const {
+
+		_sv.increment(_idx);
+
+		return *this;
+
+    }
+
+    succinct_vector_reference const operator++(value_type) const {
+
+    	succinct_vector_reference copy(*this);
+
+		++(*this);
+
+		return copy;
+
+    }
+
+private:
+
+	Container &_sv;
+	ulint _idx;
+
+};
+
 //template parameter: numeric (unsigned) type
 template <typename T = ulint> class succinct_vector{
 
@@ -57,6 +103,9 @@ template <typename T = ulint> class succinct_vector{
 
 public:
 
+    using value_type = T;
+    using succinct_vector_ref = succinct_vector_reference<succinct_vector>;
+
     succinct_vector(){};
 
     succinct_vector(ulint n, uint field_width = 1, ulint packed_view_size = 256){
@@ -76,11 +125,16 @@ public:
 
     }
 
-    //this operator is for access only. Modifying a field requires more work, so it is demanded to set()
-	T operator[](ulint i){
+	succinct_vector_ref operator[](ulint i){
 
 		assert(i<n);
+		return { *this, i };
 
+	}
+
+	ulint get(ulint i){
+
+		assert(i<n);
 		return packed_views[i/packed_view_size][i%packed_view_size];
 
 	}
@@ -145,5 +199,6 @@ public:
 
 };
 
+}
 
 #endif /* SUCCINCT_VECTOR_H_ */

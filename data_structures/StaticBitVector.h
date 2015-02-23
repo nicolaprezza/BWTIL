@@ -40,6 +40,10 @@ class StaticBitVector {
 
 public:
 
+	inline uint operator[](ulint i){
+		return at(i);
+	}
+
 	//build empty bitvector, then add bits with push_back
 	StaticBitVector(){
 

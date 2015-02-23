@@ -18,6 +18,8 @@
 #include "../../algorithms/cw_bwt.h"
 #include "../../data_structures/FileReader.h"
 #include "../../data_structures/DummyDynamicBitvector.h"
+#include "../../data_structures/sparse_vector.h"
+#include "../../data_structures/succinct_vector.h"
 #include "../../extern/bitvector/include/bitvector.h"
 
 using namespace bwtil;
@@ -176,8 +178,45 @@ void test2(){
 }
 
 
+void test_sparse_vector(){
+	 bool tempBool[] = { true, false, false, true, false, true, true };
+	 std::vector<bool> bv ( tempBool, tempBool + sizeof(tempBool) / sizeof(bool) );
+
+	 sparse_vector<int> sv(bv);
+
+	 sv[3] = 9;
+	 sv[3]++;
+
+	 sv[1]++;
+
+	 sv[0]++;
+
+	 for(uint i=0;i<bv.size();i++)
+		 cout << sv[i] << " ";
+
+	 cout << endl;
+}
 
  int main(int argc,char** argv) {
+
+
+	 succinct_vector<int> sv(10);
+
+	 for(ulint i=0;i<sv.size();i++)
+		 cout << sv[i] << " ";
+	 cout << endl;
+
+	 ++sv[3];
+
+	 sv[5]++;
+
+	 sv[5]++;
+	 sv[5]++;
+	 sv[5]++;
+
+	 for(ulint i=0;i<sv.size();i++)
+		 cout << sv[i] << " ";
+	 cout << endl;
 
 
  }

@@ -36,14 +36,66 @@
 
 namespace bwtil {
 
+template <class Container> class sparse_vector_reference{
+
+	using value_type = typename Container::value_type;
+
+public:
+
+	sparse_vector_reference(Container &sv, ulint idx): _sv(sv), _idx(idx) {}
+
+    operator value_type() {
+        return _sv.get(_idx);
+    }
+
+	sparse_vector_reference const&operator=(value_type v) const {
+
+		if(_sv.marked(_idx))
+			_sv.set(_idx, v);
+
+        return *this;
+    }
+
+	sparse_vector_reference const&operator++() const {
+
+		if(_sv.marked(_idx))
+			_sv.set(_idx, _sv[_idx]+1);
+
+		return *this;
+
+    }
+
+	sparse_vector_reference const operator++(value_type) const {
+
+		sparse_vector_reference copy(*this);
+
+		if(_sv.marked(_idx))
+			++(*this);
+
+		return copy;
+
+    }
+
+private:
+
+	Container &_sv;
+	ulint _idx;
+
+};
+
 //sparse_vector requires the type of contained elements and the underlying container type (vector by default). The difference with the underlying Container type is that sparse_vector uses only 1 bit for the positions containing null elements (which must be specified in the declaration)
 template <typename T, template <typename ...> class Container = vector> class sparse_vector{
 
-	Container<T> container;//the underlying container
 	StaticBitVector bitvector;//bitvector marking non-null elements
 	ulint n,ones;//total size/number of non-null elements
 
+	Container<T> container;//the underlying container
+
 public:
+
+	using value_type = T;
+
+    using sparse_vector_ref = sparse_vector_reference<sparse_vector>;
 
 	sparse_vector(){};
 
@@ -57,8 +109,15 @@ public:
 
 	}
 
-	//access operator
-	T operator[](ulint i){
+	sparse_vector_ref operator[](ulint i){
+
+		assert(i<n);
+
+		return { *this, i };
+
+	}
+
+	T get(ulint i){
 
 		assert(i<n);
 
@@ -81,15 +140,18 @@ public:
 			container.increment( bitvector.rank1(i) );
 
 	}
+
 	void set(ulint i, T value){
 
 		assert(i<n);
 
 		//set does nothing if performed on the zero elements
 		if(bitvector[i])
-			container.set( bitvector.rank1(i), value );
+			container[ bitvector.rank1(i) ] = value ;
 
 	}
+
+	bool marked(ulint i){return bitvector[i];}
 
 	ulint size(){return n;}
 	ulint nonzero_elements(){return ones;}
