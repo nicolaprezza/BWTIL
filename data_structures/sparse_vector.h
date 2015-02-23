@@ -65,7 +65,7 @@ public:
 
     }
 
-	sparse_vector_reference const operator++(value_type) const {
+	sparse_vector_reference const operator++(int) const {
 
 		sparse_vector_reference copy(*this);
 

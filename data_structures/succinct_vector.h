@@ -61,7 +61,7 @@ public:
 
     }
 
-    succinct_vector_reference const operator++(value_type) const {
+    succinct_vector_reference const operator++(int) const {
 
     	succinct_vector_reference copy(*this);
 
