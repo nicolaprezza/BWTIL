@@ -21,6 +21,7 @@
 #include "../../data_structures/sparse_vector.h"
 #include "../../data_structures/succinct_vector.h"
 #include "../../extern/bitvector/include/bitvector.h"
+#include "../../data_structures/sparse_bitvector.h"
 
 using namespace bwtil;
 using namespace bv;
@@ -199,25 +200,30 @@ void test_sparse_vector(){
 
  int main(int argc,char** argv) {
 
+	 sparse_bitvector<ulint> sbv;
 
-	 succinct_vector<int> sv(10);
+	 sbv.push_back(true);
+	 sbv.push_back(false);
+	 sbv.push_back(false);
+	 sbv.push_back(true);
+	 sbv.push_back(true);
+	 sbv.push_back(false);
+	 sbv.push_back(true);
 
-	 for(ulint i=0;i<sv.size();i++)
-		 cout << sv[i] << " ";
+	 for(uint i=0;i<sbv.size();i++)
+		 cout << sbv[i] << " ";
+
 	 cout << endl;
 
-	 ++sv[3];
+	 for(uint i=0;i<sbv.number_of_1();i++)
+		 cout << sbv.select(i) << " ";
 
-	 sv[5]++;
-
-	 sv[5]++;
-	 sv[5]++;
-	 sv[5]++;
-
-	 for(ulint i=0;i<sv.size();i++)
-		 cout << sv[i] << " ";
 	 cout << endl;
 
+	 for(uint i=0;i<=sbv.size();i++)
+		 cout << sbv.rank(i) << " ";
+
+	 cout << endl;
 
  }
 
