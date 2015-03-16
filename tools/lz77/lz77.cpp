@@ -27,6 +27,7 @@ void help(){
 	cout << "--v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. If W=empty, a new phrase 'c' is inserted in the dictionary, and the next phrase is initialized empty."<<endl;
 	cout << "--p arg : output the number of phrases every <arg> characters."<<endl;
 	cout << "--s arg : output the number of phrases each time a character equal to <arg> is encountered. Warning: <arg> characters are skipped and not taken into account in the LZ parse."<<endl;
+	cout << "--print-parse : [default:false] print the parse"<<endl;
 	cout << "--verbose : [default:false] show percentage of work done."<<endl;
 	exit(0);
 }
@@ -84,7 +85,12 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		opt.sep = sep.at(0);
 		ptr++;
 
+	}else if(s.compare("--print-parse")==0){
+
+		opt.store_parse=true;
+
 	}else{
+
 		cout << "Unrecognized option " << s<< endl << endl;
 		help();
 	}
@@ -118,10 +124,40 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	}
 
-	opt.path = string(argv[ptr]);
+	opt.input_path = string(argv[ptr]);
 
 	lz77_t lz77(opt);
-	cout << endl << "Total number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
+	cout << "Total number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
+
+	if(opt.store_parse){
+
+		auto parse = lz77.getParse();
+
+		for(uint i=0;i<parse.size();i++){
+
+			cout << parse[i].phrase << " " ;
+
+		}
+
+		cout << endl;
+
+		for(uint i=0;i<parse.size();i++){
+
+			cout 	<< "<";
+
+			if(parse[i].start_position_is_defined)
+				cout << parse[i].starting_position;
+			else
+				cout << "-";
+
+			cout << ", " << parse[i].phrase << ">  " ;
+
+		}
+
+		cout << endl;
+
+
+	}
 
  }
 

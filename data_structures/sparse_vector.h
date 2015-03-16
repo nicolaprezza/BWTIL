@@ -32,7 +32,7 @@
 #define SPARSE_VECTOR_H_
 
 #include "../common/common.h"
-#include "StaticBitVector.h"
+#include "succinct_bitvector.h"
 
 namespace bwtil {
 
@@ -86,7 +86,7 @@ private:
 //sparse_vector requires the type of contained elements and the underlying container type (vector by default). The difference with the underlying Container type is that sparse_vector uses only 1 bit for the positions containing null elements (which must be specified in the declaration)
 template <typename T, template <typename ...> class Container = vector> class sparse_vector{
 
-	StaticBitVector bitvector;//bitvector marking non-null elements
+	succinct_bitvector bitvector;//bitvector marking non-null elements
 	ulint n,ones;//total size/number of non-null elements
 
 	Container<T> container;//the underlying container
@@ -102,7 +102,7 @@ public:
 	sparse_vector(vector<bool> &non_null_elements){
 
 		n = non_null_elements.size();
-		bitvector = StaticBitVector(non_null_elements);
+		bitvector = succinct_bitvector(non_null_elements);
 		ones = bitvector.rank1(n);
 
 		container = Container<T>(ones);

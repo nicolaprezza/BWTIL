@@ -22,6 +22,9 @@
 #include "../../data_structures/succinct_vector.h"
 #include "../../extern/bitvector/include/bitvector.h"
 #include "../../data_structures/sparse_bitvector.h"
+#include "../../data_structures/dynamic_vector.h"
+#include "../../data_structures/DynamicBWT.h"
+
 
 using namespace bwtil;
 using namespace bv;
@@ -198,32 +201,68 @@ void test_sparse_vector(){
 	 cout << endl;
 }
 
+void test_dynamic_vector(){
+	 dynamic_vector_t dv(100,16);
+
+	 dv.insert(0,5);
+	 dv.insert(0,3);
+	 dv.insert(0,2);
+	 dv.insert(0,8);
+	 dv.insert(1,88);
+	 dv.insert(4,123);
+
+
+	 for(uint i=0;i<dv.size();i++)
+		 cout << dv[i] << " " ;
+
+	 cout << endl;
+}
+
+char remap(symbol s){
+
+	switch(s){
+		case 0: return 'i';
+		case 1: return 'm';
+		case 2: return 'p';
+		case 3: return 's';
+	}
+
+	return 'X';
+
+}
+
  int main(int argc,char** argv) {
 
-	 sparse_bitvector<ulint> sbv;
+	 vector<ulint> f;
+	 f.push_back(4);
+	 f.push_back(1);
+	 f.push_back(2);
+	 f.push_back(4);
 
-	 sbv.push_back(true);
-	 sbv.push_back(false);
-	 sbv.push_back(false);
-	 sbv.push_back(true);
-	 sbv.push_back(true);
-	 sbv.push_back(false);
-	 sbv.push_back(true);
+	 dynamic_bwt_t bwt(f,64);
 
-	 for(uint i=0;i<sbv.size();i++)
-		 cout << sbv[i] << " ";
+	 bwt.extend(0);
+	 bwt.extend(2);
+	 bwt.extend(2);
+	 bwt.extend(0);
+	 bwt.extend(3);
+	 bwt.extend(3);
+	 bwt.extend(0);
+	 bwt.extend(3);
+	 bwt.extend(3);
+	 bwt.extend(0);
+	 bwt.extend(1);
+
+	 for(uint i=0;i<bwt.size();i++)
+		 cout << remap(bwt[i]);
 
 	 cout << endl;
 
-	 for(uint i=0;i<sbv.number_of_1();i++)
-		 cout << sbv.select(i) << " ";
+	 for(uint i=0;i<bwt.size();i++)
+		cout << bwt.locate_right(i) << " ";
 
 	 cout << endl;
 
-	 for(uint i=0;i<=sbv.size();i++)
-		 cout << sbv.rank(i) << " ";
-
-	 cout << endl;
 
  }
 

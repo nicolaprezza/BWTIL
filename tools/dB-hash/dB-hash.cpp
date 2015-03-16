@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-#include "../../data_structures/StaticBitVector.h"
+#include "../../data_structures/succinct_bitvector.h"
 #include "../../data_structures/DBhash.h"
 #include "../../data_structures/HashFunction.h"
 #include "../../data_structures/FileReader.h"

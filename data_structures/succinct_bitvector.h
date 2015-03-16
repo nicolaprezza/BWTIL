@@ -15,7 +15,7 @@
  */
 
 //============================================================================
-// Name        : StaticBitVector.h
+// Name        : succinct_bitvector.h
 // Author      : Nicola Prezza
 // Version     : 1.0
 // Description :
@@ -29,32 +29,33 @@
 
 
 
-#ifndef STATICBITVECTOR_H_
-#define STATICBITVECTOR_H_
+#ifndef SUCCINCTBITVECTOR_H_
+#define SUCCINCTBITVECTOR_H_
 
 #include "../common/common.h"
 
 namespace bwtil {
 
-class StaticBitVector {
+class succinct_bitvector {
 
 public:
 
+	/*
+	 * argument: position i in the bitvector
+	 * returns: bit in position i
+	 * only access! the bitvector is static.
+	 */
 	inline uint operator[](ulint i){
 		return at(i);
 	}
 
-	//build empty bitvector, then add bits with push_back
-	StaticBitVector(){
-
-		n=0;
-		global_rank1=0;
-		local_rank1=0;
-
-	};
+	/*
+	 * empty constructor. Initialize bitvector with length 0.
+	 */
+	succinct_bitvector(){};
 
 	//build bitvector copying the content of the input vector of bool
-	StaticBitVector(vector<bool> &vb){
+	succinct_bitvector(vector<bool> &vb){
 
 		n=0;
 		global_rank1=0;
@@ -65,6 +66,10 @@ public:
 
 	};
 
+	/*
+	 * argument: a boolean b
+	 * behavior: append b at the end of the bitvector.
+	 */
 	void push_back(bool b){
 
 		if(n%word_length==0)
@@ -79,9 +84,26 @@ public:
 
 	}
 
+	/*
+	* returns: size of the bitvector
+	*/
 	ulint size(){
 
 		return bitvector.size()*word_length + rank_ptrs_1.size()*word_length + rank_ptrs_2.size()*16;
+
+	}
+
+	/*
+	 * argument: position i in the bitvector, boolean b
+	 * returns: number of bits equal to b before position i excluded
+	 */
+	ulint rank(ulint i, bool b){
+
+		assert(i<=length());
+
+		ulint ones = rank1(i);
+
+		return b*ones + (1-b)*(i-ones) ;
 
 	}
 
@@ -201,6 +223,9 @@ public:
 
 	}
 
+	/*
+	* returns: size of the bitvector
+	*/
 	ulint length(){return n;}
 
 	ulint numberOf1(){return rank1(n);}
@@ -229,49 +254,29 @@ private:
 		//position in the word is n%word_length
 		//moreover, insert bit only if it is 1 (otherwise nothing changes)
 
-		if(b) bitvector[ bitvector.size()-1 ] |= ( ((ulint)1) << ( (word_length - 1) - (n%word_length)) );
+		if(b){
 
-	}
+			bitvector[ bitvector.size()-1 ] |= ( ((ulint)1) << ( (word_length - 1) - (n%word_length)) );
 
-	/*void computeRanks(){//compute rank structures basing on the content of the bitvector
-
-		ulint nr_of_ones_global = 0;
-		ulint nr_of_ones_local = 0;
-
-		rank_ptrs_1[0]=0;
-		rank_ptrs_2[0]=0;
-
-		if(n==0)
-			return;
-
-		for(ulint i=0;i<n;i++){
-
-			if((i+1)%(word_length*word_length)==0)
-				nr_of_ones_local = 0;
-			else
-				nr_of_ones_local += at(i);
-
-			nr_of_ones_global += at(i);
-
-			if((i+1)%word_length==0)
-				rank_ptrs_2[(i+1)/word_length]=nr_of_ones_local;
-
-			if((i+1)%(word_length*word_length)==0)
-				rank_ptrs_1[(i+1)/(word_length*word_length)]=nr_of_ones_global;
+			//if((global_rank1-1)%word_length_2 == 0)
+				//sampled_select.push_back(rank_ptrs_1.size()-1);
 
 		}
 
-	}*/
+	}
 
 
-	ulint n;//length of the bitvector
+
+	ulint n=0;//length of the bitvector
 
 	vector<uint64_t> bitvector;//the bits are stored in a vector, so that they can be accessed in blocks of size word_length
 	vector<uint64_t> rank_ptrs_1;//rank pointers sampled every word_length^2 positions
 	vector<uint16_t> rank_ptrs_2;//rank pointers sampled every word_length positions
+	//vector<uint64_t> sampled_select;//pointer to rank_ptrs_1 every word_length^2 ones
 
-	uint64_t global_rank1;//rank1 up to position n excluded
-	uint16_t local_rank1;//rank1 up to position n excluded from beginning of current block of size word_length^2
+
+	uint64_t global_rank1=0;//rank1 up to position n excluded
+	uint16_t local_rank1=0;//rank1 up to position n excluded from beginning of current block of size word_length^2
 
 	static constexpr uint word_length = 64;//size of words
 	static constexpr ulint word_length_2 = word_length*word_length;//square of size of words
@@ -279,4 +284,4 @@ private:
 };
 
 } /* namespace data_structures */
-#endif /* BITVECTOR_H_ */
+#endif /* SUCCINCTBITVECTOR_H_ */

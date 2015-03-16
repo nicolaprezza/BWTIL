@@ -126,6 +126,17 @@ inline packed_view_t load_packed_view_from_file_T(size_t width, size_t size, FIL
 }
 */
 
+inline uint number_of_bits(ulint x){
+
+	uint width = 0;
+	while(x>0){
+		width++;
+		x = x>>1;
+	}
+
+	return width;
+}
+
 inline void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 
 	ulint i = 0;

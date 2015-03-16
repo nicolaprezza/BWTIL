@@ -33,7 +33,7 @@
 #define INDEXEDBWT_H_
 
 #include "WaveletTree.h"
-#include "StaticBitVector.h"
+#include "succinct_bitvector.h"
 
 namespace bwtil {
 
@@ -118,7 +118,7 @@ public:
 
 		bwt_wt =  WaveletTree(BWT,verbose);
 
-		marked_positions =  StaticBitVector();
+		marked_positions =  succinct_bitvector();
 
 		text_pointers =  packed_view_t(w,number_of_SA_pointers);
 
@@ -154,7 +154,7 @@ public:
 			if(verbose) cout << "\n  Marking positions containing a SA pointer ... ";
 
 			vector<bool> mark_pos = markPositions(verbose);
-			marked_positions = StaticBitVector( mark_pos );
+			marked_positions = succinct_bitvector( mark_pos );
 
 			if(verbose) cout << "  Done.\n";
 
@@ -315,7 +315,7 @@ public:
 		bwt_wt =  WaveletTree();
 		bwt_wt.loadFromFile(fp);
 
-		marked_positions =  StaticBitVector();
+		marked_positions =  succinct_bitvector();
 		marked_positions.loadFromFile(fp);
 		text_pointers = load_packed_view_from_file(w, number_of_SA_pointers, fp);
 
@@ -464,7 +464,7 @@ private:
 	uint w;//size of a pointer = log2 n
 
 	WaveletTree bwt_wt;//BWT stored as a wavelet tree
-	StaticBitVector marked_positions;//marks positions on the BWT having a text-pointer
+	succinct_bitvector marked_positions;//marks positions on the BWT having a text-pointer
 	packed_view_t text_pointers;
 
 	vector<ulint> FIRST;//first column in the matrix of the ordered suffixes. FIRST[c]=position of the first occurrence of c in the 1st column

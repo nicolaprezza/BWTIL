@@ -27,7 +27,7 @@
 #ifndef WAVELETTREE_H_
 #define WAVELETTREE_H_
 
-#include "StaticBitVector.h"
+#include "succinct_bitvector.h"
 
 namespace bwtil {
 
@@ -57,7 +57,7 @@ public:
 
 		if (verbose) cout << "   filling nodes ... " << endl;
 
-		nodes = vector<StaticBitVector>(number_of_nodes);
+		nodes = vector<succinct_bitvector>(number_of_nodes);
 
 		uint node = root();
 
@@ -173,7 +173,7 @@ public:
 		numBytes = fread(&number_of_nodes, sizeof(ulint), 1, fp);
 		assert(numBytes>0);
 
-		nodes = vector<StaticBitVector>(number_of_nodes);
+		nodes = vector<succinct_bitvector>(number_of_nodes);
 
 		for(ulint i=0;i<number_of_nodes;i++)
 			nodes[i].loadFromFile(fp);
@@ -224,7 +224,7 @@ private:
 
 	ulint n;//text length
 
-	vector<StaticBitVector> nodes;//the tree: a vector of bitvectors
+	vector<succinct_bitvector> nodes;//the tree: a vector of bitvectors
 	uint sigma;//alphabet size
 	uint log_sigma;//number of bits for each symbol
 	ulint number_of_nodes;

@@ -21,7 +21,7 @@
 // Description :
 
  /*
-  * sparse bitvector: static bitvector stored as a simple vector of integers (one for each 1).
+  * sparse bitvector: static bitvector stored as a simple vector of integers (one for each 1). Operatins implemented through binary search.
   */
 
 //============================================================================
@@ -79,14 +79,16 @@ public:
 	}
 
 	/*
-	 * argument: position i in the bitvector
-	 * returns: number of 1s before position i excluded
+	 * argument: position i in the bitvector, boolean b
+	 * returns: number of bits equal to b before position i excluded
 	 */
-	ulint rank(ulint i){
+	ulint rank(ulint i, bool b=true){
 
 		assert(i<=length);
 
-		return std::lower_bound(ones.begin(),ones.end(),i) - ones.begin();
+		ulint n1 = std::lower_bound(ones.begin(),ones.end(),i) - ones.begin();
+
+		return b*n1 + (1-b)*(i-n1) ;
 
 	}
 
