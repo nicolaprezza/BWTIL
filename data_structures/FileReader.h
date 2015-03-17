@@ -32,7 +32,7 @@ class FileReader {
 
 public:
 
-	FileReader();
+	FileReader(){};
 
 	FileReader(string path){
 
@@ -99,9 +99,9 @@ public:
 private:
 
 	std::ifstream * fs;
-	ulint n;
+	ulint n=0;
 
-	ulint pos;
+	ulint pos=0;
 
 };
 

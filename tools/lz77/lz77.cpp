@@ -21,6 +21,7 @@ using namespace bwtil;
 
 void help(){
 	cout << "*** Count number of phrases in the LZ77 parse of the file ***\n";
+	cout << "*** Input file must not contain a 0x0 character, since 0x0 is automatically appended as terminator. ***\n";
 	cout << "Usage: lz77 [options] text_file\n";
 	cout << "Options:" <<  endl;
 	cout << "--v1 : [default] LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary."<<endl;
@@ -32,7 +33,7 @@ void help(){
 	exit(0);
 }
 
-lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
+lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** argv, int argc){
 
 	string s(argv[ptr]);
 	ptr++;
@@ -87,7 +88,7 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	}else if(s.compare("--print-parse")==0){
 
-		opt.store_parse=true;
+		print_parse=true;
 
 	}else{
 
@@ -110,11 +111,11 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 	lz77_t::options opt;
 
 	int ptr = 1;
+	bool print_parse=false;
 
 	//parse arguments. Last arg is path
 	while(ptr<argc-1)
-		opt = parse(opt,ptr,argv, argc);
-
+		opt = parse(opt,print_parse, ptr,argv, argc);
 
 	//if args are correct, now ptr = argc-1 = path
 	if(ptr!=argc-1){
@@ -124,40 +125,42 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	}
 
-	opt.input_path = string(argv[ptr]);
+	opt.mode = lz77_t::file_path;
+	opt.prepend_alphabet = false;
 
-	lz77_t lz77(opt);
-	cout << "Total number of LZ77 phrases = " << lz77.getNumberOfPhrases() << endl;
+	lz77_t lz77(opt,string(argv[ptr]));
 
-	if(opt.store_parse){
+	ulint number_of_phrases=0;
 
-		auto parse = lz77.getParse();
+	if(print_parse){
 
-		for(uint i=0;i<parse.size();i++){
+		while(not lz77.end_of_parse()){
 
-			cout << parse[i].phrase << " " ;
+			auto token = lz77.get_token();
 
-		}
+			cout << "<";
 
-		cout << endl;
-
-		for(uint i=0;i<parse.size();i++){
-
-			cout 	<< "<";
-
-			if(parse[i].start_position_is_defined)
-				cout << parse[i].starting_position;
+			if(token.start_position_is_defined)
+				cout << token.starting_position;
 			else
 				cout << "-";
 
-			cout << ", " << parse[i].phrase << ">  " ;
+			cout << ", " << token.phrase << ">" << endl;
+
+			number_of_phrases++;
 
 		}
 
-		cout << endl;
+	}else{
 
+		while(not lz77.end_of_parse()){
+			lz77.get_token();
+			number_of_phrases++;
+		}
 
 	}
+
+	cout << "number of phrases: " << number_of_phrases << endl;
 
  }
 

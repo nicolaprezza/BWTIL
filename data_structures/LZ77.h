@@ -48,10 +48,10 @@ public:
 	 * given the path of a ASCII-coded file, builds the LZ77 parse. Warning: the text file must contain < 256 distinct characters (one is reserved for the BWT terminator)
 	 */
 
+	/*	v1 : LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary. With this variant, the last token may contain the terminator 0x0
+	*	v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. With this variant, the last token never contains the terminator 0x0.
+	*/
 	enum variant {v1,v2};
-
-	//v1 : LZ77 variant 1: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase Wc is inserted in the dictionary
-	//v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase
 
 	/*
 	 * token: an element of the parse
@@ -65,14 +65,16 @@ public:
 
 	};
 
+	enum input_mode {file_path,text};//input is a file path or a text string?
+
 	struct options{
 
-		string input_path;
+		input_mode mode=text;
 		bool verbose=false;//output percentages
-		bool store_parse=false;//store the parse in a vector of phrases?
 		variant lz_variant=v1;
 		ulint block=0;//output number of phrases every block characters. If 0, don't print anything.
 		symbol sep=0;//separator: output number of phrases each time sep is seen in the stream. These characters are ignored in phrase computation. If 0, there are no separators.
+		bool prepend_alphabet=false;//add a prefix 'a_1a_2...a_k' to the text, where {a_1, ..., a_k} is the alphabet
 
 	};
 
@@ -83,198 +85,240 @@ public:
 	 * With lz77 version 2, the file should moreover start with all alphabet characters concatenated
 	 *
 	 */
-	LZ77(options opt){
+	LZ77(options opt, string input){
 
-		store_parse=opt.store_parse;
-		string path = opt.input_path;
+		this->opt = opt;
+		this->input = input;
 		bool verbose = opt.verbose;
-		variant lz_variant = opt.lz_variant;
+		alphabet_iterator=1;//start from 1 since terminator char is present
 
 		symbol_to_int = vector<uint>(256);
 		sigma=0;
 
-		if(verbose) cout << "Scanning input file to compute character frequencies ... " << endl<<endl;
+		if(verbose) cout << "Scanning input to compute character frequencies ... " << endl<<endl;
 
-		FileReader fr(path);
-		set<symbol> alphabet;
+		//if input string is a file path, then open file
+		if(opt.mode==file_path)
+			fr = FileReader(input);
 
-		while(not fr.eof())
-			alphabet.insert(fr.get());
+		//create alphabet
+		set<symbol> alphabet_set;
 
-		fr.rewind();
+		bool prepend_alphabet_temp =  opt.prepend_alphabet;
+		opt.prepend_alphabet = false;//disable temporary to permit calling get() before alphabet is created
 
-		for(set<symbol>::iterator it=alphabet.begin();it!=alphabet.end();++it){
+		while(not eof()){
+			symbol s=get();
+			alphabet_set.insert(s);
 
-			symbol_to_int[*it] = sigma;
+			if(s==TERMINATOR and (not eof())){
+
+				cout << "Error: input text contains a 0x0 character, which is reserved."<<endl;
+				exit(1);
+
+			}
+		}
+
+		opt.prepend_alphabet = prepend_alphabet_temp;
+
+		//alphabet_set.insert(TERMINATOR);
+
+		alphabet = vector<symbol>(alphabet_set.size());
+
+		std::copy(alphabet_set.begin(), alphabet_set.end(), alphabet.begin());
+
+		//go back to beginning of input source
+		rewind();
+
+		//compute character remapping
+		for(ulint i=0;i<alphabet.size();i++){
+
+			symbol_to_int[alphabet[i]] = sigma;
 			sigma++;
 
 		}
 
 		assert(sigma<256);
 
+		//compute character frequencies
 		vector<ulint> freqs(sigma,0);
+		while(not eof())
+			freqs[ symbol_to_int[get()] ]++;
 
-		while(not fr.eof())
-			freqs[ symbol_to_int[fr.get()] ]++;
-
-		fr.rewind();
-
-		//start parsing
-
+		rewind();
 		number_of_phrases=0;
 
-		uint sample_rate=0;
-		if(store_parse)
-			sample_rate=64;
+		//init the dynamic BWT
+		uint sample_rate=64;
 
-		dynamic_bwt_t dbwt(freqs, sample_rate);
+		dbwt = dynamic_bwt_t(freqs, sample_rate);
+		interval = pair<ulint, ulint>(0,dbwt.size());//current interval
 
-		pair<ulint, ulint> interval(0,dbwt.size());
+		current_phrase=string();
 
-		if(verbose) cout << "Parsing input file ... " << endl<<endl;
+	}
 
-		ulint i=0;//characters read
-		ulint n=fr.size();//file length
-		int last_perc=-1;
-		uint l =0;//current phrase length
+	token get_token(){
 
-		string current_phrase="";
+		number_of_phrases++;
 
-		while(not fr.eof()){
+		if(opt.block>0 and global_position%opt.block==0)
+			cout << global_position << "\t" << number_of_phrases << endl;//print number of phrases
 
-			//read next symbol from file
-			symbol s = fr.get();
+		if(end_of_parse()){
 
+			cout << "END" << endl;
+
+			if(not file_closed and opt.mode == file_path){
+				fr.close();
+				file_closed=true;
+			}
+
+			//if parse is terminated, return a terminator token
+			return {string()+char(TERMINATOR),0,false};
+
+		}
+
+		//if mode is v1, initial interval must be <0,n>
+		assert( opt.lz_variant==v2 or (interval.second==dbwt.size() and interval.first==0));
+
+		//if mode is v2 and interval is empty, then we have a phrase of 1 character
+
+		if(opt.lz_variant==v2 and interval.second<=interval.first){
+
+			assert(current_phrase.size()==1);
+
+			string current_phrase_copy(current_phrase);
+			current_phrase = string();
+			interval = pair<ulint, ulint>(0,dbwt.size());
+
+			return {current_phrase_copy, 0, false};
+
+		}
+
+		ulint low_interval=0;
+		symbol s;
+
+		//repeat until we do not have a match
+		while(interval.second>interval.first){
+
+			//read symbol from stream
+			s = get();
+
+			//if character is a separator, output number of phrases and skip all separators
 			if(opt.sep>0 and s==opt.sep){
 
-				while((s=fr.get())==opt.sep){}//skip all separators
-				cout << i << "\t" << number_of_phrases << endl;//print number of phrases
+				while((s=get())==opt.sep){}//skip all separators
+				cout << global_position << "\t" << number_of_phrases << endl;//print number of phrases
 
 			}
 
 			//store low part of the interval
-			ulint low_interval=interval.first;
+			low_interval=interval.first;
 			//extend search with the new character
 			interval = dbwt.BS( interval, symbol_to_int[s] );
-			//increment phrase length
-			l++;
 
-			//if interval is empty, then locate one occurrence in the previous interval
-			//if there are no matches
-			if(interval.second<=interval.first){
+			//if new interval is not empty, then s is part of the current phrase
+			if(interval.second>interval.first){
 
-				ulint occurrence = dbwt.locate_right(low_interval);
+				//extend with s
 
-				//a new phrase is created
-				number_of_phrases++;
-
-				if(l==1 or lz_variant==v1){
-
-					//if phrase is 1 character long, variants 1 and 2 are the same:
-					//extend BWT with the new character, reset interval and create new phrase
-					dbwt.extend( symbol_to_int[s] );
-					interval = pair<ulint, ulint>(0,dbwt.size());
-
-					//extend current phrase with the character
-					current_phrase += (char)s;
-
-					if(store_parse){
-
-						//create a new phrase composed by only one character.
-						//moreover, start position is not defined since this is
-						//the first occurrence of the character in the text
-						if(l==1)
-							parse.push_back( {current_phrase , occurrence, false} );
-						else{
-
-							//phrase has length > 1 AND variant is v1: new standard phrase
-							//low_interval is an occurrence of the prefix of this phrase, except last character
-							parse.push_back( {current_phrase , occurrence-(l-1), true} );
-
-						}
-
-					}
-
-					l=0;
-					current_phrase="";
-
-				}else{
-
-					//l>1 AND variant=v2. The mismatching character is part of the next phrase
-
-					//new token.
-					if(store_parse)
-						parse.push_back( {current_phrase,occurrence-(l-1), true} );
-
-					current_phrase=char(s);
-
-					//we search mismatching character
-					interval = dbwt.BS( pair<ulint, ulint>(0,dbwt.size()), symbol_to_int[s] );
-
-					if(interval.second<=interval.first){
-
-						//if character does not occur, then create new phrase with it and extend bwt
-
-						if(store_parse)
-							parse.push_back( {current_phrase,occurrence, false} );
-
-						dbwt.extend( symbol_to_int[s] );
-						interval = pair<ulint, ulint>(0,dbwt.size());//new interval
-						current_phrase="";
-						l=0;//length of new phrase is 0
-						number_of_phrases++;//we just created a phrase with only 1 character
-
-					}else{
-
-						//if character does occur, then extend bwt and remember that current phrase has length 1 (the character)
-
-						dbwt.extend( symbol_to_int[s] );
-						interval.second++;//increment upper bound because we inserted a new prefix that falls in this interval
-						l=1;
-
-					}
-
-				}
-
-
-
-			}else{
-
-				//we have at least one match: extend with s
 				current_phrase+=char(s);
 
+				//add s to the BWT
 				dbwt.extend( symbol_to_int[s] );
-				interval.second++;//increment upper bound because we inserted a new prefix that falls in this interval
+				//increment upper bound because we inserted a new prefix that falls in this interval
+				interval.second++;
 
 			}
 
-			i++;
+		}//while interval not empty
 
-			if(opt.block>0){
+		//at this point, extending with s caused the interval to become empty.
 
-				if(i%opt.block==0)
-					cout << i << "\t" << number_of_phrases << endl;
+		//phrase w=current_phrase occurs, but ws does not. the following is the location of an occurrence of w:
+		//if phrase is empty, no occurrence
+		ulint occurrence = 0;
+		if(current_phrase.size()>0)
+			occurrence = dbwt.locate_right(low_interval);
+
+		if(opt.lz_variant==v1){
+
+			//extend BWT with mismatching character
+			dbwt.extend( symbol_to_int[s] );
+			//reset interval
+			interval = pair<ulint, ulint>(0,dbwt.size());
+
+			//variant v1: ws is part of this phrase
+
+			//s is the first occurrence of that character
+			if(current_phrase.size()==0){
+
+				//return <'s', -, false> : no start position
+
+				return {string()+char(s), 0, false};
 
 			}
 
-			if(verbose){
+			//else: phrase contains at least 1 character
 
-				int perc = (i*100)/n;
+			string current_phrase_copy=string(current_phrase)+char(s);
 
-				if(perc>last_perc){
-					cout << perc << "% done." << endl;
-					last_perc=perc;
-				}
+			//reset current phrase
+			current_phrase=string();
+
+			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-2)-1, true};
+
+		}else if(opt.lz_variant==v2){
+
+			//variant v2: the phrase to be returned is only w
+			//and s is part of the next phrase
+
+			//s is the first occurrence of that character
+			if(current_phrase.size()==0){
+
+				//reset interval
+				interval = pair<ulint, ulint>(0,dbwt.size());
+
+				//extend the BWT
+				dbwt.extend( symbol_to_int[s] );
+
+				//return <'s', -, false> : no start position
+				return {string()+char(s), 0, false};
 
 			}
+
+			//else: phrase contains at least 1 character
+
+			//before to extend the BWT, we have to search the mismatching character
+			interval = dbwt.BS( pair<ulint, ulint>(0,dbwt.size()), symbol_to_int[s] );
+			dbwt.extend( symbol_to_int[s] );
+
+			if(interval.second>interval.first){
+				//increment upper bound because we inserted a new prefix that falls in this interval
+				interval.second++;
+				//else: interval is empty and phrase will be output at the next call of getToken
+			}
+
+			string current_phrase_copy(current_phrase);
+
+			//reset current phrase. s is part of the next phrase!
+			current_phrase=string()+char(s);
+
+			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-1)-1, true};
 
 		}
 
-		fr.close();
+		return{string(),0,false};
 
 	}
 
-	ulint getNumberOfPhrases(){return number_of_phrases;}
+	bool end_of_parse(){
+		return global_position==size();
+	}
+
+
+	//ulint getNumberOfPhrases(){return number_of_phrases;}
 
 	/*
 	 * output:
@@ -284,23 +328,113 @@ public:
 	 * - in lz77 version 2: a list of pairs <w, i>, where w is a word, c a character, and i an integer.
 	 *   meaning: word w in position i.
 	 */
-	vector<token> getParse(){
+	/*vector<token> getParse(){
 
 		return parse;
 
-	}
+	}*/
 
 private:
 
+	symbol get(){
+
+		assert(global_position<size());
+
+		if(opt.prepend_alphabet and alphabet_iterator<alphabet.size()){
+
+			global_position++;
+
+			return alphabet[alphabet_iterator++];
+
+		}
+
+		if(global_position==size()-1 ){
+
+			global_position++;
+
+			return TERMINATOR;//return terminator character
+
+		}
+
+		if(opt.mode==file_path){
+
+			global_position++;
+
+			symbol s = fr.get();
+
+			return s;
+
+		}
+
+		global_position++;
+		return input[position++];
+
+	}
+
+	bool eof(){
+
+		return global_position==size();
+
+	}
+
+	void rewind(){
+
+		alphabet_iterator=1;//start from 1 if terminator char is present
+		global_position=0;
+		position=0;
+
+		if(opt.mode==file_path){
+
+			fr.rewind();
+
+		}
+
+	}
+
+	/*
+	 * returns total size of the stream, inclulded prefix/suffix
+	 */
+	ulint size(){
+
+		ulint increment = 	(opt.prepend_alphabet?alphabet.size()-1:0) + 1;
+
+		if(opt.mode==file_path){
+
+			return fr.size()+increment;
+
+		}
+
+		return input.size()+increment;
+
+	}
+
+	dynamic_bwt_t dbwt;//the dynamic BWT
+	pair<ulint, ulint> interval;//current interval
+
+	symbol TERMINATOR=0;
+
 	//remapping of symbols:
 	vector<uint> symbol_to_int;
-
 	vector<token> parse;//LZ77 parse: vector of pairs <phrase, start position>
+	vector<symbol> alphabet;
+	uint alphabet_iterator=0;//iterator on the elements of the alphabet. used if alphabet is prepended to the text
+
+	//input modes:
+	FileReader fr;//from file
+	string input="";//from string
+	ulint global_position=0;//takes into account prefix/suffix added to the input stream
+	ulint position=0;//current position of character to be read in the string/file stream (does not account for prefix/suffix)
 
 	uint sigma=0;//alphabet size
 	ulint number_of_phrases=0;
+	string current_phrase=string();
 
-	bool store_parse;
+	int last_perc=-1;//for verbose output
+
+	options opt;
+
+	bool file_closed=false;//file has been closed
+
 
 };
 
