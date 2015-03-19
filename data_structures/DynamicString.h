@@ -34,7 +34,6 @@ namespace bwtil {
 
 //definition of the bitvector used
 //typedef DummyDynamicBitvector bitv;
-typedef bitvector_t<W_leafs> bitv;
 
 template <typename bitvector_type>
 class DynamicString {
