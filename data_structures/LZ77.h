@@ -240,7 +240,7 @@ public:
 		//phrase w=current_phrase occurs, but ws does not. the following is the location of an occurrence of w:
 		//if phrase is empty, no occurrence
 		ulint occurrence = 0;
-		if(current_phrase.size()>0)
+		if(current_phrase.size()>0 and opt.sample_rate>0)
 			occurrence = dbwt.locate_right(low_interval);
 
 		if(opt.lz_variant==v1){
@@ -267,6 +267,9 @@ public:
 
 			//reset current phrase
 			current_phrase=string();
+
+			if(opt.sample_rate==0)
+				return {current_phrase_copy, 0, false};
 
 			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-2)-1, true};
 
@@ -305,6 +308,9 @@ public:
 
 			//reset current phrase. s is part of the next phrase!
 			current_phrase=string()+char(s);
+
+			if(opt.sample_rate==0)
+				return {current_phrase_copy, 0, false};
 
 			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-1)-1, true};
 

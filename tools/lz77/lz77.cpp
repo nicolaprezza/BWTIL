@@ -35,7 +35,7 @@ void help(){
 	cout << "--v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. If W=empty, a new phrase 'c' is inserted in the dictionary, and the next phrase is initialized empty."<<endl;
 	cout << "--p arg : output the number of phrases every <arg> characters."<<endl;
 	cout << "--s arg : output the number of phrases each time a character equal to <arg> is encountered. Warning: <arg> characters are skipped and not taken into account in the LZ parse."<<endl;
-	cout << "--sample-rate arg : Sample rate to be used in the dynamic FM index. Default: 8."<<endl;
+	cout << "--sample-rate arg : Sample rate to be used in the dynamic FM index. If 0, don't perform sampling and do not print starting positions of phrases. Default: 8."<<endl;
 	cout << "--print-parse : [default:false] print the parse"<<endl;
 	cout << "--verbose : [default:false] show percentage of work done."<<endl;
 	cout << "--save-parse sep filename : saves the LZ factorization in file 'filename', separating each phrase using character 'sep'. " << endl;
@@ -84,8 +84,8 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		int sample_rate;
 		istringstream ( string(argv[ptr]) ) >> sample_rate;
 
-		if(sample_rate<=0){
-			cout << "error: sample_rate must be > 0" << endl;
+		if(sample_rate<0){
+			cout << "error: sample_rate must be >= 0" << endl;
 			help();
 		}
 
@@ -173,8 +173,8 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	}
 
-	opt.mode = lz77_t::file_path;
-	opt.prepend_alphabet = false;
+	opt.mode = lz77_t::file_path;//input string is a file path rather than a text to parse
+	opt.prepend_alphabet = false;//don't add the alphabet as prefix
 
 	lz77_t lz77(opt,string(argv[ptr]));
 
