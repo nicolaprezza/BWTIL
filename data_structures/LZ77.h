@@ -75,6 +75,7 @@ public:
 		ulint block=0;//output number of phrases every block characters. If 0, don't print anything.
 		symbol sep=0;//separator: output number of phrases each time sep is seen in the stream. These characters are ignored in phrase computation. If 0, there are no separators.
 		bool prepend_alphabet=false;//add a prefix 'a_1a_2...a_k' to the text, where {a_1, ..., a_k} is the alphabet
+		uint sample_rate=8;//store one SA pointer every sample_rate text positions
 
 	};
 
@@ -89,13 +90,12 @@ public:
 
 		this->opt = opt;
 		this->input = input;
-		bool verbose = opt.verbose;
 		alphabet_iterator=1;//start from 1 since terminator char is present
 
 		symbol_to_int = vector<uint>(256);
 		sigma=0;
 
-		if(verbose) cout << "Scanning input to compute character frequencies ... " << endl<<endl;
+		if(opt.verbose) cout << "Scanning input to detect alphabet ... " << endl;
 
 		//if input string is a file path, then open file
 		if(opt.mode==file_path)
@@ -140,6 +140,8 @@ public:
 
 		assert(sigma<256);
 
+		if(opt.verbose) cout << "Scanning input to compute character frequencies ... " << endl;
+
 		//compute character frequencies
 		vector<ulint> freqs(sigma,0);
 		while(not eof())
@@ -148,13 +150,12 @@ public:
 		rewind();
 		number_of_phrases=0;
 
-		//init the dynamic BWT
-		uint sample_rate=64;
-
-		dbwt = dynamic_bwt_t(freqs, sample_rate);
+		dbwt = dynamic_bwt_t(freqs, opt.sample_rate);
 		interval = pair<ulint, ulint>(0,dbwt.size());//current interval
 
 		current_phrase=string();
+
+		if(opt.verbose) cout << "Now parsing ... " << endl;
 
 	}
 
@@ -340,6 +341,18 @@ private:
 
 		assert(global_position<size());
 
+		if(opt.verbose){
+
+			int perc=(global_position*100)/size();
+			if(perc>=last_perc+5){
+
+				cout << perc << " % done ... " << endl;
+				last_perc=perc;
+
+			}
+
+		}
+
 		if(opt.prepend_alphabet and alphabet_iterator<alphabet.size()){
 
 			global_position++;
@@ -379,6 +392,7 @@ private:
 
 	void rewind(){
 
+		last_perc=-1;
 		alphabet_iterator=1;//start from 1 if terminator char is present
 		global_position=0;
 		position=0;
