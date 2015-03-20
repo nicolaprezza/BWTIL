@@ -16,8 +16,15 @@
 
 #include "../../data_structures/LZ77.h"
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 using namespace bwtil;
+
+bool print_parse=false;
+bool save_parse=false;
+string out_filename;
+char sep_out;
 
 void help(){
 	cout << "*** Count number of phrases in the LZ77 parse of the file ***\n";
@@ -30,10 +37,11 @@ void help(){
 	cout << "--s arg : output the number of phrases each time a character equal to <arg> is encountered. Warning: <arg> characters are skipped and not taken into account in the LZ parse."<<endl;
 	cout << "--print-parse : [default:false] print the parse"<<endl;
 	cout << "--verbose : [default:false] show percentage of work done."<<endl;
+	cout << "--save-parse sep filename : saves the LZ factorization in file 'filename', separating each phrase using character 'sep'. " << endl;
 	exit(0);
 }
 
-lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** argv, int argc){
+lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	string s(argv[ptr]);
 	ptr++;
@@ -90,6 +98,27 @@ lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** 
 
 		print_parse=true;
 
+	}else if(s.compare("--save-parse")==0){
+
+		save_parse=true;
+
+		if(ptr>=argc){
+			cout<<"Missing separator and output file name in option --save-parse" << endl;
+			help();
+		}
+
+		string sep(argv[ptr]);
+		sep_out=sep[0];
+		ptr++;
+
+		if(ptr>=argc){
+			cout<<"Missing output file name in option --save-parse" << endl;
+			help();
+		}
+
+		out_filename = string(argv[ptr]);
+		ptr++;
+
 	}else{
 
 		cout << "Unrecognized option " << s<< endl << endl;
@@ -111,11 +140,10 @@ lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** 
 	lz77_t::options opt;
 
 	int ptr = 1;
-	bool print_parse=false;
 
 	//parse arguments. Last arg is path
 	while(ptr<argc-1)
-		opt = parse(opt,print_parse, ptr,argv, argc);
+		opt = parse(opt, ptr,argv, argc);
 
 	//if args are correct, now ptr = argc-1 = path
 	if(ptr!=argc-1){
@@ -130,13 +158,16 @@ lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** 
 
 	lz77_t lz77(opt,string(argv[ptr]));
 
+	ofstream out_file;
+	if(save_parse)
+		out_file.open (out_filename.c_str());
+
 	ulint number_of_phrases=0;
+	while(not lz77.end_of_parse()){
 
-	if(print_parse){
+		auto token = lz77.get_token();
 
-		while(not lz77.end_of_parse()){
-
-			auto token = lz77.get_token();
+		if(print_parse){
 
 			cout << "<";
 
@@ -147,18 +178,20 @@ lz77_t::options parse(lz77_t::options &opt, bool &print_parse, int &ptr, char** 
 
 			cout << ", " << token.phrase << ">" << endl;
 
-			number_of_phrases++;
+		}
+
+		if(save_parse){
+
+			out_file << token.phrase << sep_out;
 
 		}
 
-	}else{
-
-		while(not lz77.end_of_parse()){
-			lz77.get_token();
-			number_of_phrases++;
-		}
+		number_of_phrases++;
 
 	}
+
+	if(save_parse)
+		out_file.close();
 
 	cout << "number of phrases: " << number_of_phrases << endl;
 

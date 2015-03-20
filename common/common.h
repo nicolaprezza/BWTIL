@@ -43,8 +43,8 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <fstream>
-#include "../extern/bitvector/include/bitvector.h"
-#include "../extern/bitvector/include/packed_view.h"
+#include "bitvector.h"
+#include "packed_view.h"
 #include <assert.h>
 
 using namespace std;
