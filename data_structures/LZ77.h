@@ -59,8 +59,8 @@ public:
 	struct token{
 
 		string phrase;
-		ulint starting_position;
-		//phrases composed only by the first occurrence of a character in the text do not have a defined starting position
+		ulint start_position;
+		//phrases composed only by the first occurrence of a character in the text do not have a defined start position
 		bool start_position_is_defined;
 
 	};
