@@ -198,7 +198,7 @@ public:
 		}
 
 		ulint low_interval=0;
-		symbol s;
+		symbol s=0;
 
 		//repeat until we do not have a match
 		while(interval.second>interval.first){
