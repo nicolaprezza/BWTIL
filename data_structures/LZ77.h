@@ -324,6 +324,22 @@ public:
 		return global_position==size();
 	}
 
+	/*
+	 * returns total size of the stream, inclulded prefix/suffix
+	 */
+	ulint size(){
+
+		ulint increment = 	(opt.prepend_alphabet?alphabet.size()-1:0) + 1;
+
+		if(opt.mode==file_path){
+
+			return fr.size()+increment;
+
+		}
+
+		return input.size()+increment;
+
+	}
 
 	//ulint getNumberOfPhrases(){return number_of_phrases;}
 
@@ -408,23 +424,6 @@ private:
 			fr.rewind();
 
 		}
-
-	}
-
-	/*
-	 * returns total size of the stream, inclulded prefix/suffix
-	 */
-	ulint size(){
-
-		ulint increment = 	(opt.prepend_alphabet?alphabet.size()-1:0) + 1;
-
-		if(opt.mode==file_path){
-
-			return fr.size()+increment;
-
-		}
-
-		return input.size()+increment;
 
 	}
 
