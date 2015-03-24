@@ -192,7 +192,7 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 			cout << "<";
 
 			if(token.start_position_is_defined)
-				cout << token.starting_position;
+				cout << token.start_position;
 			else
 				cout << "-";
 
