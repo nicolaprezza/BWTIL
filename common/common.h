@@ -66,7 +66,7 @@ typedef unsigned char uint8;
 typedef packed_view<vector> packed_view_t;
 typedef bitview<vector> bitview_t;
 
-constexpr uint W_leafs = 2048;//packed B-trees parameters
+constexpr uint W_leafs = 4096;//packed B-trees parameters
 constexpr uint W_nodes = 256;
 
 typedef bitvector_t<W_leafs> bitv;

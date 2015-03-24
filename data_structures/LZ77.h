@@ -32,6 +32,7 @@
 
 #include "../common/common.h"
 #include "DynamicBWT.h"
+#include "dynamic_vector.h"
 #include "FileReader.h"
 
 
@@ -41,6 +42,8 @@ template <typename bitvector_type>
 class LZ77 {
 
 public:
+
+	typedef DynamicBWT<bitvector_type, dynamic_vector<bitvector_type> > dynamic_bwt_type;
 
 	LZ77(){}
 
@@ -150,7 +153,7 @@ public:
 		rewind();
 		number_of_phrases=0;
 
-		dbwt = dynamic_bwt_t(freqs, opt.sample_rate);
+		dbwt = dynamic_bwt_type(freqs, opt.sample_rate);
 		interval = pair<ulint, ulint>(0,dbwt.size());//current interval
 
 		current_phrase=string();
@@ -427,7 +430,9 @@ private:
 
 	}
 
-	dynamic_bwt_t dbwt;//the dynamic BWT
+	dynamic_bwt_type dbwt;
+
+	//dynamic_bwt_t dbwt;//the dynamic BWT
 	pair<ulint, ulint> interval;//current interval
 
 	symbol TERMINATOR=0;
@@ -457,7 +462,8 @@ private:
 
 };
 
-typedef LZ77<bitv> lz77_t;
+//typedef LZ77<bitv> lz77_t;
+typedef LZ77<bitvector_t<W_leafs,bv::alloc_immediatly> > lz77_t;
 
 } /* namespace data_structures */
 #endif /* LZ77_H_ */
