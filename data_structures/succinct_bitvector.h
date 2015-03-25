@@ -97,7 +97,7 @@ public:
 	 * argument: position i in the bitvector, boolean b
 	 * returns: number of bits equal to b before position i excluded
 	 */
-	ulint rank(ulint i, bool b){
+	ulint rank(ulint i, bool b=true){
 
 		assert(i<=length());
 
