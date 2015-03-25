@@ -365,7 +365,7 @@ public:
 	 */
 	string get_text(){
 
-		string text();
+		string text;
 
 		rewind();
 
