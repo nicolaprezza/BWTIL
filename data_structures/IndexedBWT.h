@@ -45,12 +45,12 @@ public:
 	/*
 	 * constructor: takes as input BWT where terminator character is 0 and builds structures.
 	 */
-	IndexedBWT(string &BWT, ulint offrate, bool verbose){
+	IndexedBWT(string &BWT, ulint sample_rate, bool verbose=false){
 
 		this->n=BWT.length();
-		this->offrate=offrate;
+		this->offrate=sample_rate;
 
-		number_of_SA_pointers = (offrate==0?0:n/offrate + 1);
+		number_of_SA_pointers = (sample_rate==0?0:n/sample_rate + 1);
 
 		if(verbose) cout << " Building indexed BWT data structure" << endl;
 		if(verbose) cout << "  Number of sampled SA pointers = " << number_of_SA_pointers << endl;
@@ -150,7 +150,7 @@ public:
 
 		BWT.at(terminator_position) = 0;
 
-		if(offrate>0){
+		if(sample_rate>0){
 			if(verbose) cout << "\n  Marking positions containing a SA pointer ... ";
 
 			vector<bool> mark_pos = markPositions(verbose);

@@ -360,6 +360,29 @@ public:
 
 	}
 
+	/* get the parsed text WITHOUT terminator appended at the end.
+	 *
+	 */
+	string get_text(){
+
+		string text();
+
+		rewind();
+
+		while(not eof()){
+
+			uchar s = get();
+			if(s!=TERMINATOR)
+				text += s;
+
+		}
+
+		rewind();
+
+		return text;
+
+	}
+
 	//ulint getNumberOfPhrases(){return number_of_phrases;}
 
 	/*
