@@ -462,8 +462,8 @@ private:
 
 };
 
-//typedef LZ77<bitv> lz77_t;
-typedef LZ77<bitvector_t<W_leafs,bv::alloc_immediatly> > lz77_t;
+typedef LZ77<bitv> lz77_t;
+//typedef LZ77<bitvector_t<W_leafs,bv::alloc_immediatly> > lz77_t;
 
 } /* namespace data_structures */
 #endif /* LZ77_H_ */
