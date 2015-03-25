@@ -369,6 +369,10 @@ public:
 
 		rewind();
 
+		//temporary disable verbose, if enabled.
+		bool verbose = opt.verbose;
+		opt.verbose = false;
+
 		while(not eof()){
 
 			uchar s = get();
@@ -378,6 +382,8 @@ public:
 		}
 
 		rewind();
+
+		opt.verbose = verbose;
 
 		return text;
 
