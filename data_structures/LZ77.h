@@ -107,31 +107,44 @@ public:
 		//create alphabet
 		set<symbol> alphabet_set;
 
-		bool prepend_alphabet_temp =  opt.prepend_alphabet;
-		opt.prepend_alphabet = false;//disable temporary to permit calling get() before alphabet is created
+		if(opt.mode==file_path){
 
-		while(not eof()){
-			symbol s=get();
-			alphabet_set.insert(s);
+			while(not fr.eof()){
+				symbol s = fr.get();
+				if(s==TERMINATOR){
 
-			if(s==TERMINATOR and (not eof())){
+					cout << "Error: input text contains a 0x0 character, which is reserved."<<endl;
+					exit(1);
 
-				cout << "Error: input text contains a 0x0 character, which is reserved."<<endl;
-				exit(1);
+				}
+				alphabet_set.insert(s);
+			}
+
+			fr.rewind();
+
+		}else{
+
+			for(ulint i=0;i<input.size();++i){
+
+				symbol s = input[i];
+				if(s==TERMINATOR){
+
+					cout << "Error: input text contains a 0x0 character, which is reserved."<<endl;
+					exit(1);
+
+				}
+				alphabet_set.insert(s);
 
 			}
+
 		}
 
-		opt.prepend_alphabet = prepend_alphabet_temp;
-
-		//alphabet_set.insert(TERMINATOR);
+		//insert terminator in alphabet
+		alphabet_set.insert(TERMINATOR);
 
 		alphabet = vector<symbol>(alphabet_set.size());
 
 		std::copy(alphabet_set.begin(), alphabet_set.end(), alphabet.begin());
-
-		//go back to beginning of input source
-		rewind();
 
 		//compute character remapping
 		for(ulint i=0;i<alphabet.size();i++){
@@ -324,6 +337,7 @@ public:
 	}
 
 	bool end_of_parse(){
+		assert(global_position<=size());
 		return global_position==size();
 	}
 
@@ -332,6 +346,8 @@ public:
 	 */
 	ulint size(){
 
+		//if alphabet is added as prefix: size is alphabet size - 1 (i.e. without terminator) plus 1 (the terminator at the end) plus the string length
+		//else: size is string length plus 1 (the terminator at the end)
 		ulint increment = 	(opt.prepend_alphabet?alphabet.size()-1:0) + 1;
 
 		if(opt.mode==file_path){
@@ -411,6 +427,7 @@ private:
 
 	bool eof(){
 
+		assert(global_position<=size());
 		return global_position==size();
 
 	}
