@@ -50,6 +50,8 @@
 using namespace std;
 using namespace bv;
 
+namespace bwtil{
+
 #define VERBOSE_CHANNEL std::cout
 #define ERROR_CHANNEL std::cerr
 
@@ -70,6 +72,8 @@ constexpr uint W_leafs = 4096;//packed B-trees parameters
 constexpr uint W_nodes = 256;
 
 typedef bitvector_t<W_leafs> bitv;
+
+enum input_mode {file_path,text};//input is a file path or a text string?
 
 enum hash_type {DNA_SEARCH,BS_SEARCH,QUALITY_DNA_SEARCH,QUALITY_BS_SEARCH,DEFAULT};
 
@@ -260,4 +264,5 @@ inline packed_view_t load_packed_view_from_file(size_t width, size_t size, FILE 
 
 }
 
+}
 #endif /* COMMON_H_ */

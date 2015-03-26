@@ -68,8 +68,6 @@ public:
 
 	};
 
-	enum input_mode {file_path,text};//input is a file path or a text string?
-
 	struct options{
 
 		input_mode mode=text;
