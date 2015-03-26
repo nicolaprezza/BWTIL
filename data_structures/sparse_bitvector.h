@@ -37,7 +37,7 @@ namespace bwtil {
 /*
  * the user can specify the type used in the underlying vector (this can be useful to save space if the maximum bitvector length is known beforehand)
  */
-template<typename int_type = ulint> class sparse_bitvector{
+template<typename word_type = ulint> class sparse_bitvector{
 
 public:
 
@@ -118,10 +118,56 @@ public:
 
 	}
 
+	/* serialize the structure to the ostream
+	 * \param out	 the ostream
+	 */
+	ulint serialize(std::ostream& out){
+
+		ulint w_bytes = 0;
+
+		uint8_t word_s = sizeof(word_type);
+		word_type ones_length = ones.size();
+
+		out.write((char *)&word_s, sizeof(uint8_t));
+		out.write((char *)&ones_length, word_s);
+		out.write((char *)&length, sizeof(ulint));
+
+		w_bytes += sizeof(uint8_t)+word_s+sizeof(ulint);
+
+		out.write((char *)ones.data(), ones_length*word_s);
+		w_bytes += ones_length*word_s;
+
+		return w_bytes;
+
+	}
+
+	/* load the structure from the istream
+	 * \param in the istream
+	 */
+	void load(std::istream& in) {
+
+		uint8_t word_s;
+		word_type ones_length;
+
+		in.read((char *)&word_s, sizeof(uint8_t));
+
+		assert(word_s==sizeof(word_type) and "Error: mismatching word lengths while loading sparse bitvector.");
+
+		in.read((char *)&ones_length, word_s);
+		in.read((char *)&length, sizeof(ulint));
+
+		ones = vector<word_type>(ones_length);
+
+		in.read((char *)ones.data(), ones_length*word_s);
+
+	}
+
+
+
 private:
 
 	ulint length=0;			//length of the bitvector
-	vector<int_type> ones;	//position of each one
+	vector<word_type> ones;	//position of each one
 
 };
 
