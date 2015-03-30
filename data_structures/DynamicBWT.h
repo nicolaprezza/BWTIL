@@ -95,6 +95,8 @@ public:
 	//extend an interval with a symbol. Return new interval
 	pair<ulint, ulint> BS(pair <ulint,ulint> interval, symbol s){
 
+		assert(interval.first <= size() and interval.second <= size());
+
 		interval.first = F[s] + rank(s,interval.first);
 		interval.second = F[s] + rank(s,interval.second);
 

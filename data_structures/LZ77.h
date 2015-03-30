@@ -21,6 +21,8 @@
 // Description : In this version, just count the number of LZ77 phrases of a text.
 
 /*
+ * This class is obsolete. Use lz77_parser instead.
+ *
  * Counts number of phrases of the LZ77 parse. Uses a dynamic compressed BWT.
  * zero-order compressed space, n log n time.
  *
@@ -76,7 +78,6 @@ public:
 		ulint block=0;//output number of phrases every block characters. If 0, don't print anything.
 		symbol sep=0;//separator: output number of phrases each time sep is seen in the stream. These characters are ignored in phrase computation. If 0, there are no separators.
 		bool prepend_alphabet=false;//add a prefix 'a_1a_2...a_k' to the text, where {a_1, ..., a_k} is the alphabet
-		uint sample_rate=8;//store one SA pointer every sample_rate text positions
 
 	};
 
@@ -164,7 +165,7 @@ public:
 		rewind();
 		number_of_phrases=0;
 
-		dbwt = dynamic_bwt_type(freqs, opt.sample_rate);
+		dbwt = dynamic_bwt_type(freqs, 0);
 		interval = pair<ulint, ulint>(0,dbwt.size());//current interval
 
 		current_phrase=string();
@@ -254,8 +255,6 @@ public:
 		//phrase w=current_phrase occurs, but ws does not. the following is the location of an occurrence of w:
 		//if phrase is empty, no occurrence
 		ulint occurrence = 0;
-		if(current_phrase.size()>0 and opt.sample_rate>0)
-			occurrence = dbwt.locate_right(low_interval);
 
 		if(opt.lz_variant==v1){
 
@@ -282,10 +281,7 @@ public:
 			//reset current phrase
 			current_phrase=string();
 
-			if(opt.sample_rate==0)
-				return {current_phrase_copy, 0, false};
-
-			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-2)-1, true};
+			return {current_phrase_copy, 0, false};
 
 		}else if(opt.lz_variant==v2){
 
@@ -323,10 +319,7 @@ public:
 			//reset current phrase. s is part of the next phrase!
 			current_phrase=string()+char(s);
 
-			if(opt.sample_rate==0)
-				return {current_phrase_copy, 0, false};
-
-			return {current_phrase_copy, occurrence-(current_phrase_copy.size()-1)-1, true};
+			return {current_phrase_copy, 0, false};
 
 		}
 

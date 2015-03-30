@@ -15,6 +15,7 @@
  */
 
 #include "../../data_structures/LZ77.h"
+#include "../../data_structures/lz77_parser.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -35,10 +36,7 @@ void help(){
 	cout << "--v2 : LZ77 variant 2: when extending the current phrase W with a character c, if Wc does not occur previously, a new phrase W is inserted in the dictionary, and c is part of the next phrase. If W=empty, a new phrase 'c' is inserted in the dictionary, and the next phrase is initialized empty."<<endl;
 	cout << "--p arg : output the number of phrases every <arg> characters."<<endl;
 	cout << "--s arg : output the number of phrases each time a character equal to <arg> is encountered. Warning: <arg> characters are skipped and not taken into account in the LZ parse."<<endl;
-	cout << "--sample-rate arg : Sample rate to be used in the dynamic FM index. If 0, don't perform sampling and do not print starting positions of phrases. Default: 8."<<endl;
-	cout << "--print-parse : [default:false] print the parse"<<endl;
 	cout << "--verbose : [default:false] show percentage of work done."<<endl;
-	cout << "--save-parse sep filename : saves the LZ factorization in file 'filename', separating each phrase using character 'sep'. " << endl;
 	exit(0);
 }
 
@@ -74,25 +72,6 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 		ptr++;
 
-	}else if(s.compare("--sample-rate")==0){
-
-		if(ptr>=argc){
-			cout<<"Missing block size in option --sample-rate" << endl;
-			help();
-		}
-
-		int sample_rate;
-		istringstream ( string(argv[ptr]) ) >> sample_rate;
-
-		if(sample_rate<0){
-			cout << "error: sample_rate must be >= 0" << endl;
-			help();
-		}
-
-		opt.sample_rate=sample_rate;
-
-		ptr++;
-
 	}else if(s.compare("--verbose")==0){
 
 		opt.verbose = true;
@@ -114,31 +93,6 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		opt.sep = sep.at(0);
 		ptr++;
 
-	}else if(s.compare("--print-parse")==0){
-
-		print_parse=true;
-
-	}else if(s.compare("--save-parse")==0){
-
-		save_parse=true;
-
-		if(ptr>=argc){
-			cout<<"Missing separator and output file name in option --save-parse" << endl;
-			help();
-		}
-
-		string sep(argv[ptr]);
-		sep_out=sep[0];
-		ptr++;
-
-		if(ptr>=argc){
-			cout<<"Missing output file name in option --save-parse" << endl;
-			help();
-		}
-
-		out_filename = string(argv[ptr]);
-		ptr++;
-
 	}else{
 
 		cout << "Unrecognized option " << s<< endl << endl;
@@ -149,6 +103,32 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 }
 
  int main(int argc,char** argv) {
+
+/*	{
+
+		string s = "ACGCGCAGGTACGAAC";
+		set<pair<uchar,ulint> > aaf;
+
+		{
+			std::istringstream istr (s);
+			aaf = lz77_parser<>::get_alphabet_and_frequencies(istr);
+		}
+
+		std::istringstream istr (s);
+		lz77_parser<> parser = lz77_parser<>(istr, aaf, 8, true);
+
+		while(not parser.eof()){
+
+			auto t = parser.get_token();
+			cout << "<" << t.phrase << ", " << t.start_position << ", " << t.start_position_is_defined << "> ";
+
+		}
+
+		cout << endl;
+
+		exit(0);
+
+	}*/
 
 #ifdef DEBUG
 	 cout << "\n ****** DEBUG MODE ******\n\n";
@@ -173,45 +153,20 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 	}
 
-	opt.mode = lz77_t::file_path;//input string is a file path rather than a text to parse
+	opt.mode = file_path;//input string is a file path rather than a text to parse
 	opt.prepend_alphabet = false;//don't add the alphabet as prefix
 
 	lz77_t lz77(opt,string(argv[ptr]));
 
 	ofstream out_file;
-	if(save_parse)
-		out_file.open (out_filename.c_str());
 
 	ulint number_of_phrases=0;
 	while(not lz77.end_of_parse()){
 
-		auto token = lz77.get_token();
-
-		if(print_parse){
-
-			cout << "<";
-
-			if(token.start_position_is_defined)
-				cout << token.start_position;
-			else
-				cout << "-";
-
-			cout << ", " << token.phrase << ">" << endl;
-
-		}
-
-		if(save_parse){
-
-			out_file << token.phrase << sep_out;
-
-		}
-
+		lz77.get_token();
 		number_of_phrases++;
 
 	}
-
-	if(save_parse)
-		out_file.close();
 
 	cout << "number of phrases: " << number_of_phrases << endl;
 
