@@ -18,7 +18,7 @@
 // Name        : DynamicBWT.h
 // Author      : Nicola Prezza
 // Version     : 1.0
-// Description : Dynamic (only append) compressed BWT. Note: at the moment, the class does not support locate (only count).
+// Description : Dynamic (only append) compressed BWT.
 
 /*
  * Zero-order Huffman-compressed dynamic BWT. Initialized using absolute symbol frequencies (you need to know final text size and symbol frequencies).
@@ -141,7 +141,7 @@ public:
 	}
 
 	//update BWT by left-extending text with character s
-	void extend(symbol s){
+	ulint extend(symbol s){
 
 		//insert in position terminator_pos character s
 		ds.insert(s,terminator_pos);
@@ -170,6 +170,8 @@ public:
 		}
 
 		current_size++;
+
+		return terminator_pos;
 
 	}
 

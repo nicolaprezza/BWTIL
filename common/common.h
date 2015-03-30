@@ -35,6 +35,7 @@
 #include <climits>
 #include <cstdlib>
 #include <iostream>
+#include <istream>
 #include <sys/stat.h>
 #include <set>
 #include "stdint.h"
