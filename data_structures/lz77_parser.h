@@ -76,6 +76,7 @@ public:
 	lz77_parser(std::istream & input, set<pair<uchar,ulint> > alphabet_and_frequencies, ulint sample_rate = 8, bool verbose = false){
 
 		this->input = &input;
+		this->verbose = verbose;
 
 		//compute input length
 		n = 0;
@@ -103,12 +104,27 @@ public:
 
 		dbwt = dynamic_bwt_type(freqs, sample_rate);
 
+		if(verbose)
+			cout << "Parsing input (LZ77) ..." << endl;
+
 	}
 
 	token get_token(){
 
 		assert(input!=0);
 		assert(position<=n);
+
+		if(verbose){
+
+			int perc = ((position*100)/n);
+			if(perc>=last_perc+5){
+
+				cout << perc << "% done ..." << endl;
+				last_perc = perc;
+
+			}
+
+		}
 
 		//if eof reached, return empty token
 		if(position==n)
@@ -331,9 +347,9 @@ private:
 
 	char mismatching_character=0;//first character after previous read phrase
 
+	bool verbose=false;
 
-
-	int last_perc=-1;//for verbose output
+	int last_perc=0;//for verbose output
 
 };
 

@@ -106,7 +106,7 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 
 /*	{
 
-		string s = "ACGCGCAGGTACGAAC";
+		string s = "ACGCTAGCTAGCACACACAACGACGTT";
 		set<pair<uchar,ulint> > aaf;
 
 		{
@@ -120,7 +120,7 @@ lz77_t::options parse(lz77_t::options &opt, int &ptr, char** argv, int argc){
 		while(not parser.eof()){
 
 			auto t = parser.get_token();
-			cout << "<" << t.phrase << ", " << t.start_position << ", " << t.start_position_is_defined << "> ";
+			//cout << "<" << t.phrase << ", " << t.start_position << ", " << t.start_position_is_defined << "> ";
 
 		}
 
