@@ -5,6 +5,9 @@
  *          http://creativecommons.org/licenses/by/3.0/deed.en_US
  */
 
+#ifndef GETRSS_H_
+#define GETRSS_H_
+
 #if defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
@@ -143,3 +146,4 @@ inline void printRSSstat(ulint size){
 
 }
 
+#endif
