@@ -146,4 +146,19 @@ inline void printRSSstat(ulint size){
 
 }
 
+string getFormattedSpaceUsage(ulint bytes){
+
+	stringstream ss;
+
+	if(bytes/((ulint)1<<30) > 0)
+		ss << (double)bytes/((ulint)1<<30) << " GB";
+	else if (bytes/((ulint)1<<20) > 0)
+		ss << (double)bytes/((ulint)1<<20) << " MB";
+	else if (bytes/((ulint)1<<10) > 0)
+		ss << (double)bytes/((ulint)1<<10) << " KB";
+
+	return ss.str();
+
+}
+
 #endif
