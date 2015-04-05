@@ -5,13 +5,13 @@ mail: nicolapr@gmail.com
 
 ### Brief introduction
 
-The BWTIL library offers a set of tools, classes and functions designed to facilitate operations that involve manipulating the Burrows-Wheeler text transform (example: computing/inverting the BWT or checking its correctness) and indexes based on the BWT. The library is specifically designed to deal with large files (which means up to 2^64 characters) and implements efficient algorithms and data structures to offer good time-and-space performances. BWTIL comes with some sample programs and classes, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, the dB-hash data structure (paper published in proceedings ISAAC2014), a succinct wavelet-tree based FM index, and a novel BWT construction algorithm (paper accepted in LATA2015). The available executables (to date) are:
+The BWTIL library offers a set of tools, classes and functions designed to facilitate operations that involve manipulating the Burrows-Wheeler text transform (example: computing/inverting the BWT or checking its correctness) and indexes based on the BWT. The library is specifically designed to deal with large files (which means up to 2^64 characters) and implements efficient algorithms and data structures to offer good time-and-space performances. BWTIL comes with some sample programs and classes, among which you can find static and dynamic bitvectors, Huffman-compressed dynamic strings, partial sums, Huffman trees, static wavelet trees, the dB-hash data structure (ISAAC2014 paper: http://link.springer.com/chapter/10.1007%2F978-3-319-13075-0_13), a succinct wavelet-tree based FM index, and a novel BWT construction algorithm (LATA2015 paper: http://link.springer.com/chapter/10.1007/978-3-319-15579-1_46). The available executables (to date) are:
 
- * **dB-hash** (paper accepted in ISAAC2014!): an implementation of the dB-hash data structure (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/dB-hash)
+ * **dB-hash** : an implementation of the dB-hash data structure (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/dB-hash)
  
  * **sFM-index** : an implementation of a succinct (uncompressed) FM-index (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/sFM-index)
 
- * **cw-bwt** (paper accepted in LATA2015!) : a novel context-wise bwt construction algorithm (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/cw-bwt)
+ * **cw-bwt** : a novel context-wise bwt construction algorithm (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/cw-bwt)
  
  * **bwt-check** : check consistency of a BWT file (see https://github.com/nicolaprezza/BWTIL/tree/master/tools/bwt-check)
  
