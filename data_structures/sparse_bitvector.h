@@ -50,7 +50,7 @@ public:
 	 * argument: a vector of booleans b
 	 * behavior: create sparse bitvector with content of bb
 	 */
-	void sparse_bitvector(vector<bool> b){
+	sparse_bitvector(vector<bool> b){
 
 		for(auto bb : b)
 			push_back(bb);
