@@ -47,6 +47,17 @@ public:
 	sparse_bitvector(){}
 
 	/*
+	 * argument: a vector of booleans b
+	 * behavior: create sparse bitvector with content of bb
+	 */
+	void sparse_bitvector(vector<bool> b){
+
+		for(auto bb : b)
+			push_back(bb);
+
+	}
+
+	/*
 	 * argument: a boolean b
 	 * behavior: append b at the end of the bitvector.
 	 */
