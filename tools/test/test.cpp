@@ -24,37 +24,13 @@
 #include "../../data_structures/sparse_bitvector.h"
 #include "../../data_structures/dynamic_vector.h"
 #include "../../data_structures/DynamicBWT.h"
+#include "../../data_structures/cgap_dictionary.h"
 
 
 using namespace bwtil;
 using namespace bv;
 
-void bug1(){
 
-	srand(time(NULL));
-	bool rand_bit;
-	ulint rand_pos;
-
-	ulint N=4033;
-
-	for(uint j=0;j<10000;j++){
-
-		bitvector_t<2048, alloc_on_demand> bv_Btree(N,256);
-
-		for(ulint i=0;i<N;i++){
-
-			rand_bit = rand()%2;
-			rand_pos = rand()%(i+1);
-
-			bv_Btree.insert(rand_pos,rand_bit);
-
-		}
-
-		cout << "done."<< endl;
-
-	}
-
-}
 
 void test1(){
 
@@ -233,36 +209,24 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
-	 vector<ulint> f;
-	 f.push_back(4);
-	 f.push_back(1);
-	 f.push_back(2);
-	 f.push_back(4);
 
-	 dynamic_bwt_t bwt(f,64);
+	 vector<pair<ulint,ulint> > gaps;
 
-	 bwt.extend(0);
-	 bwt.extend(2);
-	 bwt.extend(2);
-	 bwt.extend(0);
-	 bwt.extend(3);
-	 bwt.extend(3);
-	 bwt.extend(0);
-	 bwt.extend(3);
-	 bwt.extend(3);
-	 bwt.extend(0);
-	 bwt.extend(1);
+	 gaps.push_back({9,1});
+	 gaps.push_back({2,1});
+	 gaps.push_back({5,7});
+	 gaps.push_back({7,7});
+	 gaps.push_back({13,5});
+	 gaps.push_back({11,7});
+	 gaps.push_back({18,6});
+	 gaps.push_back({4,9});
+	 gaps.push_back({19,6});
 
-	 for(uint i=0;i<bwt.size();i++)
-		 cout << remap(bwt[i]);
+	 cgap_dictionary D(gaps);
 
-	 cout << endl;
+	 auto p = D.decode({0,1,0});
 
-	 for(uint i=0;i<bwt.size();i++)
-		cout << bwt.locate_right(i) << " ";
-
-	 cout << endl;
-
+	 cout << p.first << " len = " << p.second<<endl;
 
  }
 

@@ -152,7 +152,7 @@ public:
 
 		unary_string = false;
 
-		HuffmanTree ht = HuffmanTree(freq);
+		HuffmanTree<> ht = HuffmanTree<>(freq);
 		codes = ht.getCodes();
 
 		H0 = ht.entropy();

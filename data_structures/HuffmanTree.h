@@ -28,6 +28,7 @@
 
 namespace bwtil {
 
+template<typename T = symbol>
 class HuffmanTree {
 public:
 
@@ -36,13 +37,13 @@ public:
 
 	public:
 
-		Node(symbol label, ulint freq){
+		Node(T label, ulint freq){
 			this->freq=freq;
 			this->label=label;
 			leaf=true;
 		}
 
-		Node(symbol nr, Node l, Node r){
+		Node(T nr, Node l, Node r){
 
 			node_number=nr;
 			freq = l.freq+r.freq;
@@ -64,26 +65,26 @@ public:
 
 		bool operator<(const Node & n) const { return freq<n.freq; };
 
-		symbol node_number;
+		T node_number;
 		ulint freq;
-		symbol label;//label if leaf
+		T label;//label if leaf
 		bool leaf;//this node is leaf
 		bool leaf_left;
 		bool leaf_right;
 
-		symbol left;//pointers to children
-		symbol right;
+		T left;//pointers to children
+		T right;
 
 	};
 
 	HuffmanTree(){};
 
-	//freq = array containing absolute number of occurrencies of each symbol {0,...,freq.size()-1}
+	//freq = array containing absolute number of occurrencies of each T {0,...,freq.size()-1}
 	HuffmanTree(vector<ulint> freq){
 
 		sigma_0 = freq.size();
 
-		sigma = 0;//number of symbols with frequency > 0
+		sigma = 0;//number of Ts with frequency > 0
 
 		frequencies = freq;//copy freq
 
@@ -105,7 +106,7 @@ public:
 			exit(0);
 		}
 
-		codes = vector<vector<bool> >(sigma_0);//code associated to each symbol (empty vector if symbol has freq=0)
+		codes = vector<vector<bool> >(sigma_0);//code associated to each T (empty vector if T has freq=0)
 
 		//build Huffman tree using objects, then copy it in a more compact format inside the above vectors
 
@@ -167,11 +168,11 @@ public:
 
 	}
 
-	ulint numberOfOccurrencies(symbol s){return frequencies.at(s);};//number of occurrencies of the symbol s
+	ulint numberOfOccurrencies(T s){return frequencies.at(s);};//number of occurrencies of the T s
 
 	vector<vector<bool> > getCodes(){return codes;}
 
-	vector<bool> code(symbol s){return codes.at(s);};//from symbol -> to its binary Huffman code (compression)
+	vector<bool> code(T s){return codes.at(s);};//from T -> to its binary Huffman code (compression)
 
 private:
 
@@ -190,7 +191,7 @@ private:
 		codel.push_back(0);
 		coder.push_back(1);
 
-		//symbol node_nr = n.node_number;
+		//T node_nr = n.node_number;
 
 		if(n.leaf_left){//leaf
 
@@ -224,17 +225,17 @@ private:
 
 	}
 
-	//symbol decode(vector<bool> c, uint pos, symbol node);
+	//T decode(vector<bool> c, uint pos, T node);
 
-	uint8 sigma_0;//nr of symbols
-	uint8 sigma;//nr of symbols with frequency > 0
+	uint8 sigma_0;//nr of Ts
+	uint8 sigma;//nr of Ts with frequency > 0
 
 	//the Huffman tree:
-	//symbol root_node;
-	//symbol * left;//sigma-1 left pointers
-	//symbol * right;//sigma-1 right pointers
-	//vector<bool> left_leafs;//for each internal node i, memorizes if the symbol in left is pointer to internal nodes (0) or leaf label (1)
-	//vector<bool> right_leafs;//for each internal node i, memorizes if the symbol in left is pointer to internal nodes (0) or leaf label (1)
+	//T root_node;
+	//T * left;//sigma-1 left pointers
+	//T * right;//sigma-1 right pointers
+	//vector<bool> left_leafs;//for each internal node i, memorizes if the T in left is pointer to internal nodes (0) or leaf label (1)
+	//vector<bool> right_leafs;//for each internal node i, memorizes if the T in left is pointer to internal nodes (0) or leaf label (1)
 
 	vector<ulint> frequencies;//table of sigma_0 entries. Symbol -> number of occurrencies.
 
