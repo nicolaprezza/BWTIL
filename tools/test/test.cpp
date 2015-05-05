@@ -25,6 +25,10 @@
 #include "../../data_structures/dynamic_vector.h"
 #include "../../data_structures/DynamicBWT.h"
 #include "../../data_structures/cgap_dictionary.h"
+#include "../../data_structures/bsd_cgap.h"
+
+#include "bitview.h"
+#include <vector>
 
 
 using namespace bwtil;
@@ -209,24 +213,27 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
+	 /*bitview<vector> bvv(100);
+	 bvv(0,64) = 2119;
+	 cout << bvv.get(0,64)<<endl;
 
-	 vector<pair<ulint,ulint> > gaps;
+	 exit(0);*/
 
-	 gaps.push_back({9,1});
-	 gaps.push_back({2,1});
-	 gaps.push_back({5,7});
-	 gaps.push_back({7,7});
-	 gaps.push_back({13,5});
-	 gaps.push_back({11,7});
-	 gaps.push_back({18,6});
-	 gaps.push_back({4,9});
-	 gaps.push_back({19,6});
+	 vector<bool> B = {0,1,0,0,0,0,1,0,1,1,0,1};
 
-	 cgap_dictionary D(gaps);
+	 bool last = B[B.size()-1];
+	 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
+	 auto D = cgap_dictionary::build_dictionary(gaps);
 
-	 auto p = D.decode({0,1,0});
+	 for(auto g:gaps){
+		 cout << g << " -> ";
+		 auto c = D.encode(g);
+		 for(auto b:c)
+			 cout << b;
+		 cout << endl;
+	 }
 
-	 cout << p.first << " len = " << p.second<<endl;
+	 bsd_cgap bsd(gaps,last,D);
 
  }
 

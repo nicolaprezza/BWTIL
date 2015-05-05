@@ -144,6 +144,22 @@ inline uint number_of_bits(ulint x){
 	return width;
 }
 
+//number of bits required to write down x
+uint8_t intlog2(ulint x){
+
+	uint8_t res=0;
+
+	while(x>0){
+		x=x>>1;
+		res++;
+	}
+
+	if(res==0) res = 1;
+
+	return res;
+
+}
+
 inline void save_bitview_to_file(bitview_t bv, size_t size, FILE * fp){
 
 	ulint i = 0;

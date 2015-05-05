@@ -12,8 +12,8 @@
 #define CGAP_DICTIONARY_H_
 
 #include "HuffmanTree.h"
-#include "bitview.h"
 #include "../common/common.h"
+#include <map>
 
 namespace bwtil{
 
@@ -167,6 +167,9 @@ public:
 
 		for(auto g : gaps){
 
+			assert(g.first>0);
+			assert(g.second>0);
+
 			u += (g.first*g.second);
 			n += g.second;
 
@@ -201,6 +204,10 @@ public:
 		}
 
 		assert(codes.size()==gaps.size());
+
+		//build the code function
+		for(ulint i=0;i<codes.size();++i)
+			encoding[gaps[i].first] = codes[i];
 
 		/*for(auto g : gaps)
 			cout << g.first<<endl;
@@ -330,6 +337,11 @@ public:
 
 	}
 
+	/*
+	 * Decode the code in the leftmost part of x
+	 * \param x unsigned int containing the code in the most significant bits
+	 * \return pair <decoded value(i.e. gap length), bit length of the code>
+	 */
 	pair<ulint, ulint> decode(ulint x){
 
 		//take leftmost prefix_length bits
@@ -352,6 +364,11 @@ public:
 
 	}
 
+	/*
+	 * Decode the input code
+	 * \param vb the code
+	 * \return pair <decoded value(i.e. gap length), bit length of the code>
+	 */
 	pair<ulint, ulint> decode(vector<bool> vb){
 
 		ulint x = 0;
@@ -366,6 +383,63 @@ public:
 
 	}
 
+	vector<bool > encode(ulint g){
+		return encoding[g];
+	}
+
+	static cgap_dictionary build_dictionary(vector<ulint> gaps){
+
+		auto comp = [](pair<ulint,ulint> x, pair<ulint,ulint> y){ return x.first < y.first; };
+		std::set<pair<ulint,ulint> ,decltype(comp)> gaps_and_freq(comp);
+
+		for(auto g : gaps){
+
+			if(gaps_and_freq.find({g,0})!=gaps_and_freq.end()){
+
+				auto it = gaps_and_freq.find({g,0});
+				ulint new_freq = it->second+1;
+				gaps_and_freq.erase(it);
+				gaps_and_freq.insert({g,new_freq});
+
+			}else{
+				gaps_and_freq.insert({g,1});
+			}
+
+		}
+
+		vector<pair<ulint,ulint> > gaps_and_freq_v;
+
+		for(auto p : gaps_and_freq)
+			gaps_and_freq_v.push_back(p);
+
+		return {gaps_and_freq_v};
+
+	}
+
+	static vector<ulint> bitvector_to_gaps(vector<bool> &B){
+
+		ulint gap_len=1;
+		vector<ulint> gaps;
+
+		for(ulint i=0;i<B.size();++i){
+
+			if(B[i]){
+
+				gaps.push_back(gap_len);
+				gap_len=1;
+
+			}else{
+				gap_len++;
+			}
+
+		}
+
+		if(not B[B.size()-1])
+			gaps.push_back(gap_len-1);
+
+		return gaps;
+
+	}
 
 private:
 
@@ -378,6 +452,8 @@ private:
 	vector <bool> exceeds;
 
 	vector<bin_tree<ulint> > partial_htrees;
+
+	std::map<ulint,vector<bool> > encoding;
 
 	//length of codes' prefixes that are indexed in the hash table H
 	uint8_t prefix_length=0;
