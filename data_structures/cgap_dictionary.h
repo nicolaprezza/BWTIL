@@ -250,8 +250,11 @@ public:
 				//shift to left so to occupy exactly prefix_length bits
 				h = h << (prefix_length-l);
 
-				exceeds[h] = false;
-				H[h] = {gaps[i].first,l};
+				//fill all combinations of h followed by any bit sequence (in total prefix_length bits)
+				for(ulint j=0;j<(ulint(1)<<(prefix_length-l));++j){
+					exceeds[h+j] = false;
+					H[h+j] = {gaps[i].first,l};
+				}
 
 			}else{
 

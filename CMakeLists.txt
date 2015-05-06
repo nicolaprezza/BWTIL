@@ -30,5 +30,6 @@ add_executable(bwt-to-sa tools/bwt-to-sa/bwt-to-sa.cpp)
 add_executable(sa-to-bwt tools/sa-to-bwt/sa-to-bwt.cpp)
 add_executable(bwt-invert tools/bwt-invert/bwt-invert.cpp)
 add_executable(lz77 tools/lz77/lz77.cpp)
+add_executable(count-runs tools/count-runs/count-runs.cpp)
 add_executable(test tools/test/test.cpp)
 

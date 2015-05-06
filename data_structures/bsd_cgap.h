@@ -64,6 +64,9 @@ public:
 		t = logu;
 		if(t<2) t = 2;
 
+		//cout << "log u = " << (uint)logu << endl;
+		//cout << "t = " << (uint)t << endl;
+
 		number_of_blocks = n/t + (n%t!=0);
 		first_el = {logu,number_of_blocks};
 
@@ -77,8 +80,12 @@ public:
 
 		}
 
-		C = {c+W};//pad with W bits to prevent overflow while extracting gaps
+		//c+=W;//pad with W bits to prevent overflow while extracting gaps
+
+		C = {c};
 		logc = intlog2(c);
+
+		//cout << "log c = " << (uint)logc << endl;
 
 		C_addr = {logc,number_of_blocks};
 
@@ -108,7 +115,12 @@ public:
 				for(uint j=0;j<l;j++)
 					code_ul = code_ul*2+code[j];
 
-				C(cumulative_c,cumulative_c+l) = code_ul;
+				//transform to access correctly C:
+				//interval [i,i+l) -> [(c-i)-l,c-i)
+				ulint left = (c - cumulative_c)-l;
+				ulint right = c - cumulative_c;
+
+				C(left,right) = code_ul;
 
 				cumulative_c+=l;
 
@@ -116,6 +128,28 @@ public:
 
 		}
 
+/*
+		cout << "C = ";
+		for(uint i=0;i<c;++i)
+			cout << C[(c-1)-i];
+
+		cout << endl;
+
+		cout << "C addr:"<<endl;
+		for(uint i=0;i<number_of_blocks;++i)
+			cout << C_addr[i] <<endl;
+
+		cout << "first:"<<endl;
+		for(uint i=0;i<number_of_blocks;++i)
+			cout << first_el[i] <<endl;
+
+		ulint i=0;
+		ulint len=W-1;
+		//TODO sembra che estrarre W bits da bitview crei problemi....
+		cout << "TEST: " << D.decode(C.get((c-i)-len,c-i)).first << endl;
+		cout << "TEST: " << D.decode(ulint(5)<<61).first << endl;
+
+*/
 
 
 	}
@@ -158,16 +192,34 @@ public:
 
 		ulint result = first_el[bl];
 
+		//cout << "first el = " << result << endl;
+		//cout << "block = " << bl << " rem = "<< rem << endl;
+
 		ulint C_idx = C_addr[bl];
 
 		//now extract i%t gaps starting from position C_idx
 		for(ulint i=0;i<rem;++i){
 
 			//extract W bits from C
-			ulint x = C.get(C_idx,C_idx+W);
+			//transform to access correctly C:
+			//interval [i,i+l) -> [(c-i)-l,c-i)
+			//left = C_idx
+			//right = min{C_idx + W,c}
+			//l = right-left = min{C_idx + W,c} - C_idx
+			ulint left = C_idx;
+			ulint len = (C_idx + W>c?c:C_idx + W) - left;
+
+			ulint left1 = (c - left)-len;
+			ulint right1 = c - left;
+
+			ulint x = C.get(left1,right1);
+
+			x = x << (W-len);
 
 			//decode
 			auto decoded = D.decode(x);
+
+			//cout << "read gap " << decoded.first<<endl;
 
 			result += decoded.first;//decompressed gap value
 			C_idx += decoded.second;//bit length of the code

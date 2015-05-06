@@ -213,13 +213,35 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
-	 /*bitview<vector> bvv(100);
-	 bvv(0,64) = 2119;
-	 cout << bvv.get(0,64)<<endl;
+/*	 ulint c = 12;
+
+	 bitview<vector> bvv(c);
+
+	 ulint i = 4;
+	 ulint j = 7;
+	 ulint l = j-i;
+
+	 ulint i1 = (c-i)-l;
+	 ulint j1 = c-i;
+
+	 cout << "i1 = " << i1 << ", j1 = " << j1 << endl;
+
+	 bvv(i1,j1) = 6;
+
+	 cout << bvv.get(i1,j1) << endl;
+
+	 i = 4;
+	 j = 9;
+	 l = j-i;
+
+	 i1 = (c-i)-l;
+	 j1 = c-i;
+
+	 cout << bvv.get(i1,j1) << endl;
 
 	 exit(0);*/
 
-	 vector<bool> B = {0,1,0,0,0,0,1,0,1,1,0,1};
+	 vector<bool> B = {0,0,1,0,0,0,0,1,0,1,1,0,1,0,1,1,1,1,0,0,0,1};
 
 	 bool last = B[B.size()-1];
 	 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
@@ -234,6 +256,11 @@ char remap(symbol s){
 	 }
 
 	 bsd_cgap bsd(gaps,last,D);
+
+	 cout << "\nselects: "<<endl;
+	 for(uint i=0;i<bsd.number_of_1();++i)
+		 cout << i << " -> " << bsd.select(i)<<endl;
+
 
  }
 
