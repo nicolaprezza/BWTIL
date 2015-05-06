@@ -209,21 +209,6 @@ public:
 		for(ulint i=0;i<codes.size();++i)
 			encoding[gaps[i].first] = codes[i];
 
-		/*for(auto g : gaps)
-			cout << g.first<<endl;
-
-		for(auto c : codes){
-			for(auto b : c)
-				cout << b;
-			cout << endl;
-		}*/
-
-		/*vector<ulint> lengths;
-		for(auto g : gaps)
-			lengths.push_back(g.first);
-
-		partial_htrees.push_back({codes,lengths});*/
-
 		H = vector<pair<ulint,ulint> >(ulint(1)<<prefix_length,{0,0});
 		exceeds = vector<bool>(H.size());
 
@@ -331,12 +316,6 @@ public:
 			}
 
 		}
-
-	/*	cout << "partial_htrees size = " << partial_htrees.size()<<endl;
-
-		for(auto b:exceeds)
-			cout << b << " ";
-		cout << endl;*/
 
 	}
 

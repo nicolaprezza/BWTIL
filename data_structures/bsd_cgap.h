@@ -25,6 +25,34 @@ public:
 	bsd_cgap(){}
 
 	/*
+	 * Constructor 1 : build BSD from a bitvector
+	 * Builds its own dictionary.
+	 */
+	bsd_cgap(vector<bool> B){
+
+		bool last = B[B.size()-1];
+		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
+		auto D = cgap_dictionary::build_dictionary(gaps);
+
+		build(gaps,last,D);
+
+	}
+
+	/*
+	 * Constructor 2: build BSD from a bitvector and a dictionary.
+	 * copy reference to passed dictionary (do not create a new one)
+	 */
+	bsd_cgap(vector<bool> B,cgap_dictionary &D){
+
+		bool last = B[B.size()-1];
+		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
+
+		build(gaps,last,D);
+
+	}
+
+	/*
+	 * Constructor 3:
 	 * build BSD data structure given the ordered list of gaps, value of last bit, and the gap dictionary
 	 * Note: let k be the last gap length. The tail of the bitvector is 0^k or 0^(k-1)1 if last=0 or
 	 * last=1, respectively.
@@ -64,9 +92,6 @@ public:
 		t = logu;
 		if(t<2) t = 2;
 
-		//cout << "log u = " << (uint)logu << endl;
-		//cout << "t = " << (uint)t << endl;
-
 		number_of_blocks = n/t + (n%t!=0);
 		first_el = {logu,number_of_blocks};
 
@@ -80,12 +105,8 @@ public:
 
 		}
 
-		//c+=W;//pad with W bits to prevent overflow while extracting gaps
-
 		C = {c};
 		logc = intlog2(c);
-
-		//cout << "log c = " << (uint)logc << endl;
 
 		C_addr = {logc,number_of_blocks};
 
@@ -97,10 +118,6 @@ public:
 			cumulative_u+=gaps[i];
 
 			if(i%t==0){
-
-				//cout << i/t << "/"<<number_of_blocks<<endl;
-				//cout << cumulative_u-1 << "/" << (uint)intlog2(cumulative_u-1) << "/" << (uint)logu << endl;
-				//cout << cumulative_c << "/" << (uint)intlog2(cumulative_c) << "/" << (uint)logc << endl;
 
 				first_el[i/t] = cumulative_u-1;
 				C_addr[i/t] = cumulative_c;
@@ -127,30 +144,6 @@ public:
 			}
 
 		}
-
-/*
-		cout << "C = ";
-		for(uint i=0;i<c;++i)
-			cout << C[(c-1)-i];
-
-		cout << endl;
-
-		cout << "C addr:"<<endl;
-		for(uint i=0;i<number_of_blocks;++i)
-			cout << C_addr[i] <<endl;
-
-		cout << "first:"<<endl;
-		for(uint i=0;i<number_of_blocks;++i)
-			cout << first_el[i] <<endl;
-
-		ulint i=0;
-		ulint len=W-1;
-		//TODO sembra che estrarre W bits da bitview crei problemi....
-		cout << "TEST: " << D.decode(C.get((c-i)-len,c-i)).first << endl;
-		cout << "TEST: " << D.decode(ulint(5)<<61).first << endl;
-
-*/
-
 
 	}
 
@@ -191,38 +184,16 @@ public:
 		ulint rem = i%t;
 
 		ulint result = first_el[bl];
-
-		//cout << "first el = " << result << endl;
-		//cout << "block = " << bl << " rem = "<< rem << endl;
-
 		ulint C_idx = C_addr[bl];
 
 		//now extract i%t gaps starting from position C_idx
 		for(ulint i=0;i<rem;++i){
 
-			//extract W bits from C
-			//transform to access correctly C:
-			//interval [i,i+l) -> [(c-i)-l,c-i)
-			//left = C_idx
-			//right = min{C_idx + W,c}
-			//l = right-left = min{C_idx + W,c} - C_idx
-			ulint left = C_idx;
-			ulint len = (C_idx + W>c?c:C_idx + W) - left;
+			//extract gap code, decompress it and retrieve its bit-length
+			auto g = extract_gap(C_idx);
 
-			ulint left1 = (c - left)-len;
-			ulint right1 = c - left;
-
-			ulint x = C.get(left1,right1);
-
-			x = x << (W-len);
-
-			//decode
-			auto decoded = D.decode(x);
-
-			//cout << "read gap " << decoded.first<<endl;
-
-			result += decoded.first;//decompressed gap value
-			C_idx += decoded.second;//bit length of the code
+			result += g.first;//decompressed gap value
+			C_idx += g.second;//bit length of the code
 
 		}
 
@@ -231,6 +202,33 @@ public:
 	}
 
 private:
+
+	/*
+	 * extract gap starting from the bit C[i]
+	 * \param i position in C
+	 * \return <gap,len> : gap value and length in bits of the code
+	 */
+	pair <ulint,ulint> extract_gap(ulint i){
+
+		//transform to access correctly C:
+		//interval [i,i+l) -> [(c-i)-l,c-i)
+
+		//how many bits have to be extracted? W bits or less if we go beyond C end
+		ulint len = (i + W>c?c:i + W) - i;
+
+		//start and end position in C
+		ulint left = (c - i)-len;
+		ulint right = c - i;
+
+		//get bits
+		ulint x = C.get(left,right);
+		//left shift: align extracted code on the left
+		x = x << (W-len);
+
+		//decode and return
+		return D.decode(x);
+
+	}
 
 	//Dictionary: permits encoding/decoding of gap codes (Huffman)
 	cgap_dictionary D;
