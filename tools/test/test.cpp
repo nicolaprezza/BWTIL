@@ -19,7 +19,9 @@
 #include "../../data_structures/FileReader.h"
 #include "../../data_structures/DummyDynamicBitvector.h"
 #include "../../data_structures/sparse_vector.h"
+#include "../../data_structures/sparse_bitvector.h"
 #include "../../data_structures/succinct_vector.h"
+#include "../../data_structures/succinct_bitvector.h"
 #include "../../extern/bitvector/include/bitvector.h"
 #include "../../data_structures/sparse_bitvector.h"
 #include "../../data_structures/dynamic_vector.h"
@@ -213,6 +215,30 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
+/*	 uint w=64;
+	 ulint n=1000000;
+	 ulint max = 0;
+
+	 if(w<64)
+		 max = ulint(1)<<w;
+
+	 packed_view<vector> pv(w,n);
+
+	 srand(time(NULL));
+
+	 for(ulint i=0;i<n;++i)
+		 pv[i] = (w<64?rand()%max:rand());
+
+	 std::sort(pv.begin(),pv.end());
+
+	 for(ulint i=1;i<n;++i)
+		 if(pv[i]<pv[i-1]){
+			 cout << "something's wrong!"<<endl;
+			 exit(0);
+		 }
+
+	 cout << "OK!" <<endl;*/
+
 /*	 ulint c = 12;
 
 	 bitview<vector> bvv(c);
@@ -241,26 +267,77 @@ char remap(symbol s){
 
 	 exit(0);*/
 
-	 vector<bool> B = {0,0,1,0,0,0,0,1,0,1,1,0,1,0,1,1,1,1,0,0,0,1};
+	 ulint u = 100000000;
+	 double p=0.01;
+	 vector<bool> B(u);
 
-	 bool last = B[B.size()-1];
-	 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
-	 auto D = cgap_dictionary::build_dictionary(gaps);
+	 srand(time(NULL));
 
-	 for(auto g:gaps){
-		 cout << g << " -> ";
-		 auto c = D.encode(g);
-		 for(auto b:c)
+	 uint last_perc=0;
+	 ulint trials=5;
+
+	 cout << "start!" << endl;
+
+	 for(ulint j=0;j<trials;j++){
+
+		 uint perc = (j*100)/trials;
+		 if(perc-last_perc>0){
+			 cout << perc << "% done ..." <<endl;
+			 last_perc=perc;
+		 }
+
+		 for(ulint i=0;i<B.size();++i){
+
+			 ulint max = 99999999;
+			 double x = (double)(rand()%max)/(double)max;
+
+			 B[i] = x<p;
+		 }
+
+/*		 for(auto b:B)
 			 cout << b;
-		 cout << endl;
+		 cout << endl;*/
+
+		 bool last = B[B.size()-1];
+		 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
+		 auto D = cgap_dictionary::build_dictionary(gaps);
+		 bsd_cgap bsd(gaps,last,&D);
+
+		 sparse_bitvector<> sbv(B);
+
+		 for(uint i=0;i<bsd.number_of_1();++i){
+
+			 if(bsd.select(i)!=sbv.select(i)){
+				 cout << "ERROR in select"<<endl;
+				 exit(0);
+			 }
+
+		 }
+
+		 for(uint i=0;i<bsd.size();++i){
+
+			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
+
+			if(bsd.rank(i)!=sbv.rank(i)){
+				 cout << "ERROR in rank"<<endl;
+				 exit(0);
+			}
+
+
+		 }
+
 	 }
 
-	 bsd_cgap bsd(gaps,last,D);
+	 cout << "OK!" << endl;
 
-	 cout << "\nselects: "<<endl;
+	 /*cout << "selects: "<<endl;
 	 for(uint i=0;i<bsd.number_of_1();++i)
 		 cout << i << " -> " << bsd.select(i)<<endl;
 
+	 cout << "ranks: "<<endl;
+	 for(uint i=0;i<bsd.size();++i)
+		 cout << i << " -> " << bsd.rank(i)<<endl;
+*/
 
  }
 

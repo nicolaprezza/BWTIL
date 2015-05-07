@@ -85,7 +85,7 @@ public:
 	}
 
 	/*
-	* returns: size of the bitvector
+	* returns: bit size of the data structure
 	*/
 	ulint size(){
 
@@ -224,7 +224,7 @@ public:
 	}
 
 	/*
-	* returns: size of the bitvector
+	* returns: length of the bitvector (i.e. number of bits of the underlying bit sequence)
 	*/
 	ulint length(){return n;}
 

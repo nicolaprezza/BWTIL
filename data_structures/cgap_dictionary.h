@@ -161,9 +161,16 @@ public:
 	 */
 	cgap_dictionary(vector<pair<ulint,ulint> > gaps){
 
+		assert(gaps.size()>0);
+
+		//if there is only 1 distinct gap, this creates problems with the huffman codes ...
+		//in this case, create one fake gap. There will be 2 codes: 0 and 1
+		if(gaps.size()==1)
+			gaps.push_back({gaps[0].first+1,1});
+
 		//compute u and n
-		u=0;
-		n=0;
+		ulint u=0;
+		ulint n=0;
 
 		for(auto g : gaps){
 
@@ -175,18 +182,19 @@ public:
 
 		}
 
-		//cout << "u = " << u << ", n = " << n << endl;
-
 		//compute optimal prefix length for the hash table.
 		//we choose prefix_length = log2( n/(log u*log n) ), so total size of the hash is o(n)
 
-		prefix_length = (uint8_t)ceil(log2( (double)n/(log2(u)*log2(n)) ));
+		if(log2(u)*log2(n)>=n)
+			prefix_length = 8;
+		else
+			prefix_length = (uint8_t)ceil(log2( (double)n/(log2(u)*log2(n)) ));
 
 		//we index at least 2^8 = 256 bits
 		if(prefix_length<8)
 			prefix_length=8;
 
-		//cout << "prefix = " << (ulint)prefix_length << endl;
+		assert(prefix_length<64);
 
 		//build Huffman tree and retrieve boolean codes
 		vector<vector<bool> > codes;
@@ -209,7 +217,10 @@ public:
 		for(ulint i=0;i<codes.size();++i)
 			encoding[gaps[i].first] = codes[i];
 
-		H = vector<pair<ulint,ulint> >(ulint(1)<<prefix_length,{0,0});
+		ulint H_size = ulint(1)<<prefix_length;
+
+		H = vector<pair<ulint,ulint> >(H_size,{0,0});
+
 		exceeds = vector<bool>(H.size());
 
 		//build hash
@@ -369,7 +380,12 @@ public:
 		return encoding[g];
 	}
 
+	/*
+	 * build (Huffman) dictionary given list of gaps.
+	 */
 	static cgap_dictionary build_dictionary(vector<ulint> gaps){
+
+		assert(gaps.size()>0);
 
 		auto comp = [](pair<ulint,ulint> x, pair<ulint,ulint> y){ return x.first < y.first; };
 		std::set<pair<ulint,ulint> ,decltype(comp)> gaps_and_freq(comp);
@@ -398,6 +414,12 @@ public:
 
 	}
 
+	/*
+	 * convert a bitvector to a list of gaps.
+	 * Length of a gap is number of 0s + 1 (we count the leading bit set)
+	 * If last bit is 0, last gap equals
+	 * the length of the tail of 0s in B
+	 */
 	static vector<ulint> bitvector_to_gaps(vector<bool> &B){
 
 		ulint gap_len=1;
@@ -440,8 +462,6 @@ private:
 	//length of codes' prefixes that are indexed in the hash table H
 	uint8_t prefix_length=0;
 
-	//total length of the bitvector (u) and number of 1s (n)
-	ulint u=0,n=0;
 
 };
 
