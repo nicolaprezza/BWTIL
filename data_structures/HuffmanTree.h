@@ -84,7 +84,7 @@ public:
 
 		sigma_0 = freq.size();
 
-		sigma = 0;//number of Ts with frequency > 0
+		//sigma = 0;//number of Ts with frequency > 0
 
 		frequencies = freq;//copy freq
 
@@ -96,8 +96,8 @@ public:
 
 			tot+=frequencies.at(i);
 
-			if(freq.at(i)>0)
-				sigma++;
+			//if(freq.at(i)>0)
+				//sigma++;
 
 		}
 
@@ -172,7 +172,7 @@ public:
 
 	vector<vector<bool> > getCodes(){return codes;}
 
-	vector<bool> code(T s){return codes.at(s);};//from T -> to its binary Huffman code (compression)
+	vector<bool> code(T s){return codes[s];};//from T -> to its binary Huffman code (compression)
 
 private:
 
@@ -227,8 +227,8 @@ private:
 
 	//T decode(vector<bool> c, uint pos, T node);
 
-	uint8 sigma_0;//nr of Ts
-	uint8 sigma;//nr of Ts with frequency > 0
+	T sigma_0;//nr of Ts
+	//T sigma;//nr of Ts with frequency > 0
 
 	//the Huffman tree:
 	//T root_node;
