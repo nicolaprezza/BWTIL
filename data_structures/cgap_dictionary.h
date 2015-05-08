@@ -458,6 +458,8 @@ public:
 		if(not B[B.size()-1])
 			gaps.push_back(gap_len-1);
 
+		assert(gaps.size()>0);
+
 		return gaps;
 
 	}

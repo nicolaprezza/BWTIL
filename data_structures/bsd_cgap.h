@@ -28,7 +28,7 @@ public:
 	 * Constructor 1: build BSD from a bitvector and a dictionary.
 	 * copy reference to passed dictionary (do not create a new one)
 	 */
-	bsd_cgap(vector<bool> B,cgap_dictionary * D){
+	bsd_cgap(vector<bool> &B,cgap_dictionary * D){
 
 		bool last = B[B.size()-1];
 		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
@@ -46,116 +46,6 @@ public:
 	 */
 	bsd_cgap(vector<ulint> &gaps,bool last, cgap_dictionary * D){
 		build(gaps,last,D);
-	}
-
-	void build(vector<ulint> &gaps,bool last, cgap_dictionary * D){
-
-		assert(gaps.size()>0);
-
-		W = sizeof(ulint)*8;
-
-		this->D=D;
-		if(last) last=1;
-
-		if(last){
-
-			tail=0;
-			n=gaps.size();
-
-		}else{
-
-			tail=gaps[gaps.size()-1];
-			n=gaps.size()-1;
-
-		}
-
-		//cout << "n = " << (ulint)n<<endl;
-
-		u = tail;
-
-		//count bits and ones
-		for(ulint i=0;i<(gaps.size()-1)+last;++i)
-			u+=gaps[i];
-
-		assert(u>0);
-
-		//cout << "u = " << (ulint)u<<endl;
-
-		logu = intlog2(u);
-
-		//compute block size
-		t = logu;
-		if(t<2) t = 2;
-
-		//cout << "t = " << (ulint)t<<endl;
-
-		number_of_blocks = n/t + (n%t!=0);
-		first_el = {logu,number_of_blocks};
-
-		c=0;
-
-		//count number of bits in C
-		for(ulint i=0;i<(gaps.size()-1)+last;++i){
-
-			if(i%t!=0)
-				c+=D->encode(gaps[i]).size();
-
-		}
-
-		C = {c};
-		logc = intlog2(c);
-
-		C_addr = {logc,number_of_blocks};
-
-		ulint cumulative_u = 0;
-		ulint cumulative_c = 0;
-
-		for(ulint i=0;i<(gaps.size()-1)+last;++i){
-
-			cumulative_u+=gaps[i];
-
-			if(i%t==0){
-
-				assert(cumulative_u>0);
-				assert(cumulative_u-1<(ulint(1)<<logu));
-				assert(cumulative_c<(ulint(1)<<logc));
-
-				first_el[i/t] = cumulative_u-1;
-				C_addr[i/t] = cumulative_c;
-
-			}else{
-
-				auto code = D->encode(gaps[i]);
-				uint l = code.size();
-
-				ulint code_ul=0;
-
-				for(uint j=0;j<l;j++)
-					code_ul = code_ul*2+code[j];
-
-				assert(code_ul<(ulint(1)<<l));
-
-				//transform to access correctly C:
-				//interval [i,i+l) -> [(c-i)-l,c-i)
-
-				assert(c>=(cumulative_c+l));
-				ulint left = (c - cumulative_c)-l;
-				ulint right = c - cumulative_c;
-
-				C(left,right) = code_ul;
-
-				cumulative_c+=l;
-
-			}
-
-		}
-
-		//cout << "c = " << (ulint)c<<endl;
-
-		/*cout << "first el : "<<endl;
-		for(auto i : first_el)
-			cout << i << endl;*/
-
 	}
 
 	ulint size(){
@@ -374,7 +264,230 @@ public:
 
 	}
 
+	/* serialize the structure to the ostream
+	 * \param out	 the ostream
+	 */
+	ulint serialize(std::ostream& out){
+
+		//Dictionary is not serialized, since it is passed as argument to the constructor
+
+		ulint w_bytes = 0;
+
+		//vars
+
+		out.write((char *)&W, sizeof(uint8_t));
+		out.write((char *)&c, sizeof(ulint));
+		out.write((char *)&logc, sizeof(uint8_t));
+		out.write((char *)&logu, sizeof(uint8_t));
+		out.write((char *)&tail, sizeof(ulint));
+		out.write((char *)&u, sizeof(ulint));
+		out.write((char *)&n, sizeof(ulint));
+		out.write((char *)&t, sizeof(uint));
+		out.write((char *)&number_of_blocks, sizeof(ulint));
+
+		w_bytes += sizeof(uint8_t)*4 + sizeof(ulint)*5 + sizeof(uint);
+
+		ulint bitview_type_size = sizeof(*C.container().data());
+		out.write((char *)&bitview_type_size, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		ulint packed_view_type_size = sizeof(*first_el.container().data());
+		out.write((char *)&packed_view_type_size, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		// C
+
+		ulint C_container_len = C.container().size();
+		out.write((char *)&C_container_len, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		out.write((char *)C.container().data(), bitview_type_size*C_container_len);
+		w_bytes += bitview_type_size*C_container_len;
+
+		//first_el
+
+		ulint first_el_container_len = first_el.container().size();
+		out.write((char *)&first_el_container_len, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		out.write((char *)first_el.container().data(), packed_view_type_size*first_el_container_len);
+		w_bytes += packed_view_type_size*first_el_container_len;
+
+		//C_addr
+
+		ulint C_addr_container_len = C_addr.container().size();
+		out.write((char *)&C_addr_container_len, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		out.write((char *)C_addr.container().data(), packed_view_type_size*C_addr_container_len);
+		w_bytes += packed_view_type_size*C_addr_container_len;
+
+		return w_bytes;
+
+	}
+
+	/* load the structure from the istream
+	 * \param in the istream
+	 */
+	void load(std::istream& in) {
+
+		//Dictionary is not serialized, since it is passed as argument to the constructor
+
+		//vars
+
+		in.read((char *)&W, sizeof(uint8_t));
+		in.read((char *)&c, sizeof(ulint));
+		in.read((char *)&logc, sizeof(uint8_t));
+		in.read((char *)&logu, sizeof(uint8_t));
+		in.read((char *)&tail, sizeof(ulint));
+		in.read((char *)&u, sizeof(ulint));
+		in.read((char *)&n, sizeof(ulint));
+		in.read((char *)&t, sizeof(uint));
+		in.read((char *)&number_of_blocks, sizeof(ulint));
+
+		ulint bitview_type_size;
+		in.read((char *)&bitview_type_size, sizeof(ulint));
+
+		ulint packed_view_type_size;
+		in.read((char *)&packed_view_type_size, sizeof(ulint));
+
+		// C
+
+		ulint C_container_len;
+		in.read((char *)&C_container_len, sizeof(ulint));
+
+		C = {c};
+		in.read((char *)C.container().data(), bitview_type_size*C_container_len);
+
+		//first_el
+
+		ulint first_el_container_len;
+		in.read((char *)&first_el_container_len, sizeof(ulint));
+
+		first_el = {logu,number_of_blocks};
+		in.read((char *)first_el.container().data(), packed_view_type_size*first_el_container_len);
+
+		//C_addr
+
+		ulint C_addr_container_len;
+		in.read((char *)&C_addr_container_len, sizeof(ulint));
+
+		C_addr = {logc,number_of_blocks};
+		in.read((char *)C_addr.container().data(), packed_view_type_size*C_addr_container_len);
+
+	}
+
 private:
+
+	void build(vector<ulint> &gaps,bool last, cgap_dictionary * D){
+
+		assert(gaps.size()>0);
+
+		W = sizeof(ulint)*8;
+
+		this->D=D;
+		if(last) last=1;
+
+		if(last){
+
+			tail=0;
+			n=gaps.size();
+
+		}else{
+
+			tail=gaps[gaps.size()-1];
+			n=gaps.size()-1;
+
+		}
+
+		//cout << "n = " << (ulint)n<<endl;
+
+		u = tail;
+
+		//count bits and ones
+		for(ulint i=0;i<(gaps.size()-1)+last;++i)
+			u+=gaps[i];
+
+		assert(u>0);
+
+		//cout << "u = " << (ulint)u<<endl;
+
+		logu = intlog2(u);
+
+		//compute block size
+		t = logu;
+		if(t<2) t = 2;
+
+		//cout << "t = " << (ulint)t<<endl;
+
+		number_of_blocks = n/t + (n%t!=0);
+		first_el = {logu,number_of_blocks};
+
+		c=0;
+
+		//count number of bits in C
+		for(ulint i=0;i<(gaps.size()-1)+last;++i){
+
+			if(i%t!=0)
+				c+=D->encode(gaps[i]).size();
+
+		}
+
+		C = {c};
+		logc = intlog2(c);
+
+		C_addr = {logc,number_of_blocks};
+
+		ulint cumulative_u = 0;
+		ulint cumulative_c = 0;
+
+		for(ulint i=0;i<(gaps.size()-1)+last;++i){
+
+			cumulative_u+=gaps[i];
+
+			if(i%t==0){
+
+				assert(cumulative_u>0);
+				assert(cumulative_u-1<(ulint(1)<<logu));
+				assert(cumulative_c<(ulint(1)<<logc));
+
+				first_el[i/t] = cumulative_u-1;
+				C_addr[i/t] = cumulative_c;
+
+			}else{
+
+				auto code = D->encode(gaps[i]);
+				uint l = code.size();
+
+				ulint code_ul=0;
+
+				for(uint j=0;j<l;j++)
+					code_ul = code_ul*2+code[j];
+
+				assert(code_ul<(ulint(1)<<l));
+
+				//transform to access correctly C:
+				//interval [i,i+l) -> [(c-i)-l,c-i)
+
+				assert(c>=(cumulative_c+l));
+				ulint left = (c - cumulative_c)-l;
+				ulint right = c - cumulative_c;
+
+				C(left,right) = code_ul;
+
+				cumulative_c+=l;
+
+			}
+
+		}
+
+		//cout << "c = " << (ulint)c<<endl;
+
+		/*cout << "first el : "<<endl;
+		for(auto i : first_el)
+			cout << i << endl;*/
+
+	}
 
 	/*
 	 * extract gap starting from the bit C[i]
@@ -408,7 +521,7 @@ private:
 
 	}
 
-	//Dictionary: permits encoding/decoding of gap codes (Huffman)
+	//Dictionary: supports encoding/decoding of gap codes (Huffman)
 	cgap_dictionary * D;
 
 	//bit-array with all Huffman codes stored consecutively
