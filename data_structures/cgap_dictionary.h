@@ -99,6 +99,17 @@ class cgap_dictionary{
 				return children[1];
 			}
 
+			ulint bytesize(){
+
+				ulint s = sizeof(value) + sizeof(children);
+
+				for(auto c : children)
+					s += c.bytesize();
+
+				return s;
+
+			}
+
 		private:
 
 			vector<node> children;
@@ -122,6 +133,12 @@ class cgap_dictionary{
 		pair<T,T> search(ulint bitv){
 
 			return search(bitv,root,0);
+
+		}
+
+		ulint bytesize(){
+
+			return sizeof(root) + root.bytesize();
 
 		}
 
@@ -442,6 +459,31 @@ public:
 			gaps.push_back(gap_len-1);
 
 		return gaps;
+
+	}
+
+	ulint bytesize(){
+
+		return 0;
+
+		ulint H_size = sizeof(H)+H.size()*sizeof(ulint)*2;
+		ulint exceeds_size = sizeof(exceeds) + exceeds.size()/8 + sizeof(ulint);
+		ulint partial_htrees_size = sizeof(partial_htrees);
+
+		for(auto t : partial_htrees)
+			partial_htrees_size += t.bytesize();
+
+		ulint encoding_size = sizeof(encoding) + encoding.size()*sizeof(ulint);
+
+		for(auto e : encoding)
+			encoding_size += (e.second.size()/8 + sizeof(ulint));
+
+		ulint varsize = sizeof(prefix_length);
+
+		return 	H_size +
+				exceeds_size +
+				partial_htrees_size +
+				varsize;
 
 	}
 

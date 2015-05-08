@@ -215,6 +215,7 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
+
 /*	 uint w=64;
 	 ulint n=1000000;
 	 ulint max = 0;
@@ -267,14 +268,27 @@ char remap(symbol s){
 
 	 exit(0);*/
 
-	 ulint u = 100000000;
-	 double p=0.01;
+/*	 vector<bool> B = {1,0,1,0,1,0,0,0,1,1,0,1,1,1,1,1,1,0,1,1};
+
+	 bool last = B[B.size()-1];
+	 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
+	 auto D = cgap_dictionary::build_dictionary(gaps);
+	 bsd_cgap bsd(gaps,last,&D);
+
+	 cout << (bsd[11]==B[11]) << endl;*/
+
+
+	 ulint u = 10000000;
+	 ulint trials=2;
+
+	 //double p=0.175;//with this p we have a ratio of approx. 1
+	 double p=0.00001;
+
 	 vector<bool> B(u);
 
 	 srand(time(NULL));
 
 	 uint last_perc=0;
-	 ulint trials=5;
 
 	 cout << "start!" << endl;
 
@@ -303,9 +317,24 @@ char remap(symbol s){
 		 auto D = cgap_dictionary::build_dictionary(gaps);
 		 bsd_cgap bsd(gaps,last,&D);
 
-		 sparse_bitvector<> sbv(B);
+		 cout << "u = " << u << ", n = " << bsd.number_of_1() << ", bitsize = " << bsd.bytesize()*8 << ", ratio = " << ((double)(bsd.bytesize()*8)/u)<< ", bits per element = "<< ((double)(bsd.bytesize()*8)/bsd.number_of_1()) << endl;
+
+		/* sparse_bitvector<> sbv(B);
 
 		 for(uint i=0;i<bsd.number_of_1();++i){
+
+			 cout << i << endl;
+
+			 if(bsd.gapAt(i)!=gaps[i]){
+				 cout << "ERROR in gapAt"<<endl;
+				 exit(0);
+			 }
+
+		 }
+
+		 for(uint i=0;i<bsd.number_of_1();++i){
+
+			 cout << i << endl;
 
 			 if(bsd.select(i)!=sbv.select(i)){
 				 cout << "ERROR in select"<<endl;
@@ -316,6 +345,8 @@ char remap(symbol s){
 
 		 for(uint i=0;i<bsd.size();++i){
 
+			 cout << i << endl;
+
 			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
 
 			if(bsd.rank(i)!=sbv.rank(i)){
@@ -323,8 +354,20 @@ char remap(symbol s){
 				 exit(0);
 			}
 
-
 		 }
+
+		 for(uint i=0;i<bsd.size();++i){
+
+			 cout << i << endl;
+
+			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
+
+			if(bsd[i]!=B[i]){
+				 cout << "ERROR in access " << i <<endl;
+				 exit(0);
+			}
+
+		 }*/
 
 	 }
 

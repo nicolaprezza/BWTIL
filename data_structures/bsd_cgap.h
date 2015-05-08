@@ -25,21 +25,7 @@ public:
 	bsd_cgap(){}
 
 	/*
-	 * Constructor 1 : build BSD from a bitvector
-	 * Builds its own dictionary.
-	 */
-/*	bsd_cgap(vector<bool> B){
-
-		bool last = B[B.size()-1];
-		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
-		auto D = cgap_dictionary::build_dictionary(gaps);
-
-		build(gaps,last,D);
-
-	}*/
-
-	/*
-	 * Constructor 2: build BSD from a bitvector and a dictionary.
+	 * Constructor 1: build BSD from a bitvector and a dictionary.
 	 * copy reference to passed dictionary (do not create a new one)
 	 */
 	bsd_cgap(vector<bool> B,cgap_dictionary * D){
@@ -52,7 +38,7 @@ public:
 	}
 
 	/*
-	 * Constructor 3:
+	 * Constructor 2:
 	 * build BSD data structure given the ordered list of gaps, value of last bit, and the gap dictionary
 	 * Note: let k be the last gap length. The tail of the bitvector is 0^k or 0^(k-1)1 if last=0 or
 	 * last=1, respectively.
@@ -166,7 +152,7 @@ public:
 
 		//cout << "c = " << (ulint)c<<endl;
 
-/*		cout << "first el : "<<endl;
+		/*cout << "first el : "<<endl;
 		for(auto i : first_el)
 			cout << i << endl;*/
 
@@ -267,6 +253,124 @@ public:
 		}
 
 		return result;
+
+	}
+
+	/*
+	 * returns i-th bit of the underlying bitvector
+	 */
+	bool operator[](ulint i){
+
+		assert(i<size());
+
+		//i falls in the tail of zeroes
+		if(i>=(u-tail)) return false;
+
+		//from here, i < (u-tail)
+
+		//i falls before or on the first 1
+		if(i<=first_el[0])
+			return i==first_el[0];
+
+		//binary search explicitly stored first block elements
+
+		//first block whose first element is > i
+		auto it = std::upper_bound(first_el.begin(),first_el.end(),i);
+
+		//block number
+		ulint bl = std::distance(first_el.begin(),it) - 1;
+
+		ulint C_idx = C_addr[bl];
+		ulint u_pos = first_el[bl];
+
+		//cout << "start from block " << bl << endl;
+		//cout << "initial u pos is " << u_pos << endl;
+
+		//extract gaps until we reach i
+		ulint last_gap = 0;
+		uint steps = 0;
+
+		while((u_pos+last_gap)<=i and steps<t-1){
+
+			if((u_pos+last_gap)==i)
+				return true;
+
+			steps++;
+			u_pos += last_gap;
+
+			//extract gap code, decompress it and retrieve its bit-length
+			auto g = extract_gap(C_idx);
+
+			last_gap = g.first;//decompressed gap value
+			C_idx += g.second;//bit length of the code
+
+		}
+
+		return (u_pos+last_gap)==i;
+
+	}
+
+	/*
+	 * retrieve length of the i-th gap (i>=0). gap length includes the leading 1
+	 * \param i<number_of_1()
+	 *
+	 */
+	ulint gapAt(ulint i){
+
+		assert(i<number_of_1());
+
+		if(i==0)
+			return first_el[0]+1;
+
+		ulint bl = i/t;
+		ulint rem = i%t;
+
+		if(rem==0)
+			return first_el[bl] - select(i-1);
+
+		ulint result = first_el[bl];
+		ulint C_idx = C_addr[bl];
+
+		//now extract i%t gaps starting from position C_idx
+		for(ulint i=0;i<rem;++i){
+
+			//extract gap code, decompress it and retrieve its bit-length
+			auto g = extract_gap(C_idx);
+
+			result = g.first;//decompressed gap value
+			C_idx += g.second;//bit length of the code
+
+		}
+
+		return result;
+
+	}
+
+	/*
+	 * \return bit size of the data structure
+	 */
+	ulint bytesize(){
+
+		ulint C_size = sizeof(C)+C.container().size()*sizeof(ulint);
+		ulint first_el_size = sizeof(first_el) + first_el.container().size()*sizeof(ulint);
+		ulint C_addr_size = sizeof(C_addr) + C_addr.container().size()*sizeof(ulint);
+		ulint D_size = sizeof(D) + D->bytesize();
+
+		ulint varsize = (	sizeof(W) +
+							sizeof(c) +
+							sizeof(logc) +
+							sizeof(logu) +
+							sizeof(tail) +
+							sizeof(u) +
+							sizeof(n) +
+							sizeof(t) +
+							sizeof(number_of_blocks));
+
+		return 	C_size +
+				first_el_size +
+				C_addr_size +
+				D_size +
+				varsize;
 
 	}
 
