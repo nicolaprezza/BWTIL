@@ -110,6 +110,37 @@ class cgap_dictionary{
 
 			}
 
+			ulint serialize(std::ostream& out){
+
+				ulint w_bytes = 0;
+
+				ulint nr_children = children.size();
+				out.write((char *)&nr_children, sizeof(ulint));
+				w_bytes += sizeof(ulint);
+
+				for(auto n : children)
+					w_bytes += n.serialize(out);
+
+				out.write((char *)&value, sizeof(T));
+				w_bytes += sizeof(T);
+
+				return w_bytes;
+
+			}
+
+			void load(std::istream& in) {
+
+				ulint nr_children;
+				in.read((char *)&nr_children, sizeof(ulint));
+
+				children = {nr_children};
+				for(auto n : children)
+					n.load(in);
+
+				in.read((char *)&value, sizeof(T));
+
+			}
+
 		private:
 
 			vector<node> children;
@@ -139,6 +170,18 @@ class cgap_dictionary{
 		ulint bytesize(){
 
 			return sizeof(root) + root.bytesize();
+
+		}
+
+		ulint serialize(std::ostream& out){
+
+			return root.serialize(out);
+
+		}
+
+		void load(std::istream& in) {
+
+			root.load(in);
 
 		}
 
@@ -466,8 +509,6 @@ public:
 
 	ulint bytesize(){
 
-		return 0;
-
 		ulint H_size = sizeof(H)+H.size()*sizeof(ulint)*2;
 		ulint exceeds_size = sizeof(exceeds) + exceeds.size()/8 + sizeof(ulint);
 		ulint partial_htrees_size = sizeof(partial_htrees);
@@ -486,6 +527,94 @@ public:
 				exceeds_size +
 				partial_htrees_size +
 				varsize;
+
+	}
+
+	ulint serialize(std::ostream& out){
+
+		out.write((char *)&prefix_length, sizeof(uint8_t));
+
+		ulint H_size = H.size();
+		out.write((char *)&H_size, sizeof(ulint));
+
+		ulint w_bytes = sizeof(uint8_t) + sizeof(ulint);
+
+		out.write((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
+		w_bytes += H_size*sizeof(pair<ulint,ulint>);
+
+		for(auto b : exceeds)
+			out.write((char *)&b, sizeof(bool));
+
+		w_bytes += exceeds.size() * sizeof(bool);
+
+		for(auto t : partial_htrees)
+			w_bytes += t.serialize(out);
+
+		ulint enc_size = encoding.size();
+		out.write((char *)&enc_size, sizeof(ulint));
+		w_bytes += sizeof(ulint);
+
+		for(auto p : encoding){
+
+			out.write((char *)&p.first, sizeof(ulint));
+			w_bytes += sizeof(ulint);
+
+			ulint len = p.second.size();
+			out.write((char *)&len, sizeof(ulint));
+			w_bytes += sizeof(ulint);
+
+			for(auto b : p.second)
+				out.write((char *)&b, sizeof(bool));
+
+			w_bytes += len*sizeof(bool);
+
+		}
+
+		return w_bytes;
+
+	}
+
+	void load(std::istream& in) {
+
+		in.read((char *)&prefix_length, sizeof(uint8_t));
+
+		ulint H_size;
+		in.read((char *)&H_size, sizeof(ulint));
+
+		H = {H_size};
+		in.read((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
+
+		exceeds = {H_size};
+		for(auto b : exceeds)
+			in.read((char *)&b, sizeof(bool));
+
+		partial_htrees = {H_size};
+		for(auto t : partial_htrees)
+			t.load(in);
+
+		ulint enc_size;
+		in.read((char *)&enc_size, sizeof(ulint));
+
+		for(ulint i=0;i<enc_size;++i){
+
+			ulint key;
+			in.read((char *)&key, sizeof(ulint));
+
+			ulint len;
+			in.read((char *)&len, sizeof(ulint));
+
+			vector<bool> vb = {len};
+			for(ulint j=0;j<len;++j){
+
+				bool b;
+				in.read((char *)&b, sizeof(bool));
+				vb[j] = b;
+
+			}
+
+			encoding[key] = vb;
+
+		}
 
 	}
 

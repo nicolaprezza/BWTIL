@@ -244,7 +244,9 @@ public:
 		ulint C_size = sizeof(C)+C.container().size()*sizeof(ulint);
 		ulint first_el_size = sizeof(first_el) + first_el.container().size()*sizeof(ulint);
 		ulint C_addr_size = sizeof(C_addr) + C_addr.container().size()*sizeof(ulint);
-		ulint D_size = sizeof(D) + D->bytesize();
+
+		//we do not count dictionary size because is built externally
+		//ulint D_size = sizeof(D) + D->bytesize();
 
 		ulint varsize = (	sizeof(W) +
 							sizeof(c) +
@@ -259,7 +261,6 @@ public:
 		return 	C_size +
 				first_el_size +
 				C_addr_size +
-				D_size +
 				varsize;
 
 	}
@@ -269,7 +270,7 @@ public:
 	 */
 	ulint serialize(std::ostream& out){
 
-		//Dictionary is not serialized, since it is passed as argument to the constructor
+		//Dictionary is not serialized, since it's built externally
 
 		ulint w_bytes = 0;
 
@@ -331,7 +332,7 @@ public:
 	 */
 	void load(std::istream& in) {
 
-		//Dictionary is not serialized, since it is passed as argument to the constructor
+		//Dictionary is not serialized, since it's built externally
 
 		//vars
 
