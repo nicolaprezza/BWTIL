@@ -133,7 +133,8 @@ class cgap_dictionary{
 				ulint nr_children;
 				in.read((char *)&nr_children, sizeof(ulint));
 
-				children = {nr_children};
+				node emptynode = {};
+				children = {nr_children,emptynode};
 				for(auto n : children)
 					n.load(in);
 
@@ -581,14 +582,16 @@ public:
 		ulint H_size;
 		in.read((char *)&H_size, sizeof(ulint));
 
-		H = {H_size};
+		H = {H_size,{0,0}};
 		in.read((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
 
-		exceeds = {H_size};
+		exceeds = vector<bool>(H_size);
 		for(auto b : exceeds)
 			in.read((char *)&b, sizeof(bool));
 
-		partial_htrees = {H_size};
+		bin_tree<ulint> emptytree = {};
+
+		partial_htrees = {H_size,emptytree};
 		for(auto t : partial_htrees)
 			t.load(in);
 
@@ -603,7 +606,7 @@ public:
 			ulint len;
 			in.read((char *)&len, sizeof(ulint));
 
-			vector<bool> vb = {len};
+			vector<bool> vb = vector<bool>(len);
 			for(ulint j=0;j<len;++j){
 
 				bool b;
@@ -626,7 +629,7 @@ private:
 	vector<pair<ulint,ulint> > H;
 
 	//exceeds[i] = true iif code i is ambiguous, i.e. need to read more bits
-	vector <bool> exceeds;
+	vector<bool> exceeds;
 
 	vector<bin_tree<ulint> > partial_htrees;
 

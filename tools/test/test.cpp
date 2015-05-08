@@ -28,6 +28,7 @@
 #include "../../data_structures/DynamicBWT.h"
 #include "../../data_structures/cgap_dictionary.h"
 #include "../../data_structures/bsd_cgap.h"
+#include "../../data_structures/fid_cgap.h"
 
 #include "bitview.h"
 #include <vector>
@@ -278,7 +279,7 @@ char remap(symbol s){
 	 cout << (bsd[11]==B[11]) << endl;*/
 
 
-	 ulint u = 10000000;
+/*	 ulint u = 10000000;
 	 ulint trials=2;
 
 	 //double p=0.175;//with this p we have a ratio of approx. 1
@@ -308,18 +309,18 @@ char remap(symbol s){
 			 B[i] = x<p;
 		 }
 
-/*		 for(auto b:B)
+		 for(auto b:B)
 			 cout << b;
-		 cout << endl;*/
+		 cout << endl;
 
 		 bool last = B[B.size()-1];
 		 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
 		 auto D = cgap_dictionary::build_dictionary(gaps);
 		 bsd_cgap bsd(gaps,last,&D);
 
-		 cout << "u = " << u << ", n = " << bsd.number_of_1() << ", bitsize = " << bsd.bytesize()*8 << ", ratio = " << ((double)(bsd.bytesize()*8)/u)<< ", bits per element = "<< ((double)(bsd.bytesize()*8)/bsd.number_of_1()) << endl;
+		 //cout << "u = " << u << ", n = " << bsd.number_of_1() << ", bitsize = " << bsd.bytesize()*8 << ", ratio = " << ((double)(bsd.bytesize()*8)/u)<< ", bits per element = "<< ((double)(bsd.bytesize()*8)/bsd.number_of_1()) << endl;
 
-		/* sparse_bitvector<> sbv(B);
+		 sparse_bitvector<> sbv(B);
 
 		 for(uint i=0;i<bsd.number_of_1();++i){
 
@@ -367,11 +368,11 @@ char remap(symbol s){
 				 exit(0);
 			}
 
-		 }*/
+		 }
 
 	 }
 
-	 cout << "OK!" << endl;
+	 cout << "OK!" << endl;*/
 
 	 /*cout << "selects: "<<endl;
 	 for(uint i=0;i<bsd.number_of_1();++i)
@@ -381,6 +382,41 @@ char remap(symbol s){
 	 for(uint i=0;i<bsd.size();++i)
 		 cout << i << " -> " << bsd.rank(i)<<endl;
 */
+
+	 ulint u = 10000000;
+
+	 //double p=0.175;//with this p we have a ratio of approx. 1
+	 double p=0.00001;
+
+	 vector<bool> B(u);
+
+	 srand(time(NULL));
+
+	 for(ulint i=0;i<B.size();++i){
+
+		 ulint max = 99999999;
+		 double x = (double)(rand()%max)/(double)max;
+
+		 B[i] = x<p;
+	 }
+
+/*	 for(auto b:B)
+		 cout << b;
+	 cout << endl;*/
+
+	fid_cgap fid(B);
+
+	cout << "saving ... "<<flush;
+	std::ofstream out ("/home/nicola/Desktop/FID",std::ofstream::binary);
+	fid.serialize(out);
+	cout << "ok! "<<endl;
+
+	cout << "loading ... "<<flush;
+	fid_cgap fid1;
+	std::ifstream in ("/home/nicola/Desktop/FID",std::ofstream::binary);
+	fid1.load(in);
+	cout << "ok! "<<endl;
+
 
  }
 
