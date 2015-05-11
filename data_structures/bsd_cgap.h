@@ -24,6 +24,10 @@ public:
 
 	bsd_cgap(){}
 
+	bsd_cgap(cgap_dictionary * D){
+		this->D = D;
+	}
+
 	/*
 	 * Constructor 1: build BSD from a bitvector and a dictionary.
 	 * copy reference to passed dictionary (do not create a new one)
@@ -49,10 +53,14 @@ public:
 	}
 
 	ulint size(){
+		assert(D!=0);
+		assert(u!=0);
 		return u;
 	}
 
 	ulint number_of_1(){
+		assert(D!=0);
+		assert(u!=0);
 		return n;
 	}
 
@@ -61,6 +69,9 @@ public:
 	 * \return number of '1' before position i excluded
 	 */
 	ulint rank(ulint i){
+
+		assert(D!=0);
+		assert(u!=0);
 
 		assert(i<=size());
 
@@ -123,6 +134,9 @@ public:
 	 */
 	ulint select(ulint i){
 
+		assert(D!=0);
+		assert(u!=0);
+
 		assert(i<number_of_1());
 
 		ulint bl = i/t;
@@ -151,6 +165,8 @@ public:
 	 */
 	bool operator[](ulint i){
 
+		assert(D!=0);
+		assert(u!=0);
 		assert(i<size());
 
 		//i falls in the tail of zeroes
@@ -207,6 +223,8 @@ public:
 	 */
 	ulint gapAt(ulint i){
 
+		assert(D!=0);
+		assert(u!=0);
 		assert(i<number_of_1());
 
 		if(i==0)
@@ -241,6 +259,9 @@ public:
 	 */
 	ulint bytesize(){
 
+		assert(D!=0);
+		assert(u!=0);
+
 		ulint C_size = sizeof(C)+C.container().size()*sizeof(ulint);
 		ulint first_el_size = sizeof(first_el) + first_el.container().size()*sizeof(ulint);
 		ulint C_addr_size = sizeof(C_addr) + C_addr.container().size()*sizeof(ulint);
@@ -269,6 +290,9 @@ public:
 	 * \param out	 the ostream
 	 */
 	ulint serialize(std::ostream& out){
+
+		assert(D!=0);
+		assert(u!=0);
 
 		//Dictionary is not serialized, since it's built externally
 
@@ -332,6 +356,9 @@ public:
 	 */
 	void load(std::istream& in) {
 
+		//must load an object that already has a dictionary!
+		assert(D!=0);
+
 		//Dictionary is not serialized, since it's built externally
 
 		//vars
@@ -357,7 +384,7 @@ public:
 		ulint C_container_len;
 		in.read((char *)&C_container_len, sizeof(ulint));
 
-		C = {c};
+		C = bitview<vector>(c);
 		in.read((char *)C.container().data(), bitview_type_size*C_container_len);
 
 		//first_el
@@ -365,7 +392,7 @@ public:
 		ulint first_el_container_len;
 		in.read((char *)&first_el_container_len, sizeof(ulint));
 
-		first_el = {logu,number_of_blocks};
+		first_el = packed_view<vector>(logu,number_of_blocks);
 		in.read((char *)first_el.container().data(), packed_view_type_size*first_el_container_len);
 
 		//C_addr
@@ -373,7 +400,7 @@ public:
 		ulint C_addr_container_len;
 		in.read((char *)&C_addr_container_len, sizeof(ulint));
 
-		C_addr = {logc,number_of_blocks};
+		C_addr = packed_view<vector>(logc,number_of_blocks);
 		in.read((char *)C_addr.container().data(), packed_view_type_size*C_addr_container_len);
 
 	}
@@ -422,7 +449,7 @@ private:
 		//cout << "t = " << (ulint)t<<endl;
 
 		number_of_blocks = n/t + (n%t!=0);
-		first_el = {logu,number_of_blocks};
+		first_el = packed_view<vector>(logu,number_of_blocks);
 
 		c=0;
 
@@ -434,10 +461,10 @@ private:
 
 		}
 
-		C = {c};
+		C = bitview<vector>(c);
 		logc = intlog2(c);
 
-		C_addr = {logc,number_of_blocks};
+		C_addr = packed_view<vector>(logc,number_of_blocks);
 
 		ulint cumulative_u = 0;
 		ulint cumulative_c = 0;
@@ -497,6 +524,9 @@ private:
 	 */
 	pair <ulint,ulint> extract_gap(ulint i){
 
+		assert(D!=0);
+		assert(u!=0);
+
 		//transform to access correctly C:
 		//interval [i,i+l) -> [(c-i)-l,c-i)
 
@@ -523,7 +553,7 @@ private:
 	}
 
 	//Dictionary: supports encoding/decoding of gap codes (Huffman)
-	cgap_dictionary * D;
+	cgap_dictionary * D = 0;
 
 	//bit-array with all Huffman codes stored consecutively
 	bitview<vector> C;

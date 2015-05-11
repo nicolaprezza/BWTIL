@@ -279,13 +279,13 @@ char remap(symbol s){
 	 cout << (bsd[11]==B[11]) << endl;*/
 
 
-/*	 ulint u = 10000000;
-	 ulint trials=2;
+	 ulint u = 1000000;
+	 ulint trials=100;
 
 	 //double p=0.175;//with this p we have a ratio of approx. 1
-	 double p=0.00001;
+	 double p=0.0001;
 
-	 vector<bool> B(u);
+	 vector<bool> B(u,false);
 
 	 srand(time(NULL));
 
@@ -309,31 +309,42 @@ char remap(symbol s){
 			 B[i] = x<p;
 		 }
 
-		 for(auto b:B)
-			 cout << b;
-		 cout << endl;
+		 //for(auto b:B)
+		//	 cout << b;
+		 //cout << endl;
 
-		 bool last = B[B.size()-1];
-		 auto gaps = cgap_dictionary::bitvector_to_gaps(B);
-		 auto D = cgap_dictionary::build_dictionary(gaps);
-		 bsd_cgap bsd(gaps,last,&D);
+		 {
+			 fid_cgap fid(B);
+			// cout << "saving ... "<<flush;
+			 std::ofstream out("/home/nicola/Desktop/FID",std::ofstream::binary);
+			 fid.serialize(out);
+			 out.close();
+			// cout << "ok! "<<endl;
+		 }
 
-		 //cout << "u = " << u << ", n = " << bsd.number_of_1() << ", bitsize = " << bsd.bytesize()*8 << ", ratio = " << ((double)(bsd.bytesize()*8)/u)<< ", bits per element = "<< ((double)(bsd.bytesize()*8)/bsd.number_of_1()) << endl;
+		//cout << "loading ... "<<flush;
+		std::ifstream in("/home/nicola/Desktop/FID",std::ifstream::binary);
+		fid_cgap fid;
+		fid.load(in);
+		in.close();
+		//cout << "ok! "<<endl;
+
+		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
 
 		 sparse_bitvector<> sbv(B);
 
-		 for(uint i=0;i<bsd.number_of_1();++i){
+/*		 for(uint i=0;i<fid.number_of_1();++i){
 
 			 cout << i << endl;
 
-			 if(bsd.gapAt(i)!=gaps[i]){
+			 if(fid.gapAt(i)!=gaps[i]){
 				 cout << "ERROR in gapAt"<<endl;
 				 exit(0);
 			 }
 
-		 }
+		 }*/
 
-		 for(uint i=0;i<bsd.number_of_1();++i){
+/*		 for(uint i=0;i<fid.number_of_1();++i){
 
 			 cout << i << endl;
 
@@ -342,28 +353,26 @@ char remap(symbol s){
 				 exit(0);
 			 }
 
-		 }
+		 }*/
 
-		 for(uint i=0;i<bsd.size();++i){
+/*		 for(uint i=0;i<bsd.size();++i){
 
 			 cout << i << endl;
 
 			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
 
-			if(bsd.rank(i)!=sbv.rank(i)){
+			if(fid.rank(i)!=sbv.rank(i)){
 				 cout << "ERROR in rank"<<endl;
 				 exit(0);
 			}
 
-		 }
+		 }*/
 
-		 for(uint i=0;i<bsd.size();++i){
-
-			 cout << i << endl;
+		 for(uint i=0;i<fid.size();++i){
 
 			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
 
-			if(bsd[i]!=B[i]){
+			if(fid[i]!=B[i]){
 				 cout << "ERROR in access " << i <<endl;
 				 exit(0);
 			}
@@ -372,50 +381,7 @@ char remap(symbol s){
 
 	 }
 
-	 cout << "OK!" << endl;*/
-
-	 /*cout << "selects: "<<endl;
-	 for(uint i=0;i<bsd.number_of_1();++i)
-		 cout << i << " -> " << bsd.select(i)<<endl;
-
-	 cout << "ranks: "<<endl;
-	 for(uint i=0;i<bsd.size();++i)
-		 cout << i << " -> " << bsd.rank(i)<<endl;
-*/
-
-	 ulint u = 10000000;
-
-	 //double p=0.175;//with this p we have a ratio of approx. 1
-	 double p=0.00001;
-
-	 vector<bool> B(u);
-
-	 srand(time(NULL));
-
-	 for(ulint i=0;i<B.size();++i){
-
-		 ulint max = 99999999;
-		 double x = (double)(rand()%max)/(double)max;
-
-		 B[i] = x<p;
-	 }
-
-/*	 for(auto b:B)
-		 cout << b;
-	 cout << endl;*/
-
-	fid_cgap fid(B);
-
-	cout << "saving ... "<<flush;
-	std::ofstream out ("/home/nicola/Desktop/FID",std::ofstream::binary);
-	fid.serialize(out);
-	cout << "ok! "<<endl;
-
-	cout << "loading ... "<<flush;
-	fid_cgap fid1;
-	std::ifstream in ("/home/nicola/Desktop/FID",std::ofstream::binary);
-	fid1.load(in);
-	cout << "ok! "<<endl;
+	 cout << "OK!" << endl;
 
 
  }

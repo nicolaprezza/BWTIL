@@ -61,7 +61,14 @@ public:
 	 */
 	bool operator[](ulint i){
 
-		return 0;
+		assert(i<u);
+
+		if(not V[i/v]) return false;
+
+		assert(V_rank[i/v]<BSDs.size());
+		assert(i%v < BSDs[V_rank[i/v]].size());
+
+		return BSDs[V_rank[i/v]][i%v];
 
 	}
 
@@ -105,7 +112,9 @@ public:
 				R.size()*sizeof(ulint) +
 				sizeof(SEL) +
 				SEL.size()*sizeof(ulint) +
-				bsd_size;
+				bsd_size +
+				sizeof(V) +
+				V.size()*sizeof(bool);
 
 	}
 
@@ -125,9 +134,19 @@ public:
 		ulint v_sel_size = V_select.size();
 		out.write((char *)&v_sel_size, sizeof(ulint));
 
+		ulint bsds_size = BSDs.size();
+		out.write((char *)&bsds_size, sizeof(ulint));
+
 		ulint w_bytes = 8*sizeof(ulint);
 
 		D.serialize(out);
+
+		for(ulint i=0;i<number_of_v_blocks;++i){
+			bool b = V[i];
+			out.write((char *)&b, sizeof(bool));
+		}
+
+		w_bytes += number_of_v_blocks*sizeof(bool);
 
 		out.write((char *)V_rank.data(), number_of_v_blocks*sizeof(ulint));
 		w_bytes += number_of_v_blocks*sizeof(ulint);
@@ -164,21 +183,32 @@ public:
 		ulint v_sel_size;
 		in.read((char *)&v_sel_size, sizeof(ulint));
 
+		ulint bsds_size;
+		in.read((char *)&bsds_size, sizeof(ulint));
+
 		D.load(in);
 
-		V_rank = {number_of_v_blocks};
+		V = vector<bool>(number_of_v_blocks);
+		for(ulint i=0;i<number_of_v_blocks;++i){
+			bool b;
+			in.read((char *)&b, sizeof(bool));
+			V[i]=b;
+		}
+
+		V_rank = vector<ulint>(number_of_v_blocks);
 		in.read((char *)V_rank.data(), number_of_v_blocks*sizeof(ulint));
 
-		V_select = {v_sel_size};
+		V_select = vector<ulint>(v_sel_size);
 		in.read((char *)V_select.data(), v_sel_size*sizeof(ulint));
 
-		R = {number_of_v_blocks};
+		R = vector<ulint>(number_of_v_blocks);
 		in.read((char *)R.data(), number_of_v_blocks*sizeof(ulint));
 
-		for(auto bsd : BSDs)
-			bsd.load(in);
+		BSDs = vector<bsd_cgap>(bsds_size,bsd_cgap(&D));
+		for(ulint i=0;i<BSDs.size();++i)
+			BSDs[i].load(in);
 
-		SEL = {number_of_t_blocks};
+		SEL = vector<ulint>(number_of_t_blocks);
 		in.read((char *)SEL.data(), number_of_t_blocks*sizeof(ulint));
 
 	}
@@ -206,7 +236,7 @@ private:
 		}
 
 		//compute block size (at most u)
-		v = (u*intlog2(u)*intlog2(u))/n;
+		v = (u*intlog2(u)*intlog2(u))/(n==0?1:n);
 		if(v>u) v=u;
 
 		t = intlog2(u)*intlog2(u);
@@ -215,13 +245,15 @@ private:
 		number_of_t_blocks = n/t + (n%t!=0);
 
 		assert(number_of_v_blocks>0 and number_of_v_blocks<=u);
+		//assert(number_of_t_blocks>0);
 
 		//V rank in i-1
 		ulint last_V_rank = 0;
 		ulint global_rank = 0;
 
 		{
-			SEL = {number_of_t_blocks};
+			SEL = vector<ulint>(number_of_t_blocks);
+
 			//current '1'
 			ulint j = 0;
 
@@ -231,7 +263,7 @@ private:
 
 					if(j%t==0){
 
-						assert(j/t<number_of_t_blocks);
+						assert(j/t<SEL.size());
 						SEL[j/t] = i/v;
 
 					}
@@ -252,7 +284,9 @@ private:
 
 			if(r>u) r = u;
 
-			vector<bool> subB = {B.begin()+l,B.begin()+r};
+			auto subB = vector<bool>(r-l,false);
+			for(ulint j=l;j<r;++j)
+				subB[j-l] = B[j];
 
 			R.push_back(global_rank);
 			global_rank += number_of_1(subB);
@@ -261,10 +295,15 @@ private:
 
 			if(not empty(subB)){
 
+				V.push_back(true);
 				V_select.push_back(i);
 				last_V_rank++;
 
-				BSDs.push_back({subB,&D});
+				BSDs.push_back(bsd_cgap(subB,&D));
+
+			}else{
+
+				V.push_back(false);
 
 			}
 
@@ -310,6 +349,7 @@ private:
 	cgap_dictionary D;
 
 	//naive (but ultrafast) constant-time rank-select bitvector taking 2ulog u bits
+	vector<bool> V;
 	vector<ulint> V_rank;
 	vector<ulint> V_select;
 

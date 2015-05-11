@@ -53,7 +53,7 @@ class cgap_dictionary{
 						if(bitvectors[i][0]){
 
 							if(bitvectors[i].size()>1)
-								bv1.push_back( {bitvectors[i].begin()+1,bitvectors[i].end()} );
+								bv1.push_back( vector<bool>(bitvectors[i].begin()+1,bitvectors[i].end()) );
 							else
 								bv1.push_back(vector<bool>());
 
@@ -64,7 +64,7 @@ class cgap_dictionary{
 						}else{
 
 							if(bitvectors[i].size()>1)
-								bv0.push_back( {bitvectors[i].begin()+1,bitvectors[i].end()} );
+								bv0.push_back( vector<bool>(bitvectors[i].begin()+1,bitvectors[i].end()) );
 							else
 								bv0.push_back(vector<bool>());
 
@@ -76,8 +76,8 @@ class cgap_dictionary{
 
 					}
 
-					children.push_back({bv0,values0});
-					children.push_back({bv1,values1});
+					children.push_back(node(bv0,values0));
+					children.push_back(node(bv1,values1));
 
 				}
 
@@ -116,6 +116,7 @@ class cgap_dictionary{
 
 				ulint nr_children = children.size();
 				out.write((char *)&nr_children, sizeof(ulint));
+
 				w_bytes += sizeof(ulint);
 
 				for(auto n : children)
@@ -133,10 +134,10 @@ class cgap_dictionary{
 				ulint nr_children;
 				in.read((char *)&nr_children, sizeof(ulint));
 
-				node emptynode = {};
-				children = {nr_children,emptynode};
-				for(auto n : children)
-					n.load(in);
+				node emptynode;
+				children = vector<node>(nr_children,emptynode);
+				for(ulint i=0;i<children.size();++i)
+					children[i].load(in);
 
 				in.read((char *)&value, sizeof(T));
 
@@ -156,7 +157,7 @@ class cgap_dictionary{
 		bin_tree(vector<vector<bool> > bitvectors, vector<T> values){
 
 			assert(bitvectors.size()==values.size());
-			root = {bitvectors,values};
+			root = node(bitvectors,values);
 
 		}
 
@@ -538,13 +539,20 @@ public:
 		ulint H_size = H.size();
 		out.write((char *)&H_size, sizeof(ulint));
 
+		ulint partial_htrees_size = partial_htrees.size();
+		out.write((char *)&partial_htrees_size, sizeof(ulint));
+
 		ulint w_bytes = sizeof(uint8_t) + sizeof(ulint);
 
 		out.write((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
 		w_bytes += H_size*sizeof(pair<ulint,ulint>);
 
-		for(auto b : exceeds)
+		for(ulint i=0;i<exceeds.size();++i){
+
+			bool b = exceeds[i];
 			out.write((char *)&b, sizeof(bool));
+
+		}
 
 		w_bytes += exceeds.size() * sizeof(bool);
 
@@ -564,8 +572,12 @@ public:
 			out.write((char *)&len, sizeof(ulint));
 			w_bytes += sizeof(ulint);
 
-			for(auto b : p.second)
+			for(ulint i=0;i<p.second.size();++i){
+
+				bool b = p.second[i];
 				out.write((char *)&b, sizeof(bool));
+
+			}
 
 			w_bytes += len*sizeof(bool);
 
@@ -582,18 +594,27 @@ public:
 		ulint H_size;
 		in.read((char *)&H_size, sizeof(ulint));
 
-		H = {H_size,{0,0}};
+		ulint partial_htrees_size;
+		in.read((char *)&partial_htrees_size, sizeof(ulint));
+
+		H = vector<pair<ulint,ulint> >(H_size,{0,0});
 		in.read((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
 
 		exceeds = vector<bool>(H_size);
-		for(auto b : exceeds)
+		for(ulint i=0;i<H_size;++i){
+
+			bool b;
 			in.read((char *)&b, sizeof(bool));
+			exceeds[i] = b;
 
-		bin_tree<ulint> emptytree = {};
+		}
 
-		partial_htrees = {H_size,emptytree};
-		for(auto t : partial_htrees)
-			t.load(in);
+		bin_tree<ulint> emptytree;
+
+		partial_htrees = vector<bin_tree<ulint> >(partial_htrees_size,emptytree);
+
+		for(ulint i=0;i<partial_htrees.size();++i)
+			partial_htrees[i].load(in);
 
 		ulint enc_size;
 		in.read((char *)&enc_size, sizeof(ulint));
@@ -618,6 +639,7 @@ public:
 			encoding[key] = vb;
 
 		}
+
 
 	}
 
