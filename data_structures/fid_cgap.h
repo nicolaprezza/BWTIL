@@ -303,6 +303,49 @@ public:
 
 	}
 
+	fid_cgap & operator= (const fid_cgap & other) {
+
+		W=other.W;
+
+		//number of bits/number of 1s
+		u=other.u;
+		n=other.n;
+
+		//block size
+		v=other.v;
+
+		//sample select every t bits set
+		t=other.v;
+
+		number_of_v_blocks=other.number_of_v_blocks;
+		number_of_t_blocks=other.number_of_t_blocks;
+
+		//Dictionary: supports encoding/decoding of gap codes (Huffman)
+		D=other.D;
+
+		//naive (but ultrafast) constant-time rank-select bitvector taking 2ulog u bits
+		V = other.V;
+		V_rank = other.V_rank;
+		V_select = other.V_select;
+
+		//sampled rank results
+		R = other.R;
+
+		//same as R, but we store R entries only in blocks marked with a 1 in V
+		R_1 = other.R_1;
+
+		//one BSD per nonempty block
+		BSDs = other.BSDs;
+
+		for(ulint i=0;i<BSDs.size();++i)
+			BSDs[i].replace_dictionary(&D);
+
+		//sampled select on blocks
+		SEL = other.SEL;
+
+	    return *this;
+	}
+
 private:
 
 	void build(vector<bool> &B){

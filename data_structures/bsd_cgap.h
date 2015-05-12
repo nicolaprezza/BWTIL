@@ -403,6 +403,10 @@ public:
 
 	}
 
+	void replace_dictionary(cgap_dictionary * D){
+		this->D = D;
+	}
+
 private:
 
 	void build(vector<ulint> &gaps,bool last, cgap_dictionary * D){
