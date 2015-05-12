@@ -279,11 +279,11 @@ char remap(symbol s){
 	 cout << (bsd[11]==B[11]) << endl;*/
 
 
-	 ulint u = 1000000;
+	 ulint u = 100000;
 	 ulint trials=100;
 
 	 //double p=0.175;//with this p we have a ratio of approx. 1
-	 double p=0.0001;
+	 double p=0.001;
 
 	 vector<bool> B(u,false);
 
@@ -316,14 +316,14 @@ char remap(symbol s){
 		 {
 			 fid_cgap fid(B);
 			// cout << "saving ... "<<flush;
-			 std::ofstream out("/home/nicola/Desktop/FID",std::ofstream::binary);
+			 std::ofstream out("/home/nicola/workspace/BWTIL/FID",std::ofstream::binary);
 			 fid.serialize(out);
 			 out.close();
 			// cout << "ok! "<<endl;
 		 }
 
 		//cout << "loading ... "<<flush;
-		std::ifstream in("/home/nicola/Desktop/FID",std::ifstream::binary);
+		std::ifstream in("/home/nicola/workspace/BWTIL/FID",std::ifstream::binary);
 		fid_cgap fid;
 		fid.load(in);
 		in.close();
@@ -333,31 +333,25 @@ char remap(symbol s){
 
 		 sparse_bitvector<> sbv(B);
 
-/*		 for(uint i=0;i<fid.number_of_1();++i){
-
-			 cout << i << endl;
+		 for(uint i=0;i<fid.number_of_1();++i){
 
 			 if(fid.gapAt(i)!=gaps[i]){
 				 cout << "ERROR in gapAt"<<endl;
 				 exit(0);
 			 }
 
-		 }*/
+		 }
 
-/*		 for(uint i=0;i<fid.number_of_1();++i){
+		 for(uint i=0;i<fid.number_of_1();++i){
 
-			 cout << i << endl;
-
-			 if(bsd.select(i)!=sbv.select(i)){
+			 if(fid.select(i)!=sbv.select(i)){
 				 cout << "ERROR in select"<<endl;
 				 exit(0);
 			 }
 
-		 }*/
+		 }
 
-/*		 for(uint i=0;i<bsd.size();++i){
-
-			 cout << i << endl;
+		 for(uint i=0;i<fid.size();++i){
 
 			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
 
@@ -366,7 +360,7 @@ char remap(symbol s){
 				 exit(0);
 			}
 
-		 }*/
+		 }
 
 		 for(uint i=0;i<fid.size();++i){
 

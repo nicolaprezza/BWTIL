@@ -54,13 +54,11 @@ public:
 
 	ulint size(){
 		assert(D!=0);
-		assert(u!=0);
 		return u;
 	}
 
 	ulint number_of_1(){
 		assert(D!=0);
-		assert(u!=0);
 		return n;
 	}
 

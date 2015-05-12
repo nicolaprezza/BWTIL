@@ -42,7 +42,15 @@ public:
 	 */
 	ulint rank(ulint i){
 
-		return 0;
+		assert(i<=u);
+		assert(i/v<R.size());
+
+		if(not V[i/v]) return R[i/v];
+
+		assert(V_rank[i/v]<BSDs.size());
+		assert(i%v < BSDs[V_rank[i/v]].size());
+
+		return R[i/v] + BSDs[V_rank[i/v]].rank(i%v);
 
 	}
 
@@ -52,7 +60,39 @@ public:
 	 */
 	ulint select(ulint i){
 
-		return 0;
+		assert(t>0);
+		assert(n>0);
+		assert(u>0);
+
+		assert(i<n);
+
+		ulint q_l = SEL[i/t];
+		ulint q_r = R_1.size();
+
+		if(i/t+1<SEL.size())
+			q_r = SEL[i/t+1]+1;
+
+		//i-th bit set is among V-marked blocks q_l,...,q_r
+		//note that |{q_l,...,q_r}| <= t, so following binary search costs log t
+
+		assert(q_l<R_1.size());
+
+		ulint q_m = (std::upper_bound(R_1.begin()+q_l,R_1.begin()+q_r,i) - R_1.begin()) - 1;
+
+		assert(R_1[q_m]<=i);
+		assert(q_m+1 == R_1.size() || R_1[q_m+1]>i);
+
+		assert(q_m<V_select.size());
+
+		//now V_select[q_m] is the block containing the i-th set bit
+
+		assert(q_m<BSDs.size());
+		assert(q_m<R_1.size());
+		assert(i>=R_1[q_m]);
+
+		assert(i-R_1[q_m]<BSDs[q_m].number_of_1());
+
+		return V_select[q_m]*v + BSDs[q_m].select(i-R_1[q_m]);
 
 	}
 
@@ -79,7 +119,39 @@ public:
 	 */
 	ulint gapAt(ulint i){
 
-		return 0;
+		assert(t>0);
+		assert(n>0);
+		assert(u>0);
+
+		assert(i<n);
+
+		ulint q_l = SEL[i/t];
+		ulint q_r = R_1.size();
+
+		if(i/t+1<SEL.size())
+			q_r = SEL[i/t+1]+1;
+
+		//i-th bit set is among V-marked blocks q_l,...,q_r
+		//note that |{q_l,...,q_r}| <= t, so following binary search costs log t
+
+		assert(q_l<R_1.size());
+
+		ulint q_m = (std::upper_bound(R_1.begin()+q_l,R_1.begin()+q_r,i) - R_1.begin()) - 1;
+
+		assert(R_1[q_m]<=i);
+		assert(q_m+1 == R_1.size() || R_1[q_m+1]>i);
+
+		assert(q_m<V_select.size());
+
+		//now V_select[q_m] is the block containing the i-th set bit
+
+		assert(q_m<BSDs.size());
+		assert(q_m<R_1.size());
+		assert(i>=R_1[q_m]);
+
+		assert(i-R_1[q_m]<BSDs[q_m].number_of_1());
+
+		return BSDs[q_m].gapAt(i-R_1[q_m]);
 
 	}
 
@@ -157,6 +229,9 @@ public:
 		out.write((char *)R.data(), number_of_v_blocks*sizeof(ulint));
 		w_bytes += number_of_v_blocks*sizeof(ulint);
 
+		out.write((char *)R_1.data(), v_sel_size*sizeof(ulint));
+		w_bytes += v_sel_size*sizeof(ulint);
+
 		for(auto bsd : BSDs)
 			w_bytes += bsd.serialize(out);
 
@@ -203,6 +278,9 @@ public:
 
 		R = vector<ulint>(number_of_v_blocks);
 		in.read((char *)R.data(), number_of_v_blocks*sizeof(ulint));
+
+		R_1 = vector<ulint>(v_sel_size);
+		in.read((char *)R_1.data(), v_sel_size*sizeof(ulint));
 
 		BSDs = vector<bsd_cgap>(bsds_size,bsd_cgap(&D));
 		for(ulint i=0;i<BSDs.size();++i)
@@ -251,30 +329,6 @@ private:
 		ulint last_V_rank = 0;
 		ulint global_rank = 0;
 
-		{
-			SEL = vector<ulint>(number_of_t_blocks);
-
-			//current '1'
-			ulint j = 0;
-
-			for(ulint i = 0;i<u;++i){
-
-				if(B[i]){
-
-					if(j%t==0){
-
-						assert(j/t<SEL.size());
-						SEL[j/t] = i/v;
-
-					}
-
-					j++;
-
-				}
-
-			}
-		}
-
 		for(ulint i = 0;i<number_of_v_blocks;++i){
 
 			ulint l = i*v;
@@ -289,12 +343,11 @@ private:
 				subB[j-l] = B[j];
 
 			R.push_back(global_rank);
-			global_rank += number_of_1(subB);
-
 			V_rank.push_back(last_V_rank);
 
 			if(not empty(subB)){
 
+				R_1.push_back(global_rank);
 				V.push_back(true);
 				V_select.push_back(i);
 				last_V_rank++;
@@ -307,6 +360,33 @@ private:
 
 			}
 
+			global_rank += number_of_1(subB);
+
+		}
+
+		{
+			SEL = vector<ulint>(number_of_t_blocks);
+
+			//current '1'
+			ulint j = 0;
+
+			for(ulint i = 0;i<u;++i){
+
+				if(B[i]){
+
+					if(j%t==0){
+
+						assert(j/t<SEL.size());
+						assert(i/v<V_rank.size());
+						SEL[j/t] = V_rank[i/v];
+
+					}
+
+					j++;
+
+				}
+
+			}
 		}
 
 	}
@@ -355,6 +435,9 @@ private:
 
 	//sampled rank results
 	vector<ulint> R;
+
+	//same as R, but we store R entries only in blocks marked with a 1 in V
+	vector<ulint> R_1;
 
 	//one BSD per nonempty block
 	vector<bsd_cgap> BSDs;
