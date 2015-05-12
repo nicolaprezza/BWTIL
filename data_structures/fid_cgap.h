@@ -49,7 +49,8 @@ public:
 		if(not V[i/v]) return R[i/v];
 
 		assert(V_rank[i/v]<BSDs.size());
-		assert(i%v < BSDs[V_rank[i/v]].size());
+
+		assert(i%v <= BSDs[V_rank[i/v]].size());
 
 		return R[i/v] + BSDs[V_rank[i/v]].rank(i%v);
 
@@ -81,6 +82,7 @@ public:
 		ulint q_m = (std::upper_bound(R_1.begin()+q_l,R_1.begin()+q_r,i) - R_1.begin()) - 1;
 
 		assert(R_1[q_m]<=i);
+
 		assert(q_m+1 == R_1.size() || R_1[q_m+1]>i);
 
 		assert(q_m<V_select.size());
@@ -315,7 +317,7 @@ public:
 		v=other.v;
 
 		//sample select every t bits set
-		t=other.v;
+		t=other.t;
 
 		number_of_v_blocks=other.number_of_v_blocks;
 		number_of_t_blocks=other.number_of_t_blocks;
@@ -369,7 +371,7 @@ private:
 		}
 
 		//compute block size (at most u)
-		v = (u*intlog2(u)*intlog2(u))/(n==0?1:n);
+		v = (u*intlog2(u)*64)/(n==0?1:n);
 		if(v>u) v=u;
 
 		t = intlog2(u)*intlog2(u);
