@@ -10,6 +10,7 @@
 #ifndef FID_CGAP_H_
 #define FID_CGAP_H_
 
+#include "bsd_cgap.h"
 #include "cgap_dictionary.h"
 #include "packed_view.h"
 #include "../common/common.h"
