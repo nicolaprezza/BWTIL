@@ -125,6 +125,9 @@ public:
 
 		assert(i<n);
 
+		//we treat this case separately
+		if(i==0) return select(0)+1;
+
 		ulint q_l = SEL[i/t];
 		ulint q_r = R_1.size();
 
@@ -151,7 +154,13 @@ public:
 
 		assert(i-R_1[q_m]<BSDs[q_m].number_of_1());
 
-		return BSDs[q_m].gapAt(i-R_1[q_m]);
+		//if this is at least the 2nd gap in the BSD, then gap is not splitted between >=2 BSDs
+		if(i>R_1[q_m])
+			return BSDs[q_m].gapAt(i-R_1[q_m]);
+
+		//otherwise, gap could be splitted between >=2 BSDs!
+		//note that i>0 since we treated this case at the beginning
+		return select(i)-select(i-1);
 
 	}
 
@@ -186,7 +195,9 @@ public:
 				SEL.size()*sizeof(ulint) +
 				bsd_size +
 				sizeof(V) +
-				V.size()*sizeof(bool);
+				V.size()*sizeof(bool) +
+				sizeof(R_1) +
+				R_1.size()*sizeof(ulint);
 
 	}
 
