@@ -160,6 +160,8 @@ public:
 		auto comp = [](triple x, triple y){ return std::get<0>(x) < std::get<0>(y); };
 		std::sort(H_long.begin(),H_long.end(),comp);
 
+		assert(log2_max_gap>0);
+
 	}
 
 	/*
@@ -312,6 +314,9 @@ public:
 		out.write((char *)&log2_max_gap, sizeof(ulint));
 		ulint w_bytes = sizeof(ulint);
 
+		//if empty dictionary, stop here
+		if(log2_max_gap==0) return w_bytes;
+
 		out.write((char *)&prefix_length, sizeof(uint8_t));
 		w_bytes += sizeof(uint8_t);
 
@@ -347,6 +352,10 @@ public:
 	void load(std::istream& in) {
 
 		in.read((char *)&log2_max_gap, sizeof(ulint));
+
+		//if empty dictionary, stop here
+		if(log2_max_gap==0) return;
+
 		in.read((char *)&prefix_length, sizeof(uint8_t));
 
 		ulint H_size;

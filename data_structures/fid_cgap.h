@@ -210,6 +210,9 @@ public:
 	ulint serialize(std::ostream& out){
 
 		out.write((char *)&W, sizeof(ulint));
+
+		if(W==0) return sizeof(ulint);
+
 		out.write((char *)&u, sizeof(ulint));
 		out.write((char *)&n, sizeof(ulint));
 		out.write((char *)&v, sizeof(ulint));
@@ -262,6 +265,9 @@ public:
 	void load(std::istream& in) {
 
 		in.read((char *)&W, sizeof(ulint));
+
+		if(W==0) return;
+
 		in.read((char *)&u, sizeof(ulint));
 		in.read((char *)&n, sizeof(ulint));
 		in.read((char *)&v, sizeof(ulint));
