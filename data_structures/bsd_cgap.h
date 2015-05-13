@@ -445,7 +445,7 @@ private:
 		logu = intlog2(u);
 
 		//compute block size
-		t = logu;
+		t = 5*logu;
 		if(t<2) t = 2;
 
 		//cout << "t = " << (ulint)t<<endl;

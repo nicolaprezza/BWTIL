@@ -12,205 +12,17 @@
 #define CGAP_DICTIONARY_H_
 
 #include "HuffmanTree.h"
+#include "succinct_bitvector.h"
+#include "packed_view.h"
 #include "../common/common.h"
+#include <set>
 #include <map>
 
 namespace bwtil{
 
 class cgap_dictionary{
 
-	template<typename T>
-	class bin_tree{
-
-	public:
-
-		class node{
-
-		public:
-
-			node(){};
-
-			node(vector<vector<bool> > bitvectors, vector<T> values){
-
-				assert(bitvectors.size()>0);
-				assert(bitvectors.size()==values.size());
-
-				if(bitvectors.size()==1){
-
-					assert(bitvectors[0].size()==0);
-					value=values[0];
-
-				}else{
-
-					vector<vector<bool> > bv0;
-					vector<vector<bool> > bv1;
-
-					vector<T> values0;
-					vector<T> values1;
-
-					for(ulint i = 0; i<bitvectors.size(); ++i){
-
-						if(bitvectors[i][0]){
-
-							if(bitvectors[i].size()>1)
-								bv1.push_back( vector<bool>(bitvectors[i].begin()+1,bitvectors[i].end()) );
-							else
-								bv1.push_back(vector<bool>());
-
-							assert(bv1[bv1.size()-1].size()==0 or bv1[bv1.size()-1].size()==bitvectors[i].size()-1 );
-
-							values1.push_back(values[i]);
-
-						}else{
-
-							if(bitvectors[i].size()>1)
-								bv0.push_back( vector<bool>(bitvectors[i].begin()+1,bitvectors[i].end()) );
-							else
-								bv0.push_back(vector<bool>());
-
-							assert(bv0[bv0.size()-1].size()==0 or bv0[bv0.size()-1].size()==bitvectors[i].size()-1 );
-
-							values0.push_back(values[i]);
-
-						}
-
-					}
-
-					children.push_back(node(bv0,values0));
-					children.push_back(node(bv1,values1));
-
-				}
-
-			}
-
-			bool isLeaf(){return children.size()==0;}
-
-			T getValue(){
-				assert(isLeaf());
-				return value;
-			}
-
-			node getChild0(){
-				assert(children.size()==2);
-				return children[0];
-			}
-			node getChild1(){
-				assert(children.size()==2);
-				return children[1];
-			}
-
-			ulint bytesize(){
-
-				ulint s = sizeof(value) + sizeof(children);
-
-				for(auto c : children)
-					s += c.bytesize();
-
-				return s;
-
-			}
-
-			ulint serialize(std::ostream& out){
-
-				ulint w_bytes = 0;
-
-				ulint nr_children = children.size();
-				out.write((char *)&nr_children, sizeof(ulint));
-
-				w_bytes += sizeof(ulint);
-
-				for(auto n : children)
-					w_bytes += n.serialize(out);
-
-				out.write((char *)&value, sizeof(T));
-				w_bytes += sizeof(T);
-
-				return w_bytes;
-
-			}
-
-			void load(std::istream& in) {
-
-				ulint nr_children;
-				in.read((char *)&nr_children, sizeof(ulint));
-
-				node emptynode;
-				children = vector<node>(nr_children,emptynode);
-				for(ulint i=0;i<children.size();++i)
-					children[i].load(in);
-
-				in.read((char *)&value, sizeof(T));
-
-			}
-
-		private:
-
-			vector<node> children;
-			T value=0;
-
-		};
-
-		bin_tree(){}
-
-		//build a binary tree with these bitvectors
-		//in the leafs: <value, leaf depth>
-		bin_tree(vector<vector<bool> > bitvectors, vector<T> values){
-
-			assert(bitvectors.size()==values.size());
-			root = node(bitvectors,values);
-
-		}
-
-		//input: bitvector encoded as a 64-bits unsigned int, stored in the leftmost bits
-		//output: descend the tree according to the read bits, return <value stored in the leaf, leaf depth>
-		pair<T,T> search(ulint bitv){
-
-			return search(bitv,root,0);
-
-		}
-
-		ulint bytesize(){
-
-			return sizeof(root) + root.bytesize();
-
-		}
-
-		ulint serialize(std::ostream& out){
-
-			return root.serialize(out);
-
-		}
-
-		void load(std::istream& in) {
-
-			root.load(in);
-
-		}
-
-	private:
-
-		//input: bitvector encoded as a 64-bits unsigned int, stored in the leftmost bits
-		//input: i = start position in bitv (leftmost)
-		//input: start node (default: root)
-		//output: descend the tree according to the read bits, return <value stored in the leaf, leaf depth>
-		pair<T,T> search(ulint bitv,node n, T i){
-
-			assert(i<=sizeof(ulint)*8);
-			assert( i!=sizeof(ulint)*8 or n.isLeaf());
-
-			if(n.isLeaf())
-				return {n.getValue(),i};
-
-			uint shift = (sizeof(ulint)*8-1)-i;
-			bool bit = (bitv>>shift) & ulint(1);
-
-			return search(bitv,bit?n.getChild1():n.getChild0(),i+1);
-
-		}
-
-		node root;
-
-	};
+	typedef std::tuple<ulint,ulint,uint8_t> triple;
 
 public:
 
@@ -234,15 +46,7 @@ public:
 		ulint u=0;
 		ulint n=0;
 
-		for(auto g : gaps){
-
-			assert(g.first>0);
-			assert(g.second>0);
-
-			u += (g.first*g.second);
-			n += g.second;
-
-		}
+		ulint max_gap=0;
 
 		//compute optimal prefix length for the hash table.
 		//we choose prefix_length = log2( n/(log u*log n) ), so total size of the hash is o(n)
@@ -258,6 +62,21 @@ public:
 
 		assert(prefix_length<64);
 
+		for(auto g : gaps){
+
+			assert(g.first>0);
+			assert(g.second>0);
+
+			u += (g.first*g.second);
+			n += g.second;
+
+			if(g.first>max_gap)
+				max_gap=g.first;
+
+		}
+
+		log2_max_gap = intlog2(max_gap);
+
 		//build Huffman tree and retrieve boolean codes
 		vector<vector<bool> > codes;
 
@@ -271,6 +90,13 @@ public:
 
 			codes = ht.getCodes();
 
+			for(auto c : codes){
+
+				//make sure that no code is longer than 64 bits
+				assert(c.size()<=sizeof(ulint)*8);
+
+			}
+
 		}
 
 		assert(codes.size()==gaps.size());
@@ -281,21 +107,21 @@ public:
 
 		ulint H_size = ulint(1)<<prefix_length;
 
-		H = vector<pair<ulint,ulint> >(H_size,{0,0});
+		H_val = packed_view<vector>(log2_max_gap,H_size);
+		H_len = packed_view<vector>(intlog2(prefix_length),H_size);
 
-		exceeds = vector<bool>(H.size());
+		for(ulint i=0;i<H_size;++i) H_len[i] = 0;
 
 		//build hash
 
-		//temporary vector of containers of bitvectors. In the end, each container will be
-		//converted to a binary tree
-		vector<vector<pair<vector<bool>,ulint > > > temp_bitv;
-		temp_bitv.push_back({});//position 0 is reserved, so we just insert an empty element
+		//store here triples of the form <code,gap value,code length>
+		//where code is the left-shifted Huffman code
 
 		for(ulint i=0;i<gaps.size();++i){
 
 			//code length
 			auto l = codes[i].size();
+			assert(l>0);
 
 			if(l<=prefix_length){
 
@@ -310,85 +136,29 @@ public:
 
 				//fill all combinations of h followed by any bit sequence (in total prefix_length bits)
 				for(ulint j=0;j<(ulint(1)<<(prefix_length-l));++j){
-					exceeds[h+j] = false;
-					H[h+j] = {gaps[i].first,l};
+					H_val[h+j] = gaps[i].first;
+					H_len[h+j] = l;
 				}
 
 			}else{
 
-				//compute hash using first prefix_length bits
+				//pack the code in a memory word
 				ulint h = 0;
 
-				for(uint j=0;j<prefix_length;++j)
+				for(uint j=0;j<codes[i].size();++j)
 					h = h*2 + codes[i][j];
 
-				exceeds[h] = true;
+				//left-shift
+				h = h << (sizeof(ulint)*8-codes[i].size());
 
-				//we have to create the container of bitvectors
-				if(H[h].second==0){
-
-					H[h].second = temp_bitv.size();
-
-					//create new empty container
-					temp_bitv.push_back({});
-					temp_bitv[temp_bitv.size()-1].push_back(
-							{
-								{codes[i].begin()+prefix_length,codes[i].end()},
-								gaps[i].first
-							});
-
-
-				}else{
-
-					//use the container already existent
-					temp_bitv[ H[h].second ].push_back(
-							{
-								{codes[i].begin()+prefix_length,codes[i].end()},
-								gaps[i].first
-							});
-
-				}
+				H_long.push_back(triple(h,gaps[i].first,(uint8_t)codes[i].size()));
 
 			}
 
 		}
 
-		//now convert containers of bitvector to binary trees
-
-		for(ulint i=1;i<temp_bitv.size();++i){
-
-			auto b = temp_bitv[i];
-			//b is a vector of pairs <bitvector, value>
-			//separate the 2 components
-
-			vector<vector<bool> > bitv;
-			vector<ulint> values;
-
-			assert(b.size()>0);
-
-			for(auto p : b){
-
-				bitv.push_back(p.first);
-				values.push_back(p.second);
-
-			}
-
-			assert(bitv.size()==values.size());
-			partial_htrees.push_back({bitv,values});
-
-		}
-
-		//decrease by 1 all H pointers to partial trees
-		for(ulint i=0;i<H.size();++i){
-
-			if(exceeds[i]){
-
-				assert(H[i].second>0);
-				H[i].second--;
-
-			}
-
-		}
+		auto comp = [](triple x, triple y){ return std::get<0>(x) < std::get<0>(y); };
+		std::sort(H_long.begin(),H_long.end(),comp);
 
 	}
 
@@ -404,18 +174,24 @@ public:
 		uint W = sizeof(ulint)*8;
 		ulint h = x >> (W-prefix_length);
 
-		if(exceeds[h]){
+		if(H_len[h]==0){
 
-			//suffix of the bitvector: search it in the appropriate tree
-			ulint s = x << prefix_length;
-			auto p = partial_htrees[H[h].second].search(s);
+			auto comp = [](triple a, triple b){ return std::get<0>(a) < std::get<0>(b); };
 
-			return {p.first,p.second+prefix_length};
+			auto t = triple(x,0,0);
+
+			ulint i = std::upper_bound(H_long.begin(),H_long.end(),t, comp) - H_long.begin();
+
+			assert(i>0);
+
+			i--;
+
+			return {std::get<1>(H_long[i]),std::get<2>(H_long[i])};
 
 		}
 
 		//does not exceed: just access H
-		return H[h];
+		return {H_val[h],H_len[h]};
 
 	}
 
@@ -438,8 +214,15 @@ public:
 
 	}
 
-	vector<bool > encode(ulint g){
+	vector<bool> encode(ulint g){
+
+		/*
+		 * warning: for space efficiency, encoding is not serialized!!
+		 * therefore, if you load the structure from disk, this assert will fail
+		 */
+		assert(encoding.size()>0);
 		return encoding[g];
+
 	}
 
 	/*
@@ -511,77 +294,51 @@ public:
 
 	ulint bytesize(){
 
-		ulint H_size = sizeof(H)+H.size()*sizeof(ulint)*2;
-		ulint exceeds_size = sizeof(exceeds) + exceeds.size()/8 + sizeof(ulint);
-		ulint partial_htrees_size = sizeof(partial_htrees);
+		ulint H_size = 	sizeof(H_val)+H_val.container().size()*sizeof(ulint) +
+						sizeof(H_len)+H_len.container().size()*sizeof(ulint);
 
-		for(auto t : partial_htrees)
-			partial_htrees_size += t.bytesize();
+		ulint H_long_size = sizeof(H_long)+H_long.size()*(sizeof(triple));
 
-		ulint encoding_size = sizeof(encoding) + encoding.size()*sizeof(ulint);
-
-		for(auto e : encoding)
-			encoding_size += (e.second.size()/8 + sizeof(ulint));
-
-		ulint varsize = sizeof(prefix_length);
+		ulint varsize = sizeof(prefix_length) + sizeof(log2_max_gap);
 
 		return 	H_size +
-				exceeds_size +
-				partial_htrees_size +
+				H_long_size +
 				varsize;
 
 	}
 
 	ulint serialize(std::ostream& out){
 
+		out.write((char *)&log2_max_gap, sizeof(ulint));
+		ulint w_bytes = sizeof(ulint);
+
 		out.write((char *)&prefix_length, sizeof(uint8_t));
+		w_bytes += sizeof(uint8_t);
 
-		ulint H_size = H.size();
+		ulint H_size = H_val.size();
 		out.write((char *)&H_size, sizeof(ulint));
-
-		ulint partial_htrees_size = partial_htrees.size();
-		out.write((char *)&partial_htrees_size, sizeof(ulint));
-
-		ulint w_bytes = sizeof(uint8_t) + sizeof(ulint);
-
-		out.write((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
-		w_bytes += H_size*sizeof(pair<ulint,ulint>);
-
-		for(ulint i=0;i<exceeds.size();++i){
-
-			bool b = exceeds[i];
-			out.write((char *)&b, sizeof(bool));
-
-		}
-
-		w_bytes += exceeds.size() * sizeof(bool);
-
-		for(auto t : partial_htrees)
-			w_bytes += t.serialize(out);
-
-		ulint enc_size = encoding.size();
-		out.write((char *)&enc_size, sizeof(ulint));
 		w_bytes += sizeof(ulint);
 
-		for(auto p : encoding){
+		ulint H_long_size = H_long.size();
+		out.write((char *)&H_long_size, sizeof(ulint));
+		w_bytes += sizeof(ulint);
 
-			out.write((char *)&p.first, sizeof(ulint));
-			w_bytes += sizeof(ulint);
+		ulint H_val_cont = H_val.container().size();
+		out.write((char *)&H_val_cont, sizeof(ulint));
+		w_bytes += sizeof(ulint);
 
-			ulint len = p.second.size();
-			out.write((char *)&len, sizeof(ulint));
-			w_bytes += sizeof(ulint);
+		ulint H_len_cont = H_len.container().size();
+		out.write((char *)&H_len_cont, sizeof(ulint));
+		w_bytes += sizeof(ulint);
 
-			for(ulint i=0;i<p.second.size();++i){
+		out.write((char *)H_long.data(), H_long_size*sizeof(triple));
+		w_bytes += H_long_size*sizeof(triple);
 
-				bool b = p.second[i];
-				out.write((char *)&b, sizeof(bool));
+		out.write((char *)H_val.container().data(), H_val_cont*sizeof(ulint));
+		w_bytes += H_val_cont*sizeof(ulint);
 
-			}
-
-			w_bytes += len*sizeof(bool);
-
-		}
+		out.write((char *)H_len.container().data(), H_len_cont*sizeof(ulint));
+		w_bytes += H_len_cont*sizeof(ulint);
 
 		return w_bytes;
 
@@ -589,76 +346,53 @@ public:
 
 	void load(std::istream& in) {
 
+		in.read((char *)&log2_max_gap, sizeof(ulint));
 		in.read((char *)&prefix_length, sizeof(uint8_t));
 
 		ulint H_size;
 		in.read((char *)&H_size, sizeof(ulint));
 
-		ulint partial_htrees_size;
-		in.read((char *)&partial_htrees_size, sizeof(ulint));
+		ulint H_long_size;
+		in.read((char *)&H_long_size, sizeof(ulint));
 
-		H = vector<pair<ulint,ulint> >(H_size,{0,0});
-		in.read((char *)H.data(), H_size*sizeof(pair<ulint,ulint>));
+		ulint H_val_cont;
+		in.read((char *)&H_val_cont, sizeof(ulint));
 
-		exceeds = vector<bool>(H_size);
-		for(ulint i=0;i<H_size;++i){
+		ulint H_len_cont;
+		in.read((char *)&H_len_cont, sizeof(ulint));
 
-			bool b;
-			in.read((char *)&b, sizeof(bool));
-			exceeds[i] = b;
+		H_val = packed_view<vector>(log2_max_gap,H_size);
+		H_len = packed_view<vector>(intlog2(prefix_length),H_size);
+		H_long = vector<triple>(H_long_size);
 
-		}
-
-		bin_tree<ulint> emptytree;
-
-		partial_htrees = vector<bin_tree<ulint> >(partial_htrees_size,emptytree);
-
-		for(ulint i=0;i<partial_htrees.size();++i)
-			partial_htrees[i].load(in);
-
-		ulint enc_size;
-		in.read((char *)&enc_size, sizeof(ulint));
-
-		for(ulint i=0;i<enc_size;++i){
-
-			ulint key;
-			in.read((char *)&key, sizeof(ulint));
-
-			ulint len;
-			in.read((char *)&len, sizeof(ulint));
-
-			vector<bool> vb = vector<bool>(len);
-			for(ulint j=0;j<len;++j){
-
-				bool b;
-				in.read((char *)&b, sizeof(bool));
-				vb[j] = b;
-
-			}
-
-			encoding[key] = vb;
-
-		}
-
+		in.read((char *)H_long.data(), H_long_size*sizeof(triple));
+		in.read((char *)H_val.container().data(), H_val_cont*sizeof(ulint));
+		in.read((char *)H_len.container().data(), H_len_cont*sizeof(ulint));
 
 	}
+
+
 
 private:
 
 	//hash table: code prefix -> <decoded value, bit length of the code>
-	//if exceeds[i]=true, then instead of bit length there is a pointer to a partial
-	//Huffman tree (vector partial_htrees)
-	vector<pair<ulint,ulint> > H;
+	//if H_len[i]=0, then code exceeds max length (prefix_length). Search
+	//code in the binary tree.
 
-	//exceeds[i] = true iif code i is ambiguous, i.e. need to read more bits
-	vector<bool> exceeds;
+	packed_view<vector> H_val;
+	packed_view<vector> H_len;
 
-	vector<bin_tree<ulint> > partial_htrees;
+	//store here all codes longer than prefix_length bits
+	//vector of triples <left-shifted Huffman code, gap value, code bit-length>
+	vector<std::tuple<ulint,ulint,uint8_t> > H_long;
 
 	std::map<ulint,vector<bool> > encoding;
 
 	//length of codes' prefixes that are indexed in the hash table H
 	uint8_t prefix_length=0;
+
+	//max gap to be stored in H
+	ulint log2_max_gap=0;
 
 
 };

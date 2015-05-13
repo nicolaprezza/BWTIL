@@ -327,7 +327,6 @@ char remap(symbol s){
 		fid_cgap fid;
 		fid.load(in);
 		in.close();
-		//cout << "ok! "<<endl;
 
 		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
 
