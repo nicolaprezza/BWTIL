@@ -260,12 +260,12 @@ public:
 		assert(D!=0);
 		assert(u!=0);
 
-		ulint C_size = sizeof(C)+C.container().size()*sizeof(ulint);
-		ulint first_el_size = sizeof(first_el) + first_el.container().size()*sizeof(ulint);
-		ulint C_addr_size = sizeof(C_addr) + C_addr.container().size()*sizeof(ulint);
+		ulint C_size = C.container().size()*sizeof(ulint);
+		ulint first_el_size = first_el.container().size()*sizeof(ulint);
+		ulint C_addr_size = C_addr.container().size()*sizeof(ulint);
 
 		//we do not count dictionary size because is built externally
-		//ulint D_size = sizeof(D) + D->bytesize();
+		//ulint D_size = D->bytesize();
 
 		ulint varsize = (	sizeof(W) +
 							sizeof(c) +
@@ -284,11 +284,19 @@ public:
 
 	}
 
+	ulint first_el_bytesize(){
+		return first_el.container().size()*sizeof(ulint);
+	}
+
+	ulint C_addr_bytesize(){
+		return C_addr.container().size()*sizeof(ulint);
+	}
+
 	/*
 	 * return the bytesize of the Huffman-compressed sequence
 	 */
 	ulint C_bytesize(){
-		return sizeof(C)+C.container().size()*sizeof(ulint);
+		return C.container().size()*sizeof(ulint);
 	}
 
 

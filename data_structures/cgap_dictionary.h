@@ -296,10 +296,10 @@ public:
 
 	ulint bytesize(){
 
-		ulint H_size = 	sizeof(H_val)+H_val.container().size()*sizeof(ulint) +
-						sizeof(H_len)+H_len.container().size()*sizeof(ulint);
+		ulint H_size = 	H_val.container().size()*sizeof(ulint) +
+						H_len.container().size()*sizeof(ulint);
 
-		ulint H_long_size = sizeof(H_long)+H_long.size()*(sizeof(triple));
+		ulint H_long_size = H_long.size()*(sizeof(triple));
 
 		ulint varsize = sizeof(prefix_length) + sizeof(log2_max_gap);
 

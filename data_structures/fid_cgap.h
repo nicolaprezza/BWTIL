@@ -181,26 +181,19 @@ public:
 							sizeof(number_of_t_blocks) +
 							sizeof(u);
 
-		ulint bsd_size = sizeof(BSDs);
+		ulint bsd_size = 0;
 
 		for(auto bsd : BSDs)
 			bsd_size += bsd.bytesize();
 
 		return 	varsize +
-				sizeof(D) +
 				D.bytesize() +
-				sizeof(V_rank) +
 				V_rank.size()*sizeof(ulint) +
-				sizeof(V_select) +
 				V_select.size()*sizeof(ulint) +
-				sizeof(R) +
 				R.size()*sizeof(ulint) +
-				sizeof(SEL) +
 				SEL.size()*sizeof(ulint) +
 				bsd_size +
-				sizeof(V) +
 				V.size()*sizeof(bool) +
-				sizeof(R_1) +
 				R_1.size()*sizeof(ulint);
 
 	}
@@ -223,7 +216,27 @@ public:
 	 */
 	ulint D_bytesize(){
 
-		return sizeof(D) + D.bytesize();
+		return D.bytesize();
+
+	}
+
+	ulint first_el_bytesize(){
+
+		ulint res=0;
+		for(auto bsd : BSDs)
+			res += bsd.first_el_bytesize();
+
+		return res;
+
+	}
+
+	ulint C_addr_bytesize(){
+
+		ulint res=0;
+		for(auto bsd : BSDs)
+			res += bsd.C_addr_bytesize();
+
+		return res;
 
 	}
 
