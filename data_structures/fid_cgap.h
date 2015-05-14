@@ -240,6 +240,10 @@ public:
 
 	}
 
+	uint get_prefix_length(){
+		return D.get_prefix_length();
+	}
+
 	/* serialize the structure to the ostream
 	 * \param out	 the ostream
 	 */

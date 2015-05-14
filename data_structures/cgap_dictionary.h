@@ -48,20 +48,6 @@ public:
 
 		ulint max_gap=0;
 
-		//compute optimal prefix length for the hash table.
-		//we choose prefix_length = log2( n/(log u*log n) ), so total size of the hash is o(n)
-
-		if(log2(u)*log2(n)>=n)
-			prefix_length = 8;
-		else
-			prefix_length = (uint8_t)ceil(log2( (double)n/(log2(u)*log2(n)) ));
-
-		//we index at least 2^8 = 256 bits
-		if(prefix_length<8)
-			prefix_length=8;
-
-		assert(prefix_length<64);
-
 		for(auto g : gaps){
 
 			assert(g.first>0);
@@ -100,6 +86,38 @@ public:
 		}
 
 		assert(codes.size()==gaps.size());
+
+		{
+			//count long codes
+			vector<ulint> long_codes(64,0);
+			for(auto c : codes)
+				for(ulint i=0;i<c.size();++i)
+					long_codes[i]++;
+
+			//compute optimal prefix length for the hash table,
+			//i.e. prefix length that minimizes overall size of the dictionary
+			//for efficiency reasons, minimum prefix length is 8 (so all codes of length <=8
+			//are decoded in constant time)
+
+			prefix_length=4;
+			ulint opt_bitsize = ulint(1)<<63;
+
+			for(ulint p=8;p<32;++p){
+
+				//cout << p << " " << long_codes[p] << " " << assess_bitsize(p,long_codes[p]) << endl;
+
+				if(assess_bitsize(p,long_codes[p])<opt_bitsize){
+
+					opt_bitsize = assess_bitsize(p,long_codes[p]);
+					prefix_length = p;
+
+				}
+
+			}
+
+		}
+
+		//cout << "optimal prefix_length = " << (ulint)prefix_length<<endl;
 
 		//build the code function
 		for(ulint i=0;i<codes.size();++i)
@@ -162,6 +180,10 @@ public:
 
 		assert(log2_max_gap>0);
 
+	}
+
+	uint get_prefix_length(){
+		return prefix_length;
 	}
 
 	/*
@@ -383,6 +405,15 @@ public:
 
 
 private:
+
+	ulint assess_bitsize(ulint p,ulint h_long_size){
+
+		assert(log2_max_gap>0);
+
+		return	(ulint(1)<<p)*(log2_max_gap+intlog2(p)) +	//size of hash
+				h_long_size*sizeof(triple);					//size of long codes
+
+	}
 
 	//hash table: code prefix -> <decoded value, bit length of the code>
 	//if H_len[i]=0, then code exceeds max length (prefix_length). Search

@@ -279,10 +279,9 @@ char remap(symbol s){
 	 cout << (bsd[11]==B[11]) << endl;*/
 
 
-	 ulint u = 100000;
-	 ulint trials=100;
+	 ulint u = 10000000;
+	 ulint trials=2;
 
-	 //double p=0.175;//with this p we have a ratio of approx. 1
 	 double p=0.001;
 
 	 vector<bool> B(u,false);
@@ -328,6 +327,12 @@ char remap(symbol s){
 		fid.load(in);
 		in.close();
 
+		cout << "bits per element = " << (double)(fid.bytesize()*8)/fid.number_of_1() << endl;
+		cout << "bits per element C = " << (double)(fid.C_bytesize()*8)/fid.number_of_1() << endl;
+		cout << "bits per element D = " << (double)(fid.D_bytesize()*8)/fid.number_of_1() << endl;
+		cout << "Entropy = " << fid.entropy() << endl;
+		cout << "ratio = " << (double)(fid.bytesize()*8)/B.size() << endl<<endl;
+
 		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
 
 		 sparse_bitvector<> sbv(B);
@@ -353,6 +358,8 @@ char remap(symbol s){
 		 for(uint i=0;i<fid.size();++i){
 
 			//cout << i << " -> " << bsd.rank(i) << " / " <<  sbv.rank(i)<<endl;
+
+			 fid[i];
 
 			if(fid.rank(i)!=sbv.rank(i)){
 				 cout << "ERROR in rank"<<endl;
