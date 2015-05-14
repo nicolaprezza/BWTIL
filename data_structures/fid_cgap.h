@@ -432,10 +432,10 @@ private:
 		}
 
 		//compute block size (at most u)
-		v = (u*intlog2(u)*64)/(n==0?1:n);
+		v = (u*intlog2(u)*64*5)/(n==0?1:n);
 		if(v>u) v=u;
 
-		t = intlog2(u)*intlog2(u);
+		t = intlog2(u)*intlog2(u)*5;
 
 		number_of_v_blocks = u/v + (u%v!=0);
 		number_of_t_blocks = n/t + (n%t!=0);
