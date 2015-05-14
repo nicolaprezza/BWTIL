@@ -187,6 +187,7 @@ public:
 			bsd_size += bsd.bytesize();
 
 		return 	varsize +
+				sizeof(D) +
 				D.bytesize() +
 				sizeof(V_rank) +
 				V_rank.size()*sizeof(ulint) +
@@ -201,6 +202,28 @@ public:
 				V.size()*sizeof(bool) +
 				sizeof(R_1) +
 				R_1.size()*sizeof(ulint);
+
+	}
+
+	/*
+	 * return the bytesize of the Huffman-compressed sequence
+	 */
+	ulint C_bytesize(){
+
+		ulint res=0;
+		for(auto bsd : BSDs)
+			res += bsd.C_bytesize();
+
+		return res;
+
+	}
+
+	/*
+	 * return the bytesize of the dictionary
+	 */
+	ulint D_bytesize(){
+
+		return sizeof(D) + D.bytesize();
 
 	}
 
@@ -352,6 +375,21 @@ public:
 		SEL = other.SEL;
 
 	    return *this;
+	}
+
+	double entropy(){
+
+		double H=0;
+		map<ulint,ulint> freqs;
+
+		for(ulint i=0;i<n;++i)
+			freqs[gapAt(i)]++;
+
+		for(auto f : freqs)
+			H += f.second * log2((double)n/(double)f.second);
+
+		return H/n;
+
 	}
 
 private:

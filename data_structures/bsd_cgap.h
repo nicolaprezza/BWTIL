@@ -284,6 +284,14 @@ public:
 
 	}
 
+	/*
+	 * return the bytesize of the Huffman-compressed sequence
+	 */
+	ulint C_bytesize(){
+		return sizeof(C)+C.container().size()*sizeof(ulint);
+	}
+
+
 	/* serialize the structure to the ostream
 	 * \param out	 the ostream
 	 */
