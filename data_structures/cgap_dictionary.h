@@ -94,17 +94,27 @@ public:
 				for(ulint i=0;i<c.size();++i)
 					long_codes[i]++;
 
+			//just for testing purposes: code_freq[i] contains the cumulative
+			//frequency of codes having length <= i
+			vector<double> code_freq(64,0);
+			for(ulint i=0;i<codes.size();++i)
+				code_freq[codes[i].size()]+=gaps[i].second;
+			for(ulint i=1;i<code_freq.size();++i)
+				code_freq[i] += code_freq[i-1];
+			for(ulint i=0;i<code_freq.size();++i)
+				code_freq[i] = 100*code_freq[i]/n;
+
 			//compute optimal prefix length for the hash table,
 			//i.e. prefix length that minimizes overall size of the dictionary
-			//for efficiency reasons, minimum prefix length is 8 (so all codes of length <=8
-			//are decoded in constant time)
 
-			prefix_length=4;
+			prefix_length=1;
 			ulint opt_bitsize = ulint(1)<<63;
 
-			for(ulint p=8;p<32;++p){
+			//for efficiency reasons, we limit the maximum prefix length to 30 (in order to avoid
+			//huge dictionaries)
+			for(ulint p=1;p<30;++p){
 
-				//cout << p << " " << long_codes[p] << " " << assess_bitsize(p,long_codes[p]) << endl;
+				//cout << p << " " << code_freq[p] << " " << long_codes[p] << " " << assess_bitsize(p,long_codes[p]) << endl;
 
 				if(assess_bitsize(p,long_codes[p])<opt_bitsize){
 
@@ -115,9 +125,24 @@ public:
 
 			}
 
-		}
+			//now choose largest prefix that exceeds at most 20% the optimal bitsize
+			ulint max_allowed_bitsize = opt_bitsize + (20*opt_bitsize)/100;
 
-		//cout << "optimal prefix_length = " << (ulint)prefix_length<<endl;
+			//cout << "opt p = " << (uint)prefix_length << endl;
+			//cout << "opt bitsize = " << opt_bitsize << endl;
+			//cout << "max bitsize = " << max_allowed_bitsize << endl;
+
+			for(ulint p=1;p<30;++p){
+
+				if(assess_bitsize(p,long_codes[p])<=max_allowed_bitsize)
+					prefix_length = p;
+
+			}
+
+			//cout << "optimal prefix_length = " << (ulint)prefix_length<<endl;
+			//cout << "with the hash table we catch " << code_freq[prefix_length] << "% of the codes!"<<endl;
+
+		}
 
 		//build the code function
 		for(ulint i=0;i<codes.size();++i)
@@ -411,7 +436,7 @@ private:
 		assert(log2_max_gap>0);
 
 		return	(ulint(1)<<p)*(log2_max_gap+intlog2(p)) +	//size of hash
-				h_long_size*sizeof(triple);					//size of long codes
+				h_long_size*sizeof(triple)*8;					//size of long codes
 
 	}
 

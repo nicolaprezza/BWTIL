@@ -63,6 +63,38 @@ public:
 	}
 
 	/*
+	 * \param i<number_of_1()
+	 * \return position of the i-th bit set. i starts from 0 (first bit set has i=0)
+	 */
+	ulint select(ulint i){
+
+		assert(D!=0);
+		assert(u!=0);
+
+		assert(i<number_of_1());
+
+		ulint bl = i/t;
+		ulint rem = i%t;
+
+		ulint result = first_el[bl];
+		ulint C_idx = C_addr[bl];
+
+		//now extract i%t gaps starting from position C_idx
+		for(ulint i=0;i<rem;++i){
+
+			//extract gap code, decompress it and retrieve its bit-length
+			auto g = extract_gap(C_idx);
+
+			result += g.first;//decompressed gap value
+			C_idx += g.second;//bit length of the code
+
+		}
+
+		return result;
+
+	}
+
+	/*
 	 * \param i<=size() position in the bitvector
 	 * \return number of '1' before position i excluded
 	 */
@@ -121,38 +153,6 @@ public:
 		//in this case, i falls in the next block before the first 1
 		if(steps==t-1 and u_pos+last_gap<i)
 			result = (bl+1)*t;
-
-		return result;
-
-	}
-
-	/*
-	 * \param i<number_of_1()
-	 * \return position of the i-th bit set. i starts from 0 (first bit set has i=0)
-	 */
-	ulint select(ulint i){
-
-		assert(D!=0);
-		assert(u!=0);
-
-		assert(i<number_of_1());
-
-		ulint bl = i/t;
-		ulint rem = i%t;
-
-		ulint result = first_el[bl];
-		ulint C_idx = C_addr[bl];
-
-		//now extract i%t gaps starting from position C_idx
-		for(ulint i=0;i<rem;++i){
-
-			//extract gap code, decompress it and retrieve its bit-length
-			auto g = extract_gap(C_idx);
-
-			result += g.first;//decompressed gap value
-			C_idx += g.second;//bit length of the code
-
-		}
 
 		return result;
 
@@ -464,8 +464,6 @@ private:
 		t = 5*logu;
 		if(t<2) t = 2;
 
-		//cout << "t = " << (ulint)t<<endl;
-
 		number_of_blocks = n/t + (n%t!=0);
 		first_el = packed_view<vector>(logu,number_of_blocks);
 
@@ -481,6 +479,10 @@ private:
 
 		C = bitview<vector>(c);
 		logc = intlog2(c);
+
+		//cout << "log c = " << (ulint)logc<<endl;
+		//cout << "log u = " << (ulint)logu<<endl;
+		//cout << "t = " << (ulint)t<<endl;
 
 		C_addr = packed_view<vector>(logc,number_of_blocks);
 

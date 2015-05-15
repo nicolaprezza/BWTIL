@@ -38,25 +38,6 @@ public:
 	}
 
 	/*
-	 * \param i<=size() position in the bitvector
-	 * \return number of '1' before position i excluded
-	 */
-	ulint rank(ulint i){
-
-		assert(i<=u);
-		assert(i/v<R.size());
-
-		if(not V[i/v]) return R[i/v];
-
-		assert(V_rank[i/v]<BSDs.size());
-
-		assert(i%v <= BSDs[V_rank[i/v]].size());
-
-		return R[i/v] + BSDs[V_rank[i/v]].rank(i%v);
-
-	}
-
-	/*
 	 * \param i<number_of_1()
 	 * \return position of the i-th bit set. i starts from 0 (first bit set has i=0)
 	 */
@@ -96,6 +77,24 @@ public:
 		assert(i-R_1[q_m]<BSDs[q_m].number_of_1());
 
 		return V_select[q_m]*v + BSDs[q_m].select(i-R_1[q_m]);
+
+	}
+
+	/*
+	 * \param i<=size() position in the bitvector
+	 * \return number of '1' before position i excluded
+	 */
+	ulint rank(ulint i){
+
+		assert(i<=u);
+		assert(i/v<R.size());
+
+		if(not V[i/v]) return R[i/v];
+
+		assert(V_rank[i/v]<BSDs.size());
+		assert(i%v <= BSDs[V_rank[i/v]].size());
+
+		return R[i/v] + BSDs[V_rank[i/v]].rank(i%v);
 
 	}
 
@@ -193,7 +192,7 @@ public:
 				R.size()*sizeof(ulint) +
 				SEL.size()*sizeof(ulint) +
 				bsd_size +
-				V.size()*sizeof(bool) +
+				V.size()/8 + sizeof(ulint) +
 				R_1.size()*sizeof(ulint);
 
 	}
@@ -238,6 +237,15 @@ public:
 
 		return res;
 
+	}
+
+	ulint fid_arrays_bytesize(){
+		return 	V_rank.size()*sizeof(ulint) +
+				V_select.size()*sizeof(ulint) +
+				R.size()*sizeof(ulint) +
+				SEL.size()*sizeof(ulint) +
+				V.size()/8 + sizeof(ulint) +
+				R_1.size()*sizeof(ulint);
 	}
 
 	uint get_prefix_length(){
@@ -406,6 +414,17 @@ public:
 			H += f.second * log2((double)n/(double)f.second);
 
 		return H/n;
+
+	}
+
+	double number_of_distinct_gaps(){
+
+		set<ulint> gaps;
+
+		for(ulint i=0;i<n;++i)
+			gaps.insert(gapAt(i));
+
+		return gaps.size();
 
 	}
 
