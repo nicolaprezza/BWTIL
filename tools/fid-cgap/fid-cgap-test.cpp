@@ -119,6 +119,30 @@ using namespace bwtil;
 	cout << endl << "microseconds/access = " << 1000000*(double)total/nr_trials << endl<<endl;
 
 	t1 = high_resolution_clock::now();
+    cout << "bechmark gapAt ... " << endl;
+    last_perc=0;
+    perc=0;
+    srand(time(NULL));
+    for(ulint i=0;i<nr_trials;++i){
+
+    	ulint j = rand()%fid.number_of_1();
+
+    	fid.gapAt(j);
+    	perc=(100*i)/nr_trials;
+    	if(perc>=last_perc+10){
+    		last_perc=perc;
+    		cout << " " << perc << "% done ..." << endl;
+    	}
+
+    }
+
+    t2 = high_resolution_clock::now();
+	total = duration_cast<duration<double, std::ratio<1>>>(t2 - t1).count();
+
+	//print stats
+	cout << endl << "microseconds/gapAt = " << 1000000*(double)total/nr_trials << endl<<endl;
+
+	t1 = high_resolution_clock::now();
     cout << "bechmark select ... " << endl;
     last_perc=0;
     perc=0;

@@ -78,8 +78,8 @@ public:
 
 			for(auto c : codes){
 
-				//make sure that no code is longer than 64 bits
-				assert(c.size()<=sizeof(ulint)*8);
+				//make sure that no code is longer than 63 bits
+				assert(c.size()<sizeof(ulint)*8);
 
 			}
 
@@ -427,8 +427,6 @@ public:
 
 	}
 
-
-
 private:
 
 	ulint assess_bitsize(ulint p,ulint h_long_size){
@@ -441,8 +439,8 @@ private:
 	}
 
 	//hash table: code prefix -> <decoded value, bit length of the code>
-	//if H_len[i]=0, then code exceeds max length (prefix_length). Search
-	//code in the binary tree.
+	//if H_len[i]=0, then code exceeds max length (prefix_length). If this
+	//is the case, search code in H_long (binary search)
 
 	packed_view<vector> H_val;
 	packed_view<vector> H_len;
@@ -456,9 +454,8 @@ private:
 	//length of codes' prefixes that are indexed in the hash table H
 	uint8_t prefix_length=0;
 
-	//max gap to be stored in H
+	//max gap length
 	ulint log2_max_gap=0;
-
 
 };
 

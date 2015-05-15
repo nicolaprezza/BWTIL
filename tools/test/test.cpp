@@ -214,7 +214,9 @@ char remap(symbol s){
 
 }
 
+
  int main(int argc,char** argv) {
+
 
 
 /*	 uint w=64;
@@ -279,8 +281,8 @@ char remap(symbol s){
 	 cout << (bsd[11]==B[11]) << endl;*/
 
 
-	 ulint u = 10000000;
-	 ulint trials=2;
+	 ulint u = 100000;
+	 ulint trials=100;
 
 	 double p=0.001;
 
@@ -327,11 +329,13 @@ char remap(symbol s){
 		fid.load(in);
 		in.close();
 
+/*
 		cout << "bits per element = " << (double)(fid.bytesize()*8)/fid.number_of_1() << endl;
 		cout << "bits per element C = " << (double)(fid.C_bytesize()*8)/fid.number_of_1() << endl;
 		cout << "bits per element D = " << (double)(fid.D_bytesize()*8)/fid.number_of_1() << endl;
 		cout << "Entropy = " << fid.entropy() << endl;
 		cout << "ratio = " << (double)(fid.bytesize()*8)/B.size() << endl<<endl;
+*/
 
 		auto gaps = cgap_dictionary::bitvector_to_gaps(B);
 

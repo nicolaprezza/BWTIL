@@ -92,6 +92,7 @@ public:
 		if(not V[i/v]) return R[i/v];
 
 		assert(V_rank[i/v]<BSDs.size());
+
 		assert(i%v <= BSDs[V_rank[i/v]].size());
 
 		return R[i/v] + BSDs[V_rank[i/v]].rank(i%v);
