@@ -25,6 +25,8 @@ public:
 
 	fid_cgap(vector<bool> &B){
 
+		if(B.size()==0) return; //nothing to do
+
 		build(B);
 
 	}
