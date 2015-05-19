@@ -89,6 +89,9 @@ public:
 	ulint rank(ulint i){
 
 		assert(i<=u);
+
+		if(u==0) return 0;
+
 		assert(i/v<R.size());
 
 		if(not V[i/v]) return R[i/v];
