@@ -74,7 +74,7 @@ public:
 
 		input_mode mode=text;
 		bool verbose=false;//output percentages
-		variant lz_variant=v2;
+		variant lz_variant=v1;
 		ulint block=0;//output number of phrases every block characters. If 0, don't print anything.
 		symbol sep=0;//separator: output number of phrases each time sep is seen in the stream. These characters are ignored in phrase computation. If 0, there are no separators.
 		bool prepend_alphabet=false;//add a prefix 'a_1a_2...a_k' to the text, where {a_1, ..., a_k} is the alphabet
