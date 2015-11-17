@@ -36,12 +36,14 @@
 
 namespace bwtil {
 
-template <typename bitvector_type = bitv>
+template <	typename bitvector_type = bitv,
+			class dynamic_vector_type = dynamic_vector_t
+		>
 class lz77_parser {
 
 public:
 
-	typedef DynamicBWT<bitvector_type, dynamic_vector<bitvector_type> > dynamic_bwt_type;
+	typedef DynamicBWT<bitvector_type, dynamic_vector_type> dynamic_bwt_type;
 
 	lz77_parser(){};
 
