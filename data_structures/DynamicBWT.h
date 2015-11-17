@@ -77,7 +77,7 @@ public:
 		if(sample_rate>0){
 
 			number_of_samples = n/sample_rate + (n%sample_rate>0) + 1;//first text position always sampled
-			sampled_positions = dynamic_bitvector_type(n,W_nodes);
+			sampled_positions = dynamic_bitvector_type(n);
 			sa_samples = dynamic_vector_type(number_of_samples,number_of_bits(n));
 
 			//position containing terminator is sampled.

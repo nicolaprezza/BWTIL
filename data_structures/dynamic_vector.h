@@ -58,7 +58,7 @@ public:
 		 * create a dynamic bitvector with max size the max number of bits of this dynamic vector
 		 * and using the default word size for the nodes of the B tree
 		 */
-		bv = dynamic_bitvector_type(max_length*width,W_nodes);
+		bv = dynamic_bitvector_type(max_length*width);
 
 	}
 
