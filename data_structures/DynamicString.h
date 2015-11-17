@@ -290,7 +290,7 @@ private:
 
 		}
 
-		wavelet_tree[this_node] = bitvector_type(size,W_nodes);
+		wavelet_tree[this_node] = bitvector_type(size);
 
 		for(uint i=0;i<alphabet.size();i++){
 
