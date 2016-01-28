@@ -217,7 +217,14 @@ char remap(symbol s){
 
  int main(int argc,char** argv) {
 
+	 {
+		vector<uchar> a(50000000);
+	 }
 
+
+		printRSSstat();
+
+		exit(0);
 
 /*	 uint w=64;
 	 ulint n=1000000;
