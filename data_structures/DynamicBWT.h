@@ -31,8 +31,8 @@
  */
 //============================================================================
 
-#ifndef DYNAMICBWT_H_
-#define DYNAMICBWT_H_
+#ifndef BWTIL_DYNAMICBWT_H_
+#define BWTIL_DYNAMICBWT_H_
 
 #include "../common/common.h"
 #include "DynamicString.h"
@@ -260,4 +260,4 @@ private:
 typedef DynamicBWT<bitv,dynamic_vector_t> dynamic_bwt_t;
 
 } /* namespace bwtil */
-#endif /* DYNAMICBWT_H_ */
+#endif /* BWTIL_DYNAMICBWT_H_ */
